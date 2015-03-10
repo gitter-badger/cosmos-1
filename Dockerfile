@@ -2,6 +2,7 @@ FROM golang:latest
 MAINTAINER brann <brann@cosmos.io>
 
 # Install Cosmos
+ENV COSMOS_PORT 8080
 ENV INFLUXDB_HOST localhost
 ENV INFLUXDB_PORT 8086
 ENV INFLUXDB_USERNAME root

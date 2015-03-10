@@ -9,13 +9,18 @@ import (
 )
 
 var (
-	db   *influxdbc.InfluxDB
-	host = os.Getenv("INFLUXDB_HOST")
-	port = os.Getenv("INFLUXDB_PORT")
+	db *influxdbc.InfluxDB
+
+	cosmosPort = os.Getenv("COSMOS_PORT")
+	dbHost     = os.Getenv("INFLUXDB_HOST")
+	dbPort     = os.Getenv("INFLUXDB_PORT")
+	dbUsername = os.Getenv("INFLUXDB_USERNAME")
+	dbPassword = os.Getenv("INFLUXDB_PASSWORD")
+	dbName     = os.Getenv("INFLUXDB_DATABASE")
 )
 
 func startServer() {
-	db = influxdbc.NewInfluxDB(fmt.Sprintf("%s:%d", host, port), "cosmos", "root", "root")
+	db = influxdbc.NewInfluxDB(fmt.Sprintf("%s:%d", dbHost, dbPort), dbName, dbUsername, dbPassword)
 	m := martini.Classic()
 
 	m.Handlers(
@@ -30,7 +35,11 @@ func startServer() {
 		r.Get("/:host/containers", getContainers)
 	})
 
-	m.Run()
+	if cosmosPort == "" {
+		m.RunOnAddr(":3000")
+	} else {
+		m.RunOnAddr(":" + cosmosPort)
+	}
 }
 
 func main() {

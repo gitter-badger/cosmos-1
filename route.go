@@ -58,7 +58,7 @@ func postContainers(r render.Render, params martini.Params, req *http.Request) {
 func getContainers(r render.Render, params martini.Params, req *http.Request) {
 	req.ParseForm()
 
-	results, err := db.Query("SELECT * FROM containers", "")
+	results, err := db.Query("SELECT * FROM containers", "∏")
 	if err != nil {
 		fmt.Println("Error")
 		fmt.Printf("%s\n", err)
