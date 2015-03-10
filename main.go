@@ -22,8 +22,8 @@ func startServer() {
 	m.Use(render.Renderer())
 
 	m.Group("/v1", func(r martini.Router) {
-		r.Post("/:id/containers", postContainers)
-		r.Get("/:id/containers", getContainers)
+		r.Post("/:host/containers", postContainers)
+		r.Get("/:host/containers", getContainers)
 	})
 
 	m.Run()
