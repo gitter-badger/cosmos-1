@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:onbuild
 MAINTAINER brann <brann@cosmos.io>
 
 # Install Cosmos
@@ -9,13 +9,13 @@ ENV INFLUXDB_USERNAME root
 ENV INFLUXDB_PASSWORD root
 ENV INFLUXDB_DATABASE cosmos
 
-ADD . /go/src/github.com/cosmos-io/cosmos
-RUN go install github.com/cosmos-io/cosmos
+# ADD . /go/src/github.com/cosmos-io/cosmos
+# RUN go install github.com/cosmos-io/cosmos
 
 EXPOSE 8081
 CMD ["/go/bin/cosmos"]
 
 
 
-#VOLUME ["/data"]
-#CMD ["/run.sh"]
+# VOLUME ["/data"]
+# CMD ["/run.sh"]
