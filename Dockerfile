@@ -10,14 +10,11 @@ ENV INFLUXDB_PASSWORD root
 ENV INFLUXDB_DATABASE cosmos
 
 RUN go get github.com/cosmos-io/cosmos && go install github.com/cosmos-io/cosmos
-CMD ["$GOPATH/bin/cosmos"]
+
+EXPOSE 8081
+CMD ["/go/bin/cosmos"]
 
 
-# Raft port (for clustering, don't expose publicly!)
-#EXPOSE 8090
-
-# Protobuf port (for clustering, don't expose publicly!)
-#EXPOSE 8099
 
 #VOLUME ["/data"]
 #CMD ["/run.sh"]
