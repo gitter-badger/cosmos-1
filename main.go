@@ -20,7 +20,7 @@ var (
 )
 
 func startServer() {
-	db = influxdbc.NewInfluxDB(fmt.Sprintf("%s:%d", dbHost, dbPort), dbName, dbUsername, dbPassword)
+	db = influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbName, dbUsername, dbPassword)
 	m := martini.Classic()
 
 	m.Handlers(
