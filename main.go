@@ -35,13 +35,8 @@ func getEnv(key, defVal string) string {
 func contentTypeRouter() martini.Handler {
 	return func(r render.Render, req *http.Request, c martini.Context) {
 		accept := strings.ToLower(req.Header.Get("Accept"))
-		fmt.Printf("Accept = %s\n", accept)
-
 		if strings.Contains(accept, "text/html") {
-			fmt.Println("2")
 			r.HTML(http.StatusOK, "index", nil)
-		} else {
-			fmt.Println("3")
 		}
 	}
 }
