@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/attilaolah/strict"
 	"github.com/cosmos-io/influxdbc"
@@ -30,6 +32,20 @@ func getEnv(key, defVal string) string {
 	}
 }
 
+func contentTypeRouter() martini.Handler {
+	return func(r render.Render, req *http.Request, c martini.Context) {
+		accept := strings.ToLower(req.Header.Get("Accept"))
+		fmt.Printf("Accept = %s\n", accept)
+
+		if strings.Contains(accept, "text/html") {
+			fmt.Println("2")
+			r.HTML(http.StatusOK, "index", nil)
+		} else {
+			fmt.Println("3")
+		}
+	}
+}
+
 func startServer() {
 	db = influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbName, dbUsername, dbPassword)
 	m := martini.Classic()
@@ -38,7 +54,10 @@ func startServer() {
 		martini.Logger(),
 		martini.Static("public"),
 		strict.Strict,
-		render.Renderer(),
+		render.Renderer(render.Options{
+			Directory: "templates",
+		}),
+		contentTypeRouter(),
 	)
 
 	m.Group("/v1", func(r martini.Router) {
