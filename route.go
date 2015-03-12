@@ -1,70 +1,61 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/cosmos-io/influxdbc"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
-	"net/http"
 )
 
 func postContainers(r render.Render, params martini.Params, req *http.Request) {
 	req.ParseForm()
 
-	var raw []map[string]interface{}
-	err := json.Unmarshal([]byte(req.FormValue("data")), &raw)
+	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		fmt.Printf("%s\n", err)
-		r.JSON(500, err)
+		r.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	cols := make([]string, len(raw[0])+1)
-	cols[0] = "host"
+	fmt.Printf("HOST = %s", params["host"])
 
-	points := make([][]interface{}, len(raw))
+	series, err := ConvertReqBodyToSeries(params["host"], body)
+	fmt.Println(series)
 
-	series := influxdbc.NewSeries("containers")
-	series.Columns = cols
-	series.Points = points
-
-	for i, r := range raw {
-		j := 1
-		points[i] = make([]interface{}, len(cols))
-		points[i][0] = params["host"]
-		for k, v := range r {
-			if i == 0 {
-				cols[j] = k
-			}
-			points[i][j] = v
-			j += 1
-		}
+	if err != nil {
+		r.JSON(http.StatusInternalServerError, err)
+		return
 	}
 
-	s := make([]influxdbc.Series, 1)
-	s[0] = *series
+	s := make([]*influxdbc.Series, 1)
+	s[0] = series
 	err = db.WriteSeries(s, "")
 	if err != nil {
-		r.JSON(500, err)
+		r.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	//res := NewResJson()
-	//res["host"] = hostname
-	r.JSON(200, series)
+	r.JSON(http.StatusOK, series)
 }
 
-func getContainers(r render.Render, params martini.Params, req *http.Request) {
-	req.ParseForm()
-
-	results, err := db.Query("SELECT * FROM containers", "")
+func getContainers(r render.Render, params martini.Params) {
+	series, err := db.Query(fmt.Sprintf("SELECT * FROM containers WHERE host='%s'", params["host"]), "")
 	if err != nil {
-		fmt.Println("Error")
-		fmt.Printf("%s\n", err)
-		r.JSON(500, err)
+		r.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	r.JSON(200, results)
+	r.JSON(http.StatusOK, series)
+}
+
+func getContainer(r render.Render, params martini.Params) {
+	series, err := db.Query(fmt.Sprintf("SELECT * FROM containers WHERE host='%s' AND name='%s'", params["host"], params["name"]), "")
+	if err != nil {
+		r.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	r.JSON(http.StatusOK, series)
 }
