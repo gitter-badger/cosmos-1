@@ -14,7 +14,7 @@ func ConvertReqBodyToSeries(host string, body []byte) (*influxdbc.Series, error)
 	}
 
 	cols := make([]string, len(raw[0])+1)
-	cols[0] = "host"
+	cols[0] = "planet"
 
 	points := make([][]interface{}, len(raw))
 

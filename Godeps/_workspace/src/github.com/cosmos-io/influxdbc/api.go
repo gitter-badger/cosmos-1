@@ -20,7 +20,7 @@ func escape(q string) string {
 	return url.QueryEscape(q)
 }
 
-func NewInfluxDB(host string, database string, username string, password string) *InfluxDB {
+func NewInfluxDB(host, database, username, password string) *InfluxDB {
 	return &InfluxDB{host: host, database: database, username: username, password: password}
 }
 

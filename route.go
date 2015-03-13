@@ -10,7 +10,7 @@ import (
 	"github.com/martini-contrib/render"
 )
 
-func postContainers(r render.Render, params martini.Params, req *http.Request) {
+func addContainers(r render.Render, params martini.Params, req *http.Request) {
 	req.ParseForm()
 
 	body, err := ioutil.ReadAll(req.Body)
@@ -19,9 +19,9 @@ func postContainers(r render.Render, params martini.Params, req *http.Request) {
 		return
 	}
 
-	fmt.Printf("HOST = %s", params["host"])
+	fmt.Printf("Planet = %s", params["planet"])
 
-	series, err := ConvertReqBodyToSeries(params["host"], body)
+	series, err := ConvertReqBodyToSeries(params["planet"], body)
 	fmt.Println(series)
 
 	if err != nil {
@@ -41,7 +41,7 @@ func postContainers(r render.Render, params martini.Params, req *http.Request) {
 }
 
 func getContainers(r render.Render, params martini.Params) {
-	series, err := db.Query(fmt.Sprintf("SELECT * FROM containers WHERE host='%s'", params["host"]), "")
+	series, err := db.Query(fmt.Sprintf("SELECT * FROM containers WHERE planet='%s'", params["planet"]), "")
 	if err != nil {
 		r.JSON(http.StatusInternalServerError, err)
 		return
@@ -50,8 +50,8 @@ func getContainers(r render.Render, params martini.Params) {
 	r.JSON(http.StatusOK, series)
 }
 
-func getContainer(r render.Render, params martini.Params) {
-	series, err := db.Query(fmt.Sprintf("SELECT * FROM containers WHERE host='%s' AND name='%s'", params["host"], params["name"]), "")
+func getPlanets(r render.Render) {
+	series, err := db.Query("SELECT * FROM planets", "")
 	if err != nil {
 		r.JSON(http.StatusInternalServerError, err)
 		return
@@ -59,3 +59,13 @@ func getContainer(r render.Render, params martini.Params) {
 
 	r.JSON(http.StatusOK, series)
 }
+
+// func getContainer(r render.Render, params martini.Params) {
+// 	series, err := db.Query(fmt.Sprintf("SELECT * FROM containers WHERE host='%s' AND name='%s'", params["host"], params["name"]), "")
+// 	if err != nil {
+// 		r.JSON(http.StatusInternalServerError, err)
+// 		return
+// 	}
+
+// 	r.JSON(http.StatusOK, series)
+//}
