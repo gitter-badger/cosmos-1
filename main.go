@@ -47,10 +47,10 @@ func startServer() {
 
 	m.Handlers(
 		martini.Logger(),
-		martini.Static("public"),
+		martini.Static("web/public"),
 		strict.Strict,
 		render.Renderer(render.Options{
-			Directory: "templates",
+			Directory: "web/templates",
 		}),
 		contentTypeRouter(),
 	)
