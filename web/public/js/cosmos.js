@@ -27,9 +27,13 @@
 
   function getPlanets() {
     var container = $('<div>');
-    var myChart = new Chart(ctx).Line(data, options);
-    container.append(myChart);
+    container.append($('<script>', {src: '/js/bower_components/Chart.js/Chart.js'}));
+    var chart = $('<canvas>', {id: 'myChart'})
+    chart.attr({width: '800'});
+    chart.attr({height: '400'});
+    container.append(chart);
     $('#page').append(container);
+    graph();
   }
 
   $.ajax({
@@ -45,4 +49,9 @@
       getPlanets();
     }
   });
+
+  function graph() {
+    var ctx = document.getElementById("myChart").getContext("2d");
+    var myChart = new Chart(ctx).Line(data);
+  }
 })();
