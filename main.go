@@ -56,7 +56,7 @@ func createInfluxDBConn() {
 	json.Unmarshal(file, &conf)
 	_, err = db.CreateDatabase(conf)
 	if err != nil {
-		fmt.Printf("Cannot create shardspace on database '%s'. Maybe already exists..\n", dbDatabase)
+		fmt.Printf("%s\n", err)
 	}
 }
 
@@ -76,8 +76,8 @@ func startServer() {
 	m.Group("/v1", func(r martini.Router) {
 		r.Post("/:planet/containers", strict.Accept("application/json"), strict.ContentType("application/json"), addContainers)
 		r.Get("/:planet/containers", strict.Accept("application/json"), getContainers)
-		//r.Get("/:planet/containers/:name", strict.Accept("application/json"), getContainer)
 		r.Get("/planets", strict.Accept("application/json"), getPlanets)
+		r.Post("/planets", strict.Accept("application/json"), strict.ContentType("application/json"), addPlanets)
 	})
 
 	if cosmosPort == "" {
