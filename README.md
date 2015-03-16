@@ -9,10 +9,24 @@ $ docker run --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --rm --name cosm
 $ docker run --link cosmos:cosmos -e COSMOS_HOST=cosmos -e COSMOS_PLANET_NAME=Mars --rm --name curiosity cosmosio/curiosity
 ```
 
-## Rest APIs
-	[GET] /v1/:hostname/containers [Accept:application/json]
-    
-	[POST] /v1/:hostname/containers [Content-type:application/json, Accept:application/json]
+Rest APIs
+---------
+Get all of the planet(host) information in Cosmos
+	[GET]  /v1/planets [Accept:application/json]
+
+Post planet(host) information to Cosmos
+     	[POST] /v1/planets [Content-type:application/json, Accept:application/json]
+	Body : Raw
+	{
+		"column" : "value",
+		...
+	}
+
+Get container metrics of planet from Cosmos
+	[GET]  /v1/:planet/containers [Accept:application/json]
+
+Post container metrics of planet to Cosmos
+	[POST] /v1/:planet/containers [Content-type:application/json, Accept:application/json]
 	Body : Raw
 	[{
 		"column" : "value",

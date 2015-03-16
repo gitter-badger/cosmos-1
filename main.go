@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -15,12 +17,13 @@ import (
 var (
 	db *influxdbc.InfluxDB
 
-	cosmosPort = getEnv("COSMOS_PORT", "8080")
-	dbHost     = getEnv("INFLUXDB_HOST", "localhost")
-	dbPort     = getEnv("INFLUXDB_PORT", "8086")
-	dbUsername = getEnv("INFLUXDB_USERNAME", "root")
-	dbPassword = getEnv("INFLUXDB_PASSWORD", "root")
-	dbName     = getEnv("INFLUXDB_DATABASE", "cosmos")
+	cosmosPort  = getEnv("COSMOS_PORT", "8080")
+	dbHost      = getEnv("INFLUXDB_HOST", "localhost")
+	dbPort      = getEnv("INFLUXDB_PORT", "8086")
+	dbUsername  = getEnv("INFLUXDB_USERNAME", "root")
+	dbPassword  = getEnv("INFLUXDB_PASSWORD", "root")
+	dbDatabase  = getEnv("INFLUXDB_DATABASE", "cosmos")
+	dbShardConf = getEnv("INFLUXDB_SHARD_CONF", "./cosmos_shard.conf")
 )
 
 func getEnv(key, defVal string) string {
@@ -41,8 +44,23 @@ func contentTypeRouter() martini.Handler {
 	}
 }
 
+func createInfluxDBConn() {
+	db = influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbDatabase, dbUsername, dbPassword)
+	file, err := ioutil.ReadFile(dbShardConf)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		os.Exit(1)
+	}
+
+	var conf influxdbc.ShardSpace
+	json.Unmarshal(file, &conf)
+	_, err = db.CreateDatabase(conf)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+}
+
 func startServer() {
-	db = influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbName, dbUsername, dbPassword)
 	m := martini.Classic()
 
 	m.Handlers(
@@ -56,9 +74,10 @@ func startServer() {
 	)
 
 	m.Group("/v1", func(r martini.Router) {
-		r.Post("/:host/containers", strict.Accept("application/json"), strict.ContentType("application/json"), postContainers)
-		r.Get("/:host/containers", strict.Accept("application/json"), getContainers)
-		r.Get("/:host/containers/:name", strict.Accept("application/json"), getContainer)
+		r.Post("/:planet/containers", strict.Accept("application/json"), strict.ContentType("application/json"), addContainers)
+		r.Get("/:planet/containers", strict.Accept("application/json"), getContainers)
+		r.Get("/planets", strict.Accept("application/json"), getPlanets)
+		r.Post("/planets", strict.Accept("application/json"), strict.ContentType("application/json"), addPlanets)
 	})
 
 	if cosmosPort == "" {
@@ -69,5 +88,6 @@ func startServer() {
 }
 
 func main() {
+	createInfluxDBConn()
 	startServer()
 }

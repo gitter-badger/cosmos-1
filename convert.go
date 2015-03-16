@@ -6,7 +6,7 @@ import (
 	"github.com/cosmos-io/influxdbc"
 )
 
-func ConvertReqBodyToSeries(host string, body []byte) (*influxdbc.Series, error) {
+func ConvertToContainerSeries(planet string, body []byte) (*influxdbc.Series, error) {
 	var raw []map[string]interface{}
 	err := json.Unmarshal(body, &raw)
 	if err != nil {
@@ -14,7 +14,7 @@ func ConvertReqBodyToSeries(host string, body []byte) (*influxdbc.Series, error)
 	}
 
 	cols := make([]string, len(raw[0])+1)
-	cols[0] = "host"
+	cols[0] = "planet"
 
 	points := make([][]interface{}, len(raw))
 
@@ -25,7 +25,7 @@ func ConvertReqBodyToSeries(host string, body []byte) (*influxdbc.Series, error)
 	for i, r := range raw {
 		j := 1
 		points[i] = make([]interface{}, len(cols))
-		points[i][0] = host
+		points[i][0] = planet
 		for k, v := range r {
 			if i == 0 {
 				cols[j] = k
@@ -33,6 +33,31 @@ func ConvertReqBodyToSeries(host string, body []byte) (*influxdbc.Series, error)
 			points[i][j] = v
 			j += 1
 		}
+	}
+
+	return series, nil
+}
+
+func ConvertToPlanetSeries(body []byte) (*influxdbc.Series, error) {
+	var raw map[string]interface{}
+	err := json.Unmarshal(body, &raw)
+	if err != nil {
+		return nil, err
+	}
+
+	cols := make([]string, len(raw))
+	points := make([][]interface{}, 1)
+
+	series := influxdbc.NewSeries("planets")
+	series.Columns = cols
+	series.Points = points
+	points[0] = make([]interface{}, len(raw))
+
+	i := 0
+	for k, v := range raw {
+		cols[i] = k
+		points[0][i] = v
+		i = i + 1
 	}
 
 	return series, nil

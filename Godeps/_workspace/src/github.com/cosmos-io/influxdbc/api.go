@@ -20,7 +20,7 @@ func escape(q string) string {
 	return url.QueryEscape(q)
 }
 
-func NewInfluxDB(host string, database string, username string, password string) *InfluxDB {
+func NewInfluxDB(host, database, username, password string) *InfluxDB {
 	return &InfluxDB{host: host, database: database, username: username, password: password}
 }
 
@@ -48,8 +48,6 @@ func (db *InfluxDB) Query(query, tp string) ([]*Series, error) {
 	defer result.Body.Close()
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(result.Body)
-	fmt.Printf("\n%v\n", result.StatusCode)
-	fmt.Println(buf.String())
 
 	if result.StatusCode != 200 {
 		return nil, errors.New(buf.String())
