@@ -48,8 +48,6 @@ func (db *InfluxDB) Query(query, tp string) ([]*Series, error) {
 	defer result.Body.Close()
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(result.Body)
-	fmt.Printf("\n%v\n", result.StatusCode)
-	fmt.Println(buf.String())
 
 	if result.StatusCode != 200 {
 		return nil, errors.New(buf.String())
