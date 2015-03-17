@@ -24,6 +24,9 @@ Post planet(host) information to Cosmos
 
 Get container metrics of planet from Cosmos
 	[GET]  /v1/:planet/containers [Accept:application/json]
+	Requried Parameters
+	stime : start time of metrics in seconds
+	etime : end time of metrics in seconds
 
 Post container metrics of planet to Cosmos
 	[POST] /v1/:planet/containers [Content-type:application/json, Accept:application/json]

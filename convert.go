@@ -2,11 +2,16 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/cosmos-io/influxdbc"
 )
 
-func ConvertToContainerSeries(planet string, body []byte) (*influxdbc.Series, error) {
+func GenerateContainerSeriesName(token, planet string) {
+	return fmt.Sprintf("containers_%s_%s", token, planet)
+}
+
+func ConvertToContainerSeries(token, planet string, body []byte) (*influxdbc.Series, error) {
 	var raw []map[string]interface{}
 	err := json.Unmarshal(body, &raw)
 	if err != nil {
@@ -18,7 +23,7 @@ func ConvertToContainerSeries(planet string, body []byte) (*influxdbc.Series, er
 
 	points := make([][]interface{}, len(raw))
 
-	series := influxdbc.NewSeries("containers")
+	series := influxdbc.NewSeries(generateContainerSeriesName(token, planet))
 	series.Columns = cols
 	series.Points = points
 

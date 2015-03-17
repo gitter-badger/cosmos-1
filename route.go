@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/cosmos-io/influxdbc"
@@ -10,25 +9,21 @@ import (
 	"github.com/martini-contrib/render"
 )
 
-func getBodyFromRequest(req *http.Request) ([]byte, error) {
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return body, nil
-}
-
 func addContainers(r render.Render, params martini.Params, req *http.Request) {
 	req.ParseForm()
+	token := req.URL.Query().Get("token")
+	if token == "" {
+		token = "default"
+	}
+	planet := params["planet"]
 
-	body, err := getBodyFromRequest(req)
+	body, err := GetBodyFromRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	series, err := ConvertToContainerSeries(params["planet"], body)
+	series, err := ConvertToContainerSeries(token, planet, body)
 
 	if err != nil {
 		fmt.Println(err)
@@ -38,7 +33,7 @@ func addContainers(r render.Render, params martini.Params, req *http.Request) {
 
 	s := make([]*influxdbc.Series, 1)
 	s[0] = series
-	err = db.WriteSeries(s, "")
+	err = db.WriteSeries(s, "s")
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
@@ -48,8 +43,18 @@ func addContainers(r render.Render, params martini.Params, req *http.Request) {
 	r.JSON(http.StatusOK, series)
 }
 
-func getContainers(r render.Render, params martini.Params) {
-	series, err := db.Query(fmt.Sprintf("SELECT * FROM containers WHERE planet='%s'", params["planet"]), "")
+func getContainers(r render.Render, params martini.Params, req *http.Request) {
+	stime := req.URL.Query().Get("stime")
+	etime := req.URL.Query().Get("etime")
+	token := req.URL.Query().Get("token")
+	if token == "" {
+		token = "default"
+	}
+	planet := params["planet"]
+	containerSeriesName := GenerateContainerSeriesName(token, planet)
+
+	dbQuery := fmt.Sprintf("SELECT * FROM %s WHERE time >= %ss and time <= %ss", containerSeriesName, stime, etime), "s"
+	series, err := db.Query(dbQuery)
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
@@ -60,7 +65,7 @@ func getContainers(r render.Render, params martini.Params) {
 }
 
 func getPlanets(r render.Render) {
-	series, err := db.Query("SELECT * FROM planets", "")
+	series, err := db.Query("SELECT * FROM planets", "s")
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
@@ -72,7 +77,7 @@ func getPlanets(r render.Render) {
 
 func addPlanets(r render.Render, req *http.Request) {
 	req.ParseForm()
-	body, err := getBodyFromRequest(req)
+	body, err := GetBodyFromRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
@@ -88,7 +93,7 @@ func addPlanets(r render.Render, req *http.Request) {
 	fmt.Println(series)
 	s := make([]*influxdbc.Series, 1)
 	s[0] = series
-	err = db.WriteSeries(s, "")
+	err = db.WriteSeries(s, "s")
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
@@ -97,13 +102,3 @@ func addPlanets(r render.Render, req *http.Request) {
 
 	r.JSON(http.StatusOK, series)
 }
-
-// func getContainer(r render.Render, params martini.Params) {
-// 	series, err := db.Query(fmt.Sprintf("SELECT * FROM containers WHERE host='%s' AND name='%s'", params["host"], params["name"]), "")
-// 	if err != nil {
-// 		r.JSON(http.StatusInternalServerError, err)
-// 		return
-// 	}
-
-// 	r.JSON(http.StatusOK, series)
-//}
