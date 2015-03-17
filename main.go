@@ -104,7 +104,7 @@ func startServer() {
 			addContainers)
 		r.Get("/:planet/containers",
 			strict.Accept("application/json"),
-			requiredParams("stime", "etime"),
+			requiredParams("interval"),
 			getContainers)
 		r.Get("/planets",
 			strict.Accept("application/json"),

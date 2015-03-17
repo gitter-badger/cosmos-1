@@ -7,7 +7,7 @@ import (
 	"github.com/cosmos-io/influxdbc"
 )
 
-func GenerateContainerSeriesName(token, planet string) {
+func GenerateContainerSeriesName(token, planet string) string {
 	return fmt.Sprintf("containers_%s_%s", token, planet)
 }
 
@@ -23,7 +23,7 @@ func ConvertToContainerSeries(token, planet string, body []byte) (*influxdbc.Ser
 
 	points := make([][]interface{}, len(raw))
 
-	series := influxdbc.NewSeries(generateContainerSeriesName(token, planet))
+	series := influxdbc.NewSeries(GenerateContainerSeriesName(token, planet))
 	series.Columns = cols
 	series.Points = points
 

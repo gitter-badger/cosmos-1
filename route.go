@@ -44,8 +44,7 @@ func addContainers(r render.Render, params martini.Params, req *http.Request) {
 }
 
 func getContainers(r render.Render, params martini.Params, req *http.Request) {
-	stime := req.URL.Query().Get("stime")
-	etime := req.URL.Query().Get("etime")
+	interval := req.URL.Query().Get("interval")
 	token := req.URL.Query().Get("token")
 	if token == "" {
 		token = "default"
@@ -53,8 +52,8 @@ func getContainers(r render.Render, params martini.Params, req *http.Request) {
 	planet := params["planet"]
 	containerSeriesName := GenerateContainerSeriesName(token, planet)
 
-	dbQuery := fmt.Sprintf("SELECT * FROM %s WHERE time >= %ss and time <= %ss", containerSeriesName, stime, etime), "s"
-	series, err := db.Query(dbQuery)
+	dbQuery := fmt.Sprintf("SELECT * FROM %s WHERE time > now() - %s", containerSeriesName, interval)
+	series, err := db.Query(dbQuery, "s")
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
