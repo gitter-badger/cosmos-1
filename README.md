@@ -11,26 +11,33 @@ $ docker run --link cosmos:cosmos -e COSMOS_HOST=cosmos -e COSMOS_PLANET_NAME=Ma
 
 Rest APIs
 ---------
-Get all of the planet(host) information in Cosmos
+Get all of the planet(host) information
 	[GET]  /v1/planets [Accept:application/json]
 
-Post planet(host) information to Cosmos
-     	[POST] /v1/planets [Content-type:application/json, Accept:application/json]
+
+Get container list of planet
+	[GET]  /v1/planet/:planet/containers [Accept:application/json]
+	Required Parameters
+		- interval : time interval from now (ex, 30m, 1h, 7d)
+
+Post container metrics of planet
+	[POST] /v1/planet/:planet/containers [Content-Type:application/json, Accept:application/json]
 	Body : Raw
-	{
-		"column" : "value",
-		...
+	{ 
+
+	  "nginx" : {
+				"column" : "value",
+				...
+	  },
+
+	  "mysql" : {
+	  			"column" : "value",
+	  			...
+	  }, 
+	  ...	  
 	}
 
-Get container metrics of planet from Cosmos
-	[GET]  /v1/:planet/containers [Accept:application/json]
-	Requried Parameters
-	interval : time interval from now (ex, 30m, 1h, 7d)
-
-Post container metrics of planet to Cosmos
-	[POST] /v1/:planet/containers [Content-type:application/json, Accept:application/json]
-	Body : Raw
-	[{
-		"column" : "value",
-		...
-	}]
+Get metrics of container
+	[GET] /v1/planet/:planet/containers/:container_name [Accept:application/json]
+	Required parameters
+		- interval : time interval from now (ex, 30m, 1h, 7d)

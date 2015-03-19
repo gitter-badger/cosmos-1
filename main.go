@@ -103,11 +103,11 @@ func startServer() {
 			strict.Accept("application/json"),
 			getPlanets)
 
-		// post planet information
-		r.Post("/planets",
-			strict.Accept("application/json"),
-			strict.ContentType("application/json"),
-			addPlanets)
+		//// post planet information
+		// r.Post("/planets",
+		// 	strict.Accept("application/json"),
+		// 	strict.ContentType("application/json"),
+		// 	addPlanets)
 
 		// post container informations
 		r.Post("/planets/:planet/containers",
