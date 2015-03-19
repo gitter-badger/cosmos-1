@@ -35,7 +35,12 @@
 						}
 					}
 				}				
-				fn(params);
+				
+				// Invoke handler after DOM ready
+				$(function() {
+					fn(params);
+				});
+
 				return true;
 			}
 		});

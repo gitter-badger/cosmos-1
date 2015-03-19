@@ -7,43 +7,46 @@ import (
 	"github.com/cosmos-io/influxdbc"
 )
 
-func GenerateContainerSeriesName(token, planet string) string {
-	return fmt.Sprintf("containers_%s_%s", token, planet)
+func GenerateContainerInfoSeriesName(token, planet, container string) string {
+	return fmt.Sprintf("%s_%s_%s", token, planet, container)
 }
 
-func ConvertToContainerSeries(token, planet string, body []byte) (*influxdbc.Series, error) {
-	var raw []map[string]interface{}
-	err := json.Unmarshal(body, &raw)
+func GenerateContainerSeriesName(token, planet string) string {
+	return fmt.Sprintf("%s_%s", token, planet)
+}
+
+func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.Series, error) {
+	var containers map[string]map[string]interface{}
+	err := json.Unmarshal(body, &containers)
 	if err != nil {
 		return nil, err
 	}
 
-	cols := make([]string, len(raw[0])+1)
-	cols[0] = "planet"
+	result := make([]*influxdbc.Series, 0)
+	for name, infos := range containers {
+		series := influxdbc.NewSeries(GenerateContainerInfoSeriesName(token, planet, name))
 
-	points := make([][]interface{}, len(raw))
+		cols := make([]string, len(infos))
+		points := make([][]interface{}, 1)
+		points[0] = make([]interface{}, len(cols))
 
-	series := influxdbc.NewSeries(GenerateContainerSeriesName(token, planet))
-	series.Columns = cols
-	series.Points = points
+		series.Columns = cols
+		series.Points = points
 
-	for i, r := range raw {
-		j := 1
-		points[i] = make([]interface{}, len(cols))
-		points[i][0] = planet
-		for k, v := range r {
-			if i == 0 {
-				cols[j] = k
-			}
-			points[i][j] = v
-			j += 1
+		i := 0
+		for k, v := range infos {
+			cols[i] = k
+			points[0][i] = v
+			i += 1
 		}
+		fmt.Println(*series)
+		result = append(result, series)
 	}
 
-	return series, nil
+	return result, nil
 }
 
-func ConvertToPlanetSeries(body []byte) (*influxdbc.Series, error) {
+func ConvertToPlanetSeries(token string, body []byte) (*influxdbc.Series, error) {
 	var raw map[string]interface{}
 	err := json.Unmarshal(body, &raw)
 	if err != nil {
@@ -53,7 +56,7 @@ func ConvertToPlanetSeries(body []byte) (*influxdbc.Series, error) {
 	cols := make([]string, len(raw))
 	points := make([][]interface{}, 1)
 
-	series := influxdbc.NewSeries("planets")
+	series := influxdbc.NewSeries(token)
 	series.Columns = cols
 	series.Points = points
 	points[0] = make([]interface{}, len(raw))
@@ -66,4 +69,18 @@ func ConvertToPlanetSeries(body []byte) (*influxdbc.Series, error) {
 	}
 
 	return series, nil
+}
+
+func ConvertFromSeries(series []*influxdbc.Series) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0)
+	for _, s := range series {
+		for _, point := range s.Points {
+			m := make(map[string]interface{})
+			for i, val := range point {
+				m[s.Columns[i]] = val
+			}
+			result = append(result, m)
+		}
+	}
+	return result
 }

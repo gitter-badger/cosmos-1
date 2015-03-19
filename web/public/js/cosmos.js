@@ -12,7 +12,7 @@
   Cosmos.request = {
     getPlanets: function(done, fail, complete) {      
       var xhr = $.ajax({
-        url: Cosmos.API_VER + '/planets',
+        url: '/' + Cosmos.API_VER + '/planets',
         method: 'GET',
         accept: 'application/json',
         dataType: 'json'
@@ -29,7 +29,7 @@
     },
     getContainers: function(planet, timeInterval, done, fail, complete) {
       var xhr = $.ajax({
-        url: Cosmos.API_VER + '/' + planet + '/containers',        
+        url: '/' + Cosmos.API_VER + '/' + planet + '/containers',        
         method: 'GET',
         accept: 'application/json',
         dataType: 'json',
@@ -48,7 +48,7 @@
     }
   };
 
-  Cosmos.drawGraph = function(id) {
+  Cosmos.drawGraph = function(selector) {
     var data = {
       labels: ["January", "February", "March", "April", "May", "June", "July"],
       datasets: [
@@ -80,65 +80,54 @@
     chart.attr({width: '800'});
     chart.attr({height: '400'});
     container.append(chart);
-    $('#'+id).append(container);
+    $(selector).append(container);
 
     var ctx = document.getElementById("chart").getContext("2d");
     new Chart(ctx).Line(data);
   };
 })();
 
-// Route configuration
-$(function(){
-  Route.match('/', function() {
+
+var Page = {};
+Page.planetList = function() {
+    Cosmos.request.getPlanets(function(json, textStatus, jqXHR) {
+
+      var ul = $('<ul/>');
+      for (var i = 0; i < json.length; i++) {
+        var li = $('<li/>');
+        var a = $('<a/>', {href: '/planets/' + json[i].name});
+        a.text(json[i].name);
+        li.append(a);
+        ul.append(li);
+      }
+
+      $('#page').append(ul);
+
+    }, function(jqXHR, textStatus, errorThrown) {
+      console.log(jqXHR.responseText);
+    });
+
+};
+
+Page.planetDetail = function(params) {
     var scripts = ['/js/bower_components/Chart.js/Chart.js'];
     Cosmos.loadScripts(scripts);
-    $('#page').append($('<h4/>').text('Dashboard'));
-    Cosmos.drawGraph('page');
-  });
 
-  Route.match('/:menu/:submenu', function(params) {
-    console.log(params);
-  });
+    $('#page').append($('<h4/>').text(params['planet']));
+    Cosmos.request.getContainers(params['planet'], '7d', function(json, textStatus, jqXHR) {
+      console.log(json)
+    }, 
+    function(jqXHR, textStatus, errorThrown) {
+      console.log(errorThrown);
+    })
 
+    Cosmos.drawGraph('#page');
+};
+
+
+// Route configuration
+(function(){
+  Route.match('/', Page.planetList);
+  Route.match('/planets/:planet', Page.planetDetail); 
   Route.regist();
-
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+})();

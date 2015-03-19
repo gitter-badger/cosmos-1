@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	db *influxdbc.InfluxDB
+	logDb *influxdbc.InfluxDB
 
 	cosmosPort  = getEnv("COSMOS_PORT", "8080")
 	dbHost      = getEnv("INFLUXDB_HOST", "localhost")
@@ -68,18 +68,19 @@ func requiredParams(params ...string) http.HandlerFunc {
 	}
 }
 
-func createInfluxDBConn() {
-	db = influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbDatabase, dbUsername, dbPassword)
+func createDBConn() {
+	logDb = influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbDatabase, dbUsername, dbPassword)
 	file, err := ioutil.ReadFile(dbShardConf)
 	if err != nil {
-		fmt.Printf("Error: %s", err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	var conf influxdbc.ShardSpace
 	json.Unmarshal(file, &conf)
-	_, err = db.CreateDatabase(conf)
+	_, err = logDb.CreateDatabase(conf)
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Println(err)
 	}
 }
 
@@ -97,24 +98,34 @@ func startServer() {
 	)
 
 	m.Group("/v1", func(r martini.Router) {
-		r.Post("/:planet/containers",
-			strict.Accept("application/json"),
-			strict.ContentType("application/json"),
-			requiredParams(),
-			addContainers)
-		r.Get("/:planet/containers",
-			strict.Accept("application/json"),
-			requiredParams("interval"),
-			getContainers)
+		// get planet list
 		r.Get("/planets",
 			strict.Accept("application/json"),
-			requiredParams(),
 			getPlanets)
+
+		// post planet information
 		r.Post("/planets",
 			strict.Accept("application/json"),
 			strict.ContentType("application/json"),
-			requiredParams(),
 			addPlanets)
+
+		// post container informations
+		r.Post("/planets/:planet/containers",
+			strict.Accept("application/json"),
+			strict.ContentType("application/json"),
+			addContainers)
+
+		// get container list of planet
+		r.Get("/planets/:planet/containers",
+			strict.Accept("application/json"),
+			requriedParams("interval"),
+			getContainers)
+
+		// get metrics of container
+		r.Get("/planets/:planet/containers/:container",
+			strict.Accept("application/json"),
+			requiredParams("interval"),
+			getContainerInfo)
 	})
 
 	if cosmosPort == "" {
@@ -125,6 +136,6 @@ func startServer() {
 }
 
 func main() {
-	createInfluxDBConn()
+	createDBConn()
 	startServer()
 }
