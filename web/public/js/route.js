@@ -37,8 +37,9 @@
 				}				
 				
 				// Invoke handler after DOM ready
+				Route.params = params;
 				$(function() {
-					fn(params);
+					fn();
 				});
 
 				return true;

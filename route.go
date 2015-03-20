@@ -95,7 +95,7 @@ func getContainerInfo(r render.Render, params martini.Params, req *http.Request)
 	container := params["container"]
 	seriesName := GenerateContainerInfoSeriesName(token, planet, container)
 
-	dbQuery := fmt.Sprintf("SELECT * FROM %s WHERE time > now() - %s", seriesName, interval)
+	dbQuery := fmt.Sprintf("SELECT * FROM %s WHERE time > now() - %s ORDER ASC", seriesName, interval)
 	series, err := logDb.Query(dbQuery, "s")
 	if err != nil {
 		fmt.Println(err)
