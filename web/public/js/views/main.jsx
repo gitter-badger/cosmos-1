@@ -60,12 +60,12 @@ var MetricGraph = React.createClass({
 	},
 	componentDidMount: function() {
 		var self = this;
-		Cosmos.request.getContainerInfo(self.props.planetName, self.props.containerName, '7d', function(json) {
+		Cosmos.request.getContainerInfo(self.props.planetName, self.props.containerId, '1m', function(json) {
 			var cpuUsageData = [], memUsageData = [];
 			var timeLabel = [];
-			for (var i = 0; i < json.length; i++) {
-				cpuUsageData.push(json[i].cpu_usage);
-				memUsageData.push(json[i].mem_usage);
+			for (var i = json.length-1; i >= 0; i--) {
+				cpuUsageData.push(parseInt(json[i].cpu_usage_sum / json[i].cnt));
+				memUsageData.push(parseInt(json[i].mem_usage_sum / json[i].cnt));
 				var d = new Date(json[i].time * 1000)				
 				timeLabel.push(d.getMonth() + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes());
 			}
@@ -97,7 +97,7 @@ var MetricGraph = React.createClass({
 var ContainerButton = React.createClass({
 	handleClick: function(e) {		
 		React.render(
-			<MetricGraph containerName={this.props.containerName} planetName={this.props.planetName}/>,
+			<MetricGraph containerName={this.props.container.name} containerId={this.props.container.id} planetName={this.props.planetName}/>,
 			document.getElementById('graphBox')
 		);
 	}, 
@@ -105,12 +105,12 @@ var ContainerButton = React.createClass({
 		return (
 			<tr className="clickable" onClick={this.handleClick}>
 			   <td>
-			      <a href="#">{this.props.containerName}</a>
+			      <a href="#">{this.props.container.name}</a>
 			   </td>
-			   <td>...</td>
-			   <td>...</td>
-   			   <td>...</td>
-   			   <td>...</td>
+			   <td>{this.props.container.status}</td>
+			   <td>{this.props.container.id}</td>
+   			   <td>{this.props.container.port}</td>
+   			   <td>{this.props.container.command}</td>
 			</tr>
 		);
 	}	
@@ -124,7 +124,7 @@ var ContainerButtonList = React.createClass({
 		var self = this;
 		var nodes = self.props.data.map(function (container) {
 			return (
-				<ContainerButton key={container.name} containerName={container.name} planetName={self.props.planetName}/>
+				<ContainerButton key={container.id} container={container} planetName={self.props.planetName}/>
 			);
 		});
 		return (			
@@ -158,8 +158,8 @@ var ContainerButtonBox = React.createClass({
 		               <th>Name</th>
 		               <th>Status</th>
 		               <th>ImageID</th>
-		               <th>StartAt</th>
-					   <th>Description</th>
+		               <th>Ports</th>
+					   <th>Command</th>
 		             </tr>
 		          </thead>
   		   	      <ContainerButtonList data={this.state.data} planetName={this.props.planetName}/>			   	  

@@ -31,13 +31,13 @@
         xhr.complete(complete)
       }      
     },
-    getContainers: function(planet, timeInterval, done, fail, complete) {
+    getContainers: function(planet, timeToLive, done, fail, complete) {
       var xhr = $.ajax({
         url: '/' + Cosmos.API_VER + '/planets/' + planet + '/containers',
         method: 'GET',
         accept: 'application/json',
         dataType: 'json',
-        data: {interval: timeInterval}
+        data: {ttl: timeToLive}
       });
 
       if (typeof done == 'function') {

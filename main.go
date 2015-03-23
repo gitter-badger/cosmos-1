@@ -118,7 +118,7 @@ func startServer() {
 		// get container list of planet
 		r.Get("/planets/:planet/containers",
 			strict.Accept("application/json"),
-			requiredParams("interval"),
+			requiredParams("ttl"),
 			getContainers)
 
 		// get metrics of container
