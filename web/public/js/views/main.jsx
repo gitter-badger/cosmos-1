@@ -72,7 +72,6 @@ var MetricGraph = React.createClass({
 
 			Cosmos.drawGraph('#chart1', 400, 300, timeLabel, cpuUsageData)
 			Cosmos.drawGraph('#chart2', 400, 300, timeLabel, memUsageData)
-//			self.setState({data:json})
 		});
 		
 	},
