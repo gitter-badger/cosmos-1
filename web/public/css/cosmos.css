@@ -1,58 +1,169 @@
-body {
-  padding-top: 64px;
-  background-color: #191a1c;
+/*
+ * Globals
+ */
+
+/* Links */
+a,
+a:focus,
+a:hover {
+  color: #489dff;
 }
 
-/* nav start */
-
-.navbar {
-  min-height: 44px;
-  background-color: #141516;
-  border-color: #323539;
+/* Custom default button */
+.btn-default,
+.btn-default:hover,
+.btn-default:focus {
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #fff;
 }
-
-.navbar ul, .navbar ol {
-  margin: 0;
-  padding: 0;
-}
-
-.navbar ul li, .navbar ol li {
-  padding: 12px 15px;
-}
-
-.navbar ul li:hover, .navbar ol li:hoer {
-  background-color: #355089 !important;
-}
-
-.navbar ul li a, .navbar ol li a {
-  text-decoration: none;
-}
-
-.navbar a {
+.btn-github-fork,
+.btn-github-fork:hover,
+.btn-github-fork:focus {
+  padding-left: 50px;
+  padding-right: 50px;
+  font-size: 16px;
   color: #fff;
+  background-color: #489dff;
+  text-decoration: none;
+  border: none;
+}
+.btn-github-fork:hover,
+.btn-github-fork:focus {
+  background-color: #418fe8;
+}
+@media (min-width: 768px) {
+  .btn-github-fork,
+  .btn-github-fork:hover,
+  .btn-github-fork:focus {
+    font-size: 20px;
+  }
 }
 
-.navbar a:hover {
-  background-color: #323539 !important;
+@media (min-width: 992px) {
+  .btn-github-fork,
+  .btn-github-fork:hover,
+  .btn-github-fork:focus {
+    font-size: 25px;
+  }
 }
 
-.navbar-brand {
-  margin-left: -15px;
-  padding: 12px 15px;
-  height: 44px;
-  color: #555 !important;
-}
 
-/* nav end */
+/*
+ * Base structure
+ */
 
-
-/* page */
+html,
 body {
-  color: #aaa;
+  height: 100%;
+  background-color: #222;
+}
+body {
+  color: #fff;
+  text-align: center;
+}
+
+/* Extra markup and styles for table-esque vertical and horizontal centering */
+.site-wrapper {
+  display: table;
+  width: 100%;
+  height: 100%; /* For at least Firefox */
+  min-height: 100%;
+}
+.site-wrapper-inner {
+  display: table-cell;
+  vertical-align: top;
+}
+.cover-container {
+  margin-right: auto;
+  margin-left: auto;
 }
 
 
+/*
+ * Header
+ */
+.header-nav > li {
+  display: inline-block;
+}
+.header-nav > li + li {
+  margin-left: 20px;
+}
+.header-nav > li > a {
+  padding-right: 0;
+  padding-left: 0;
+  font-size: 14px;
+  font-weight: 200;
+  color: #fff; /* IE8 proofing */
+  border-bottom: 1px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.header-nav > li > a:hover,
+.header-nav > li > a:focus {
+  color: #489dff;
+  background-color: transparent;
+  border-bottom-color: #489dff;
+}
+
+/*
+ * Branding
+ */
+.branding {
+  padding: 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+/*
+ * Cover
+ */
+.cover {
+  padding-top: 100px;
+}
+
+.cover-headline {
+  font-size: 20px;
+  font-weight: 100;
+}
+
+.cover-headline-logo {
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.cover-desc {
+  font-size: 16px;
+  font-weight: 300;
+}
+
+.cover-inner {
+  padding: 20px;
+}
+
+@media (min-width: 768px) {
+  /* Handle the widths */
+  .cover-headline {
+    font-size: 40px;
+  }
+  .cover-desc {
+    font-size: 20px;
+  }
+}
+
+@media (min-width: 992px) {
+  .cover-headline {
+    font-size: 60px;
+  }
+  .cover-desc {
+    font-size: 25px;
+  }
+}
 
 
-
-
+/*
+ * Footer
+ */
+footer p {
+  color: #999;
+}
