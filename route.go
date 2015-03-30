@@ -2,108 +2,109 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/cosmos-io/influxdbc"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 )
 
-func getBodyFromRequest(req *http.Request) ([]byte, error) {
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return nil, err
+func getToken(req *http.Request) string {
+	token := req.URL.Query().Get("token")
+	if token == "" {
+		token = "default"
 	}
-
-	return body, nil
+	return token
 }
 
 func addContainers(r render.Render, params martini.Params, req *http.Request) {
 	req.ParseForm()
+	token := getToken(req)
+	planet := params["planet"]
 
-	body, err := getBodyFromRequest(req)
-	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
-		return
-	}
-	series, err := ConvertToContainerSeries(params["planet"], body)
-
-	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
-		return
-	}
-
-	s := make([]*influxdbc.Series, 1)
-	s[0] = series
-	err = db.WriteSeries(s, "")
+	body, err := GetBodyFromRequest(req)
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	r.JSON(http.StatusOK, series)
+	// Container metrics
+	series, err := ConvertToContainerSeries(token, planet, body)
+	if err != nil {
+		fmt.Println(err)
+		r.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	// Host metrics
+	planetSeries := influxdbc.NewSeries(fmt.Sprintf("%s_%s", token, planet), "desc")
+	planetSeries.AddPoint("test")
+	series = append(series, planetSeries)
+
+	err = logDb.WriteSeries(series, "s")
+	if err != nil {
+		fmt.Println(err)
+		r.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	r.Status(http.StatusOK)
 }
 
-func getContainers(r render.Render, params martini.Params) {
-	series, err := db.Query(fmt.Sprintf("SELECT * FROM containers WHERE planet='%s'", params["planet"]), "")
+func getContainers(r render.Render, params martini.Params, req *http.Request) {
+	ttl := req.URL.Query().Get("ttl")
+	token := getToken(req)
+
+	planet := params["planet"]
+
+	dbQuery := fmt.Sprintf("SELECT * FROM /%s_%s_[^_]+$/ WHERE time > now() - %s LIMIT 1", token, planet, ttl)
+	series, err := logDb.Query(dbQuery, "s")
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	r.JSON(http.StatusOK, series)
+	r.JSON(http.StatusOK, ConvertFromSeries(series))
 }
 
-func getPlanets(r render.Render) {
-	series, err := db.Query("SELECT * FROM planets", "")
+func getContainerInfo(r render.Render, params martini.Params, req *http.Request) {
+	interval := req.URL.Query().Get("interval")
+	token := getToken(req)
+
+	planet := params["planet"]
+	container := params["container"]
+	seriesName := fmt.Sprintf("%s_%s_%s", token, planet, container)
+
+	dbQuery := fmt.Sprintf("SELECT count(cpu_usage) as cnt, sum(cpu_usage) as cpu_usage_sum, sum(mem_usage) as mem_usage_sum FROM %s GROUP BY time(%s) LIMIT 10", seriesName, interval)
+	series, err := logDb.Query(dbQuery, "s")
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	r.JSON(http.StatusOK, series)
+	r.JSON(http.StatusOK, ConvertFromSeries(series))
+
 }
 
-func addPlanets(r render.Render, req *http.Request) {
-	req.ParseForm()
-	body, err := getBodyFromRequest(req)
-	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
-		return
-	}
-	series, err := ConvertToPlanetSeries(body)
+func getPlanets(r render.Render, req *http.Request) {
+	token := getToken(req)
+
+	series, err := logDb.Query(fmt.Sprintf("SELECT * FROM /%s_[^_]+$/ LIMIT 1", token), "s")
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	fmt.Println(series)
-	s := make([]*influxdbc.Series, 1)
-	s[0] = series
-	err = db.WriteSeries(s, "")
-	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
-		return
+	planets := make([]map[string]interface{}, len(series))
+	for i, s := range series {
+		planets[i] = make(map[string]interface{})
+		planets[i]["name"] = strings.Split(s.Name, "_")[1]
 	}
 
-	r.JSON(http.StatusOK, series)
+	r.JSON(http.StatusOK, planets)
 }
-
-// func getContainer(r render.Render, params martini.Params) {
-// 	series, err := db.Query(fmt.Sprintf("SELECT * FROM containers WHERE host='%s' AND name='%s'", params["host"], params["name"]), "")
-// 	if err != nil {
-// 		r.JSON(http.StatusInternalServerError, err)
-// 		return
-// 	}
-
-// 	r.JSON(http.StatusOK, series)
-//}

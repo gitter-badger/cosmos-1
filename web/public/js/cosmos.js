@@ -1,57 +1,184 @@
+// Cosmos object initialize
 (function(){
-  var data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
-    datasets: [
-        {
-            label: "My First dataset",
-            fillColor: "rgba(220,220,220,0.2)",
-            strokeColor: "rgba(220,220,220,1)",
-            pointColor: "rgba(220,220,220,1)",
-            pointStrokeColor: "#fff",
-            pointHighlightFill: "#fff",
-            pointHighlightStroke: "rgba(220,220,220,1)",
-            data: [65, 59, 80, 81, 56, 55, 40]
-        },
-        {
-            label: "My Second dataset",
-            fillColor: "rgba(151,187,205,0.2)",
-            strokeColor: "rgba(151,187,205,1)",
-            pointColor: "rgba(151,187,205,1)",
-            pointStrokeColor: "#fff",
-            pointHighlightFill: "#fff",
-            pointHighlightStroke: "rgba(151,187,205,1)",
-            data: [28, 48, 40, 19, 86, 27, 90]
-        }
-    ]
+  window.Cosmos = {};
+  Cosmos.API_VER = 'v1';
+
+  Cosmos.loadScripts = function(scripts, type) {
+    for (var i in scripts) {
+      if (type) {
+        $(document.body).append($('<script>', {src: scripts[i], type: type}));
+      } else {
+        $(document.body).append($('<script>', {src: scripts[i], type: 'text/javascript'}));
+      }
+    }
   };
 
-  function getPlanets() {
-    var container = $('<div>');
-    container.append($('<script>', {src: '/js/bower_components/Chart.js/Chart.js'}));
-    var chart = $('<canvas>', {id: 'myChart'})
-    chart.attr({width: '800'});
-    chart.attr({height: '400'});
-    container.append(chart);
-    $('#page').append(container);
-    graph();
-  }
-
-  $.ajax({
-    type: 'GET',
-    accept: 'application/json',
-    url: '/planets',
-    success: function(response){
-      console.log('success');
-      getPlanets();
+  Cosmos.request = {
+    getPlanets: function(done, fail, complete) {      
+      var xhr = $.ajax({
+        url: '/' + Cosmos.API_VER + '/planets',
+        method: 'GET',
+        accept: 'application/json',
+        dataType: 'json'
+      });
+      if (typeof done == 'function') {
+        xhr.done(done);
+      }
+      if (typeof fail == 'function') {
+        xhr.fail(fail);
+      }
+      if (typeof complete == 'function') {
+        xhr.complete(complete)
+      }      
     },
-    error: function(response){
-      console.log('error');
-      getPlanets();
-    }
-  });
+    getContainers: function(planet, timeToLive, done, fail, complete) {
+      var xhr = $.ajax({
+        url: '/' + Cosmos.API_VER + '/planets/' + planet + '/containers',
+        method: 'GET',
+        accept: 'application/json',
+        dataType: 'json',
+        data: {ttl: timeToLive}
+      });
 
-  function graph() {
-    var ctx = document.getElementById("myChart").getContext("2d");
-    var myChart = new Chart(ctx).Line(data);
-  }
+      if (typeof done == 'function') {
+        xhr.done(done);
+      }
+      if (typeof fail == 'function') {
+        xhr.fail(fail);
+      }
+      if (typeof complete == 'function') {
+        xhr.complete(complete)
+      }
+    },
+    getContainerInfo: function(planet, container, timeInterval, done, fail, complete) {
+      var xhr = $.ajax({
+        url: '/' + Cosmos.API_VER + '/planets/' + planet + '/containers/' + container,
+        method: 'GET',
+        accept: 'application/json',
+        dataType: 'json',
+        data: {interval: timeInterval}
+      });
+
+      if (typeof done == 'function') {
+        xhr.done(done);
+      }
+      if (typeof fail == 'function') {
+        xhr.fail(fail);
+      }
+      if (typeof complete == 'function') {
+        xhr.complete(complete)
+      }
+    }
+  };
+
+  Cosmos.drawGraph = function(selector, width, height, labels, data) {
+    var dataset = {
+      labels: [],
+      datasets: [
+      {
+        label: "container metric",
+        fillColor: "rgba(220,220,220,0.2)",
+        strokeColor: "rgba(220,220,220,1)",
+        pointColor: "rgba(220,220,220,1)",
+        pointStrokeColor: "#fff",
+        pointHighlightFill: "#fff",
+        pointHighlightStroke: "rgba(220,220,220,1)",
+        data: []
+      }
+      ]
+    };
+    if (labels) {
+      dataset.labels = labels;
+    }
+    if (data) {
+      dataset.datasets[0].data = data;
+      console.log(dataset);
+    }
+
+
+    var container = $('<div/>');
+    var chart = $('<canvas/>')
+    chart.attr({width: width});
+    chart.attr({height: height});
+    container.append(chart);
+    $(selector).append(container);
+
+    var ctx = chart[0].getContext("2d");
+    new Chart(ctx).Line(dataset);
+  };
+})();
+
+
+var Page = {};
+Page.planetList = function() {
+    Cosmos.request.getPlanets(function(json, textStatus, jqXHR) {
+      var page = $('#page');
+      page.addClass('planet-list');
+      page.append($('<h4/>').text('Planets'));
+
+      var divRow = $('<div/>').addClass('row');
+      
+      for (var i = 0; i < 12; i++) {
+        var divCol = $('<div/>').addClass('col-md-1 col-xs-2');
+        var a = $('<a/>', {href: '#'});
+        a.text(json[0].name).click(function(e) {          
+          return false;
+        });
+        divCol.append(a);
+        divRow.append(divCol);        
+      }
+      page.append(divRow);
+    }, function(jqXHR, textStatus, errorThrown) {
+      console.log(jqXHR.responseText);
+    });
+
+};
+
+Page.planetDetail = function() {
+    
+
+    var page = $('#page');
+    page.addClass('planet-detail');
+
+    page.append($('<h4/>').text(Route.params['planet']));
+    Cosmos.request.getContainers(Route.params['planet'], '7d', function(json, textStatus, jqXHR) {
+      var divRow = $('<div/>').addClass('row');
+      var divLeft = $('<div/>').addClass('col-md-4');
+      var divRight = $('<div/>').addClass('col-md-8');
+
+      divRow.append(divLeft).append(divRight);
+
+      var ul = $('<ul />');
+      ul.addClass('list');
+      for (var i = 0;i < json.length; i++) {
+        var li = $('<li/>');
+        var a = $('<a/>', {href: '#'});
+        a.text(json[i].name).click(function(e) {
+          Cosmos.drawGraph(divRight);
+          return false;
+        });
+        li.append(a);
+        ul.append(li);
+      }
+
+      divLeft.append(ul);
+      page.append(divRow);
+    }, 
+    function(jqXHR, textStatus, errorThrown) {
+      console.log(errorThrown);
+    })
+
+    //Cosmos.drawGraph('#page');
+};
+
+
+// Route configuration
+(function(){
+  // Route.match('/', Page.planetList);
+  Route.match('/', function() {
+    Cosmos.loadScripts(['/js/vendor/chartjs/Chart.js'], "text/javascript");
+    Cosmos.loadScripts(['/js/views/main.jsx'], "text/jsx");
+  });
+  Route.match('/planets/:planet', Page.planetDetail);
+  Route.regist();
 })();
