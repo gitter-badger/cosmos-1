@@ -60,6 +60,9 @@ body {
 }
 body {
   color: #fff;
+}
+
+header, footer {
   text-align: center;
 }
 
