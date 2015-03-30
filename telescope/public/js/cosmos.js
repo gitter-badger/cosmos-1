@@ -14,7 +14,7 @@
   };
 
   Cosmos.request = {
-    getPlanets: function(done, fail, complete) {      
+    getPlanets: function(done, fail, complete) {
       var xhr = $.ajax({
         url: '/' + Cosmos.API_VER + '/planets',
         method: 'GET',
@@ -29,7 +29,7 @@
       }
       if (typeof complete == 'function') {
         xhr.complete(complete)
-      }      
+      }
     },
     getContainers: function(planet, timeToLive, done, fail, complete) {
       var xhr = $.ajax({
@@ -117,15 +117,15 @@ Page.planetList = function() {
       page.append($('<h4/>').text('Planets'));
 
       var divRow = $('<div/>').addClass('row');
-      
+
       for (var i = 0; i < 12; i++) {
         var divCol = $('<div/>').addClass('col-md-1 col-xs-2');
         var a = $('<a/>', {href: '#'});
-        a.text(json[0].name).click(function(e) {          
+        a.text(json[0].name).click(function(e) {
           return false;
         });
         divCol.append(a);
-        divRow.append(divCol);        
+        divRow.append(divCol);
       }
       page.append(divRow);
     }, function(jqXHR, textStatus, errorThrown) {
@@ -135,7 +135,7 @@ Page.planetList = function() {
 };
 
 Page.planetDetail = function() {
-    
+
 
     var page = $('#page');
     page.addClass('planet-detail');
@@ -163,7 +163,7 @@ Page.planetDetail = function() {
 
       divLeft.append(ul);
       page.append(divRow);
-    }, 
+    },
     function(jqXHR, textStatus, errorThrown) {
       console.log(errorThrown);
     })
@@ -174,8 +174,10 @@ Page.planetDetail = function() {
 
 // Route configuration
 (function(){
-  // Route.match('/', Page.planetList);
-  Route.match('/', function() {
+  Route.match('/', function(){
+    window.location.href = '/planets';
+  });
+  Route.match('/planets', function() {
     Cosmos.loadScripts(['/vendor/chartjs-1.0.2/chart.min.js'], "text/javascript");
     Cosmos.loadScripts(['/js/views/main.jsx'], "text/jsx");
   });
