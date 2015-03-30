@@ -176,7 +176,7 @@ Page.planetDetail = function() {
 (function(){
   // Route.match('/', Page.planetList);
   Route.match('/', function() {
-    Cosmos.loadScripts(['/js/vendor/chartjs/Chart.js'], "text/javascript");
+    Cosmos.loadScripts(['/vendor/chartjs-1.0.2/chart.min.js'], "text/javascript");
     Cosmos.loadScripts(['/js/views/main.jsx'], "text/jsx");
   });
   Route.match('/planets/:planet', Page.planetDetail);
