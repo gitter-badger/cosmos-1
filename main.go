@@ -89,10 +89,10 @@ func startServer() {
 
 	m.Handlers(
 		martini.Logger(),
-		martini.Static("web/public"),
+		martini.Static("telescope/public"),
 		strict.Strict,
 		render.Renderer(render.Options{
-			Directory: "web/templates",
+			Directory: "telescope/templates",
 		}),
 		contentTypeRouter(),
 	)
