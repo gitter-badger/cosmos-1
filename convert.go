@@ -4,34 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/brannpark/cosmos/model"
 	"github.com/cosmos-io/influxdbc"
 )
 
-type Port struct {
-	PrivatePort int
-	PublicPort  int
-	Type        string
-}
-
-func (p *Port) description() string {
-	return fmt.Sprintf("%d:%d %s", p.PublicPort, p.PrivatePort, p.Type)
-}
-
-type Container struct {
-	Id         string
-	Command    string
-	Image      string
-	Names      []string
-	Ports      []*Port
-	Status     string
-	SizeRw     int64
-	SizeRootFs int64
-	CpuUsage   int
-	MemUsage   int
-}
-
 func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.Series, error) {
-	var containers []*Container
+	var containers []*model.Container
 	err := json.Unmarshal(body, &containers)
 	if err != nil {
 		return nil, err
@@ -53,10 +31,10 @@ func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.S
 		points[0][1] = cont.Command
 		points[0][2] = cont.Image
 		points[0][3] = cont.Names[0]
-		points[0][4] = cont.Ports[0].description()
+		points[0][4] = cont.Ports[0].Description()
 		points[0][5] = cont.Status
-		points[0][6] = cont.CpuUsage
-		points[0][7] = cont.MemUsage
+		points[0][6] = cont.Stats.Cpu.TotalUtilization
+		points[0][7] = cont.Stats.Memory.Usage
 
 		fmt.Println(*series)
 		result[i] = series

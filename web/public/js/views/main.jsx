@@ -64,8 +64,8 @@ var MetricGraph = React.createClass({
 			var cpuUsageData = [], memUsageData = [];
 			var timeLabel = [];
 			for (var i = json.length-1; i >= 0; i--) {
-				cpuUsageData.push(parseInt(json[i].cpu_usage_sum / json[i].cnt));
-				memUsageData.push(parseInt(json[i].mem_usage_sum / json[i].cnt));
+				cpuUsageData.push(parseInt(json[i].cpu_usage));
+				memUsageData.push(parseInt(json[i].mem_usage));
 				var d = new Date(json[i].time * 1000)				
 				timeLabel.push(d.getMonth() + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes());
 			}

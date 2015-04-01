@@ -78,7 +78,7 @@ func getContainerInfo(r render.Render, params martini.Params, req *http.Request)
 	container := params["container"]
 	seriesName := fmt.Sprintf("%s_%s_%s", token, planet, container)
 
-	dbQuery := fmt.Sprintf("SELECT count(cpu_usage) as cnt, sum(cpu_usage) as cpu_usage_sum, sum(mem_usage) as mem_usage_sum FROM %s GROUP BY time(%s) LIMIT 10", seriesName, interval)
+	dbQuery := fmt.Sprintf("SELECT mean(cpu_usage) as cpu_usage, mean(mem_usage) as mem_usage FROM %s GROUP BY time(%s) LIMIT 10", seriesName, interval)
 	series, err := logDb.Query(dbQuery, "s")
 	if err != nil {
 		fmt.Println(err)
