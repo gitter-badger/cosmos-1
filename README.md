@@ -18,7 +18,7 @@ Get all of the planet(host) information
 Get container list of planet
 	[GET]  /v1/planet/:planet/containers [Accept:application/json]
 	Required Parameters
-		- interval : time interval from now (ex, 30m, 1h, 7d)
+		- ttl : time to live for containers (ex, 30m, 1h, 7d)
 
 Post container metrics of planet
 	[POST] /v1/planet/:planet/containers [Content-Type:application/json, Accept:application/json]
