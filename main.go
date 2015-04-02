@@ -23,7 +23,7 @@ var (
 	dbUsername  = getEnv("INFLUXDB_USERNAME", "root")
 	dbPassword  = getEnv("INFLUXDB_PASSWORD", "root")
 	dbDatabase  = getEnv("INFLUXDB_DATABASE", "cosmos")
-	dbShardConf = getEnv("INFLUXDB_SHARD_CONF", "./cosmos_shard.conf")
+	dbShardConf = getEnv("INFLUXDB_SHARD_CONF", "./shard_config.json")
 )
 
 func getEnv(key, defVal string) string {
@@ -76,11 +76,20 @@ func createDBConn() {
 		os.Exit(1)
 	}
 
-	var conf influxdbc.ShardSpace
-	json.Unmarshal(file, &conf)
-	_, err = logDb.CreateDatabase(conf)
+	fmt.Println("[database sharding configuration]")
+	fmt.Println(string(file))
+
+	var conf influxdbc.ShardConfig
+	err = json.Unmarshal(file, &conf)
 	if err != nil {
 		fmt.Println(err)
+	}
+	_, err = logDb.CreateDatabase(conf)
+	if err != nil {
+		fmt.Println("Failed to create database")
+		fmt.Println(err)
+	} else {
+		fmt.Println("database 'cosmos' is created with sharding configuration")
 	}
 }
 
@@ -103,12 +112,6 @@ func startServer() {
 			strict.Accept("application/json"),
 			getPlanets)
 
-		//// post planet information
-		// r.Post("/planets",
-		// 	strict.Accept("application/json"),
-		// 	strict.ContentType("application/json"),
-		// 	addPlanets)
-
 		// post container informations
 		r.Post("/planets/:planet/containers",
 			strict.Accept("application/json"),
@@ -118,13 +121,13 @@ func startServer() {
 		// get container list of planet
 		r.Get("/planets/:planet/containers",
 			strict.Accept("application/json"),
-			requiredParams("ttl"),
+			//requiredParams("ttl"),
 			getContainers)
 
 		// get metrics of container
 		r.Get("/planets/:planet/containers/:container",
 			strict.Accept("application/json"),
-			requiredParams("interval"),
+			//requiredParams("interval"),
 			getContainerInfo)
 	})
 
@@ -136,6 +139,28 @@ func startServer() {
 }
 
 func main() {
+	// obj := model.Container{Id: "ContainerId"}
+	// obj.Ports = make([]*model.Port, 1)
+	// privatePort := 80
+	// publicPort := 80
+	// //	portType := "TCP"
+
+	// obj.Ports[0] = &model.Port{PrivatePort: &privatePort, PublicPort: &publicPort, Type: nil}
+
+	// fmt.Println(obj)
+	// t := reflect.TypeOf(obj)
+	// v := reflect.ValueOf(obj)
+	// tField := t.Field(0)
+	// vField := v.Field(0)
+
+	// fmt.Println(tField.Name)
+	// fmt.Println(vField.Interface())
+
+	// vals := MakeFieldPathAndValue(obj, ".")
+	// for _, v := range vals {
+	// 	fmt.Println(v)
+	// }
+
 	createDBConn()
 	startServer()
 }

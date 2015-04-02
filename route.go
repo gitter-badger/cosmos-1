@@ -39,8 +39,8 @@ func addContainers(r render.Render, params martini.Params, req *http.Request) {
 	}
 
 	// Host metrics
-	planetSeries := influxdbc.NewSeries(fmt.Sprintf("%s_%s", token, planet), "desc")
-	planetSeries.AddPoint("test")
+	planetSeries := influxdbc.NewSeries(fmt.Sprintf("%s.%s", token, planet), "value")
+	planetSeries.AddPoint("")
 	series = append(series, planetSeries)
 
 	err = logDb.WriteSeries(series, "s")
@@ -54,12 +54,11 @@ func addContainers(r render.Render, params martini.Params, req *http.Request) {
 }
 
 func getContainers(r render.Render, params martini.Params, req *http.Request) {
-	ttl := req.URL.Query().Get("ttl")
+	// ttl := req.URL.Query().Get("ttl")
 	token := getToken(req)
-
 	planet := params["planet"]
 
-	dbQuery := fmt.Sprintf("SELECT * FROM /%s_%s_[^_]+$/ WHERE time > now() - %s LIMIT 1", token, planet, ttl)
+	dbQuery := fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s\\.%s/ LIMIT 1", token, planet)
 	series, err := logDb.Query(dbQuery, "s")
 	if err != nil {
 		fmt.Println(err)
@@ -67,18 +66,18 @@ func getContainers(r render.Render, params martini.Params, req *http.Request) {
 		return
 	}
 
-	r.JSON(http.StatusOK, ConvertFromSeries(series))
+	r.JSON(http.StatusOK, ConvertFromContainerSeries(planet, series))
 }
 
 func getContainerInfo(r render.Render, params martini.Params, req *http.Request) {
-	interval := req.URL.Query().Get("interval")
+	// interval := req.URL.Query().Get("interval")
 	token := getToken(req)
 
 	planet := params["planet"]
-	container := params["container"]
-	seriesName := fmt.Sprintf("%s_%s_%s", token, planet, container)
+	containerId := params["container"]
+	seriesName := MakeContainerSeriesName(token, planet, containerId)
 
-	dbQuery := fmt.Sprintf("SELECT mean(cpu_usage) as cpu_usage, mean(mem_usage) as mem_usage FROM %s GROUP BY time(%s) LIMIT 10", seriesName, interval)
+	dbQuery := fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s/ LIMIT 10", seriesName)
 	series, err := logDb.Query(dbQuery, "s")
 	if err != nil {
 		fmt.Println(err)
@@ -86,14 +85,14 @@ func getContainerInfo(r render.Render, params martini.Params, req *http.Request)
 		return
 	}
 
-	r.JSON(http.StatusOK, ConvertFromSeries(series))
+	r.JSON(http.StatusOK, ConvertFromContainerInfoSeries(containerId, series))
 
 }
 
 func getPlanets(r render.Render, req *http.Request) {
 	token := getToken(req)
 
-	series, err := logDb.Query(fmt.Sprintf("SELECT * FROM /%s_[^_]+$/ LIMIT 1", token), "s")
+	series, err := logDb.Query(fmt.Sprintf("SELECT * FROM /^%s.[^\\.]+$/ LIMIT 1", token), "s")
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
@@ -103,7 +102,7 @@ func getPlanets(r render.Render, req *http.Request) {
 	planets := make([]map[string]interface{}, len(series))
 	for i, s := range series {
 		planets[i] = make(map[string]interface{})
-		planets[i]["name"] = strings.Split(s.Name, "_")[1]
+		planets[i]["name"] = strings.Split(s.Name, ".")[1]
 	}
 
 	r.JSON(http.StatusOK, planets)

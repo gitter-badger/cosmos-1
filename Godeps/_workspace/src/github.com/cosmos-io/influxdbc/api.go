@@ -74,8 +74,8 @@ func PostStruct(url string, reqStruct interface{}) (string, error) {
 	defer result.Body.Close()
 	result_buf := new(bytes.Buffer)
 	result_buf.ReadFrom(result.Body)
-	if result.StatusCode != 200 {
-		return "", errors.New(result_buf.String())
+	if int(result.StatusCode/100) != 2 {
+		return "", errors.New(fmt.Sprintf("%d - %s", result.StatusCode, result_buf.String()))
 	}
 	return result_buf.String(), nil
 }

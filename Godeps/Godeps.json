@@ -14,7 +14,7 @@
 		},
 		{
 			"ImportPath": "github.com/cosmos-io/influxdbc",
-			"Rev": "f03ad81ff498e191c07c8ae19ed6ca48bd9dcda8"
+			"Rev": "c252df3d5ab0a2d6cc53c6b1d1236630a2dface1"
 		},
 		{
 			"ImportPath": "github.com/go-martini/martini",
