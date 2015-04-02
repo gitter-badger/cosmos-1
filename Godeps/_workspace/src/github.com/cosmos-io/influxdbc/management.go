@@ -6,19 +6,22 @@ import (
 )
 
 type Space struct {
-	Name              string
-	RetentionPolicy   string
-	ShardDuration     string
-	Regex             string
-	ReplicationFactor int
-	Split             int
+	Name              string `json:"name"`
+	RetentionPolicy   string `json:"retentionPolicy"`
+	ShardDuration     string `json:"shardDuration"`
+	Regex             string `json:"regex"`
+	ReplicationFactor int    `json:"replicationFactor"`
+	Split             int    `json:"split"`
 }
 
-type ShardSpace map[string][]*Space
+type ShardConfig struct {
+	Spaces            []*Space `json:"spaces"`
+	ContinuousQueries []string `json:"continuousQueries"`
+}
 
-func (db *InfluxDB) CreateDatabase(shard ShardSpace) (string, error) {
+func (db *InfluxDB) CreateDatabase(conf ShardConfig) (string, error) {
 	url := fmt.Sprintf("http://%s/cluster/database_configs/%s?u=%s&p=%s", db.host, db.database, db.username, db.password)
-	response, err := PostStruct(url, shard)
+	response, err := PostStruct(url, conf)
 	if err != nil {
 		return response, err
 	}

@@ -3,10 +3,76 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"regexp"
+	"strings"
 
 	"github.com/brannpark/cosmos/model"
 	"github.com/cosmos-io/influxdbc"
 )
+
+type FieldPathAndValue struct {
+	Path  string
+	Value interface{}
+}
+
+func findFieldPathAndValue(obj interface{}, path string, pathDelimeter string, ret []*FieldPathAndValue) []*FieldPathAndValue {
+	objType := reflect.TypeOf(obj)
+	objValue := reflect.ValueOf(obj)
+
+	typeKind := objType.Kind()
+
+	if typeKind == reflect.Ptr {
+		if objValue.IsNil() == false {
+			return findFieldPathAndValue(objValue.Elem().Interface(), path, pathDelimeter, ret)
+		} else {
+			return append(ret, &FieldPathAndValue{Path: path, Value: nil})
+		}
+	}
+
+	if typeKind == reflect.Struct {
+		fieldCnt := objType.NumField()
+		for i := 0; i < fieldCnt; i++ {
+			typeField := objType.Field(i)
+			valueField := objValue.Field(i)
+
+			var newPath string
+			if path != "" {
+				newPath = fmt.Sprintf("%s%s%s", path, pathDelimeter, typeField.Name)
+			} else {
+				newPath = typeField.Name
+			}
+
+			ret = findFieldPathAndValue(valueField.Interface(), newPath, pathDelimeter, ret)
+		}
+	} else if typeKind == reflect.Array || typeKind == reflect.Slice {
+		sliceLen := objValue.Len()
+		if sliceLen == 0 {
+			return append(ret, &FieldPathAndValue{Path: path, Value: nil})
+		}
+		for i := 0; i < sliceLen; i++ {
+			var newPath string
+			if path != "" {
+				newPath = fmt.Sprintf("%s%s%d", path, pathDelimeter, i)
+			} else {
+				newPath = fmt.Sprintf("%d", i)
+			}
+			ret = findFieldPathAndValue(objValue.Index(i).Interface(), newPath, pathDelimeter, ret)
+		}
+	} else {
+		return append(ret, &FieldPathAndValue{Path: path, Value: objValue.Interface()})
+	}
+
+	return ret
+}
+
+func MakeFieldPathAndValue(obj interface{}, pathDelimeter string) []*FieldPathAndValue {
+	return findFieldPathAndValue(obj, "", ".", make([]*FieldPathAndValue, 0))
+}
+
+func MakeContainerSeriesName(token, planet, containerId string) string {
+	return fmt.Sprintf("%s.%s.%s", token, planet, containerId)
+}
 
 func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.Series, error) {
 	var containers []*model.Container
@@ -15,29 +81,28 @@ func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.S
 		return nil, err
 	}
 
-	result := make([]*influxdbc.Series, len(containers))
-	for i, cont := range containers {
+	result := make([]*influxdbc.Series, 0)
+	for _, cont := range containers {
+		base := MakeContainerSeriesName(token, planet, *cont.Id)
+		// series := influxdbc.NewSeries(base, "value")
+		// series.AddPoint("")
+		// result = append(result, series)
 
-		series := influxdbc.NewSeries(fmt.Sprintf("%s_%s_%s", token, planet, cont.Id))
+		var pathAndValues []*FieldPathAndValue
+		pathAndValues = MakeFieldPathAndValue(cont, ".")
 
-		cols := []string{"id", "command", "image", "name", "port", "status", "cpu_usage", "mem_usage"}
-		points := make([][]interface{}, 1)
-
-		series.Columns = cols
-		series.Points = points
-
-		points[0] = make([]interface{}, len(cols))
-		points[0][0] = cont.Id
-		points[0][1] = cont.Command
-		points[0][2] = cont.Image
-		points[0][3] = cont.Names[0]
-		points[0][4] = cont.Ports[0].Description()
-		points[0][5] = cont.Status
-		points[0][6] = cont.Stats.Cpu.TotalUtilization
-		points[0][7] = cont.Stats.Memory.Usage
-
-		fmt.Println(*series)
-		result[i] = series
+		for _, pv := range pathAndValues {
+			if pv.Value != nil {
+				series := influxdbc.NewSeries(fmt.Sprintf("%s.%s", base, pv.Path), "txt_value", "num_value")
+				t := reflect.TypeOf(pv.Value)
+				if t.Kind() == reflect.String {
+					series.AddPoint(pv.Value, 0)
+				} else {
+					series.AddPoint("", pv.Value)
+				}
+				result = append(result, series)
+			}
+		}
 	}
 
 	return result, nil
@@ -68,16 +133,32 @@ func ConvertToPlanetSeries(token string, body []byte) (*influxdbc.Series, error)
 	return series, nil
 }
 
-func ConvertFromSeries(series []*influxdbc.Series) []map[string]interface{} {
-	result := make([]map[string]interface{}, 0)
+func ConvertFromContainerSeries(planet string, series []*influxdbc.Series) map[string]map[string][]interface{} {
+	result := make(map[string]map[string][]interface{})
+
 	for _, s := range series {
-		for _, point := range s.Points {
-			m := make(map[string]interface{})
-			for i, val := range point {
-				m[s.Columns[i]] = val
-			}
-			result = append(result, m)
+		comps := regexp.MustCompile(fmt.Sprintf(".*%s\\.", planet)).Split(s.Name, -1)
+		containerId := strings.Split(comps[1], ".")[0]
+		if result[containerId] == nil {
+			result[containerId] = make(map[string][]interface{})
 		}
+		comps = regexp.MustCompile(fmt.Sprintf(".*%s\\.", containerId)).Split(s.Name, -1)
+		key := comps[1]
+		result[containerId][key] = s.Points[0]
+	}
+
+	return result
+}
+
+func ConvertFromContainerInfoSeries(containerId string, series []*influxdbc.Series) map[string][][]interface{} {
+	result := make(map[string][][]interface{})
+
+	for _, s := range series {
+		comps := regexp.MustCompile(fmt.Sprintf(".*%s\\.", containerId)).Split(s.Name, -1)
+		fmt.Println(comps)
+		key := comps[1]
+
+		result[key] = s.Points
 	}
 	return result
 }

@@ -3,28 +3,28 @@ package model
 import "fmt"
 
 type Port struct {
-	PrivatePort int
-	PublicPort  int
-	Type        string
+	PrivatePort *int
+	PublicPort  *int
+	Type        *string
 }
 
 func (p *Port) Description() string {
-	return fmt.Sprintf("%d:%d %s", p.PublicPort, p.PrivatePort, p.Type)
+	return fmt.Sprintf("%d:%d %s", *p.PublicPort, *p.PrivatePort, *p.Type)
 }
 
 type Network struct {
-	RxBytes int64
-	TxBytes int64
+	RxBytes *int64
+	TxBytes *int64
 }
 
 type Cpu struct {
-	TotalUtilization  int
+	TotalUtilization  *int
 	PerCpuUtilization []int
 }
 
 type Memory struct {
-	Limit int64
-	Usage int64
+	Limit *int64
+	Usage *int64
 }
 
 type Stats struct {
@@ -34,13 +34,13 @@ type Stats struct {
 }
 
 type Container struct {
-	Id         string
-	Command    string
-	Image      string
+	Id         *string
+	Command    *string
+	Image      *string
 	Names      []string
 	Ports      []*Port
-	Status     string
-	SizeRw     int64
-	SizeRootFs int64
+	Status     *string
+	SizeRw     *int64
+	SizeRootFs *int64
 	Stats      *Stats
 }
