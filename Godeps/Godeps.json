@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/brannpark/cosmos",
+	"ImportPath": "github.com/cosmos-io/cosmos",
 	"GoVersion": "go1.4.1",
 	"Deps": [
 		{
@@ -11,10 +11,6 @@
 			"ImportPath": "github.com/codegangsta/inject",
 			"Comment": "v1.0-rc1-10-g33e0aa1",
 			"Rev": "33e0aa1cb7c019ccc3fbe049a8262a6403d30504"
-		},
-		{
-			"ImportPath": "github.com/cosmos-io/cosmos/model",
-			"Rev": "5a46a5da1b946f874580d4f5d331faceb84a9a1d"
 		},
 		{
 			"ImportPath": "github.com/cosmos-io/influxdbc",
