@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/brannpark/cosmos/model"
+	"github.com/cosmos-io/cosmos/model"
 	"github.com/cosmos-io/influxdbc"
 )
 
