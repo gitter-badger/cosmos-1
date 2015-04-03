@@ -18,8 +18,8 @@ type Network struct {
 }
 
 type Cpu struct {
-	TotalUtilization  *int
-	PerCpuUtilization []int
+	TotalUtilization  *float32
+	PerCpuUtilization []float32
 }
 
 type Memory struct {
