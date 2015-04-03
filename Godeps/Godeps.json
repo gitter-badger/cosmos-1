@@ -13,6 +13,10 @@
 			"Rev": "33e0aa1cb7c019ccc3fbe049a8262a6403d30504"
 		},
 		{
+			"ImportPath": "github.com/cosmos-io/cosmos/model",
+			"Rev": "5a46a5da1b946f874580d4f5d331faceb84a9a1d"
+		},
+		{
 			"ImportPath": "github.com/cosmos-io/influxdbc",
 			"Rev": "c252df3d5ab0a2d6cc53c6b1d1236630a2dface1"
 		},
