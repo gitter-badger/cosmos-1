@@ -1,8 +1,6 @@
 FROM golang:1.4.2
 MAINTAINER brann <brann@cosmos.io>
 
-RUN mkdir -p /go/src/cosmos
-WORKDIR /go/src/cosmos
 ENV PATH /go/bin:$PATH
 
 COPY ./shard_config.json /shard_config.json
@@ -21,7 +19,11 @@ EXPOSE 8080
 # Install Godep
 RUN go get github.com/tools/godep
 
-COPY . /go/src/cosmos
+# Copy source code
+RUN mkdir -p /go/src/github.com/cosmos-io/cosmos
+COPY . /go/src/github.com/cosmos-io/cosmos
+WORKDIR /go/src/github.com/cosmos-io/cosmos
+
 RUN godep go install
 
 CMD ["cosmos"]
