@@ -1,0 +1,143 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/paper-checkbox/paper-checkbox.html">
+<polymer-element name="page-container" attributes="containers">
+    <template>
+        <style>
+        :host #cpu {}
+        
+        :host .card.graph {
+            display: none;
+            margin-bottom: 10px;
+            padding-top: 10px;
+        }
+        
+        :host table {
+            width: 100%;
+        }
+        
+        :host thead > tr {
+            border-bottom: 2px solid #575757;
+            height: 48px;
+        }
+        
+        :host tbody > tr {
+            border-bottom: 1px solid #424242;
+            height: 48px;
+            color: #bebebe;
+        }
+        
+        :host tbody > tr > td > paper-checkbox {
+            margin-top: 7px;
+        }
+        </style>
+        <script src="/vendor/chartjs-1.0.2/chart.min.js"></script>
+        <div class="card col graph" id="graphContainer">
+            <div horizontal layout flex>
+                <div horizontal center-justified layout flex>
+                    <div>
+                        <h5>CPU Usage (%)</h5>
+                        <div id="cpu"></div>
+                    </div>
+                </div>
+                <div horizontal center-justified layout flex>
+                    <div>
+                        <h5>Memory Usage (MB)</h5>
+                        <div id="mem"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card col c-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="30"></th>
+                        <th>Name</th>
+                        <th>Planet</th>
+                        <th>Command</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template repeat="{{key in keys(containers)}}">
+                        <tr>
+                            <td class="check">
+                                <paper-checkbox id="{{ key }}" on-change="{{onCheckChanged}}"></paper-checkbox>
+                            </td>
+                            <td>{{ containers[key]['Names.0'][3] }}</td>
+                            <td>{{ containers[key]['Planet'] }}</td>
+                            <td>{{ containers[key]['Command'][3] }}</td>
+                            <td>{{ containers[key]['Status'][3] }}</td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </template>
+    <script>
+    Polymer('page-container', {
+        created: function() {
+            this.containers = {};
+        },
+        ready: function() {},
+        keys: function(obj) {
+            return Object.keys(obj);
+        },
+        onCheckChanged: function(event, detail, sender) {
+            var container = this.containers[sender.id];
+            var self = this;
+
+            var checkboxes = $(sender).closest('table').find('paper-checkbox');
+            var checkCnt = 0;
+            checkboxes.each(function(i, elem) {
+                if (elem != sender) {
+                    if (elem.checked) {
+                        elem.checked = false;
+                    }
+                }
+
+                if (elem.checked) {
+                    checkCnt += 1;
+                }
+            });
+
+            if (checkCnt == 0) {
+            	$(self.$.graphContainer).hide();
+            	return ;
+            }
+
+            Cosmos.request.getContainerInfo(container['Planet'], sender.id, "1m", function(json) {
+                // succeed
+                var cpuUsageData = [],
+                    memUsageData = [],
+                    timeLabel = [];
+                var set = json['Stats.Cpu.TotalUtilization'];
+
+                for (var i = set.length - 1; i >= 0; i--) {
+                    cpuUsageData.push(set[i][2]);
+                    var d = new Date(set[i][0] * 1000)
+                    timeLabel.push(d.getMonth() + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes());
+                }
+
+                set = json['Stats.Memory.Usage'];
+                var kb = 1024 * 1024;
+                for (var i = set.length - 1; i >= 0; i--) {
+                    memUsageData.push(parseInt(set[i][2] / kb));
+                }
+
+                $(self.$.graphContainer).show();
+                $(self.$.cpu).empty();
+                $(self.$.mem).empty();
+                Cosmos.drawGraph(self.$.cpu, 340, 250, timeLabel, cpuUsageData)
+                Cosmos.drawGraph(self.$.mem, 340, 250, timeLabel, memUsageData)
+
+            }, function() {
+                // failed
+
+            });
+
+
+        }
+    });
+    </script>
+</polymer-element>

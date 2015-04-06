@@ -1,0 +1,26 @@
+{
+  "name": "cosmos",
+  "version": "0.0.1",
+  "homepage": "https://github.com/cosmos-io/cosmos",
+  "authors": [
+    "brann <brann@cosmos.io>"
+  ],
+  "description": "Cosmos is the dashboard for Docker containers",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.5.5",
+    "core-header-panel": "Polymer/core-header-panel#~0.5.5",
+    "core-toolbar": "Polymer/core-toolbar#~0.5.5",
+    "paper-tabs": "Polymer/paper-tabs#~0.5.5",
+    "font-roboto": "Polymer/font-roboto#~0.5.5",
+    "core-ajax": "Polymer/core-ajax#~0.5.5",
+    "core-pages": "Polymer/core-pages#~0.5.5"
+  }
+}

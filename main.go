@@ -39,7 +39,10 @@ func contentTypeRouter() martini.Handler {
 	return func(r render.Render, req *http.Request, c martini.Context) {
 		accept := strings.ToLower(req.Header.Get("Accept"))
 		if strings.Contains(accept, "text/html") {
+			//topPath := strings.Split(req.URL.Path, "/")[1]
+			//			r.HTML(http.StatusOK, "index", topPath)
 			r.HTML(http.StatusOK, "index", nil)
+
 		}
 	}
 }
@@ -101,7 +104,8 @@ func startServer() {
 		martini.Static("telescope/public"),
 		strict.Strict,
 		render.Renderer(render.Options{
-			Directory: "telescope/templates",
+			Extensions: []string{".tmpl", ".html"},
+			Directory:  "telescope/templates",
 		}),
 		contentTypeRouter(),
 	)
@@ -110,19 +114,23 @@ func startServer() {
 		// get planet list
 		r.Get("/planets",
 			strict.Accept("application/json"),
-			getPlanets)
+			getAllPlanets)
+
+		r.Get("/containers",
+			strict.Accept("application/json"),
+			getAllContainers)
 
 		// post container informations
 		r.Post("/planets/:planet/containers",
 			strict.Accept("application/json"),
 			strict.ContentType("application/json"),
-			addContainers)
+			addContainersOfPlanet)
 
 		// get container list of planet
 		r.Get("/planets/:planet/containers",
 			strict.Accept("application/json"),
 			//requiredParams("ttl"),
-			getContainers)
+			getContainersOfPlanet)
 
 		// get metrics of container
 		r.Get("/planets/:planet/containers/:container",

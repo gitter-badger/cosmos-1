@@ -18,7 +18,39 @@ func getToken(req *http.Request) string {
 	return token
 }
 
-func addContainers(r render.Render, params martini.Params, req *http.Request) {
+func getAllPlanets(r render.Render, req *http.Request) {
+	token := getToken(req)
+
+	series, err := logDb.Query(fmt.Sprintf("SELECT * FROM /^%s\\.[^\\.]+$/ LIMIT 1", token), "s")
+	if err != nil {
+		fmt.Println(err)
+		r.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	planets := make([]map[string]interface{}, len(series))
+	for i, s := range series {
+		planets[i] = make(map[string]interface{})
+		planets[i]["Name"] = strings.Split(s.Name, ".")[1]
+	}
+
+	r.JSON(http.StatusOK, planets)
+}
+
+func getAllContainers(r render.Render, req *http.Request) {
+	token := getToken(req)
+
+	series, err := logDb.Query(fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s\\..*/ LIMIT 1", token), "s")
+	if err != nil {
+		fmt.Println(err)
+		r.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	r.JSON(http.StatusOK, ConvertFromContainerSeries("", series))
+}
+
+func addContainersOfPlanet(r render.Render, params martini.Params, req *http.Request) {
 	req.ParseForm()
 	token := getToken(req)
 	planet := params["planet"]
@@ -53,7 +85,7 @@ func addContainers(r render.Render, params martini.Params, req *http.Request) {
 	r.Status(http.StatusOK)
 }
 
-func getContainers(r render.Render, params martini.Params, req *http.Request) {
+func getContainersOfPlanet(r render.Render, params martini.Params, req *http.Request) {
 	// ttl := req.URL.Query().Get("ttl")
 	token := getToken(req)
 	planet := params["planet"]
@@ -87,23 +119,4 @@ func getContainerInfo(r render.Render, params martini.Params, req *http.Request)
 
 	r.JSON(http.StatusOK, ConvertFromContainerInfoSeries(containerId, series))
 
-}
-
-func getPlanets(r render.Render, req *http.Request) {
-	token := getToken(req)
-
-	series, err := logDb.Query(fmt.Sprintf("SELECT * FROM /^%s.[^\\.]+$/ LIMIT 1", token), "s")
-	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
-		return
-	}
-
-	planets := make([]map[string]interface{}, len(series))
-	for i, s := range series {
-		planets[i] = make(map[string]interface{})
-		planets[i]["name"] = strings.Split(s.Name, ".")[1]
-	}
-
-	r.JSON(http.StatusOK, planets)
 }

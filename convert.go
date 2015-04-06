@@ -133,18 +133,32 @@ func ConvertToPlanetSeries(token string, body []byte) (*influxdbc.Series, error)
 	return series, nil
 }
 
-func ConvertFromContainerSeries(planet string, series []*influxdbc.Series) map[string]map[string][]interface{} {
-	result := make(map[string]map[string][]interface{})
+func ConvertFromContainerSeries(planet string, series []*influxdbc.Series) map[string]map[string]interface{} {
+	result := make(map[string]map[string]interface{})
 
 	for _, s := range series {
-		comps := regexp.MustCompile(fmt.Sprintf(".*%s\\.", planet)).Split(s.Name, -1)
+		var comps []string
+
+		if planet == "" {
+			comps = regexp.MustCompile(fmt.Sprintf("^(min|hour)?\\.?[^\\.]+\\.%s\\.", "[^\\.]+")).Split(s.Name, -1)
+		} else {
+			comps = regexp.MustCompile(fmt.Sprintf("^(min|hour)?\\.?[^\\.]+\\.%s\\.", planet)).Split(s.Name, -1)
+		}
+
 		containerId := strings.Split(comps[1], ".")[0]
+
 		if result[containerId] == nil {
-			result[containerId] = make(map[string][]interface{})
+			result[containerId] = make(map[string]interface{})
 		}
 		comps = regexp.MustCompile(fmt.Sprintf(".*%s\\.", containerId)).Split(s.Name, -1)
-		key := comps[1]
-		result[containerId][key] = s.Points[0]
+		result[containerId][comps[1]] = s.Points[0]
+
+		if planet == "" {
+			comps = strings.Split(s.Name, fmt.Sprintf(".%s", containerId))
+			comps = strings.Split(comps[0], ".")
+			planet = comps[len(comps)-1]
+		}
+		result[containerId]["Planet"] = planet
 	}
 
 	return result
@@ -155,7 +169,6 @@ func ConvertFromContainerInfoSeries(containerId string, series []*influxdbc.Seri
 
 	for _, s := range series {
 		comps := regexp.MustCompile(fmt.Sprintf(".*%s\\.", containerId)).Split(s.Name, -1)
-		fmt.Println(comps)
 		key := comps[1]
 
 		result[key] = s.Points

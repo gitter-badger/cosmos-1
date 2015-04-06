@@ -34,7 +34,7 @@
     }
   ],
   "continuousQueries": [
-      "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^[^min|hour][^\\.]+\\.[^\\.]+\\.[^\\.]+\\..*$/ group by time(1m) into min.:series_name backfill(false)",
-      "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^[^min|hour][^\\.]+\\.[^\\.]+\\.[^\\.]+\\..*$/ group by time(1h) into hour.:series_name backfill(false)"
+      "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^[^min|hour][^\\.]+\\.[^\\.]+\\.[^\\.]+\\..*$/ group by time(1m) into min.:series_name",
+      "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^[^min|hour][^\\.]+\\.[^\\.]+\\.[^\\.]+\\..*$/ group by time(1h) into hour.:series_name"
   ]
 }

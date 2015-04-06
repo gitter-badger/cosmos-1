@@ -1,0 +1,53 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<polymer-element name="page-cosmos" attributes="containers planets">
+    <template>
+        <style>
+          :host label {
+            float: right;
+          }
+          :host p {
+            margin-right: 50px;
+          }
+          :host h4 {
+            border-bottom: 1px solid #373737;
+            padding-bottom:8px;
+          }
+        </style>
+        <div class="card col2 l">
+            <h4>Planets</h4>
+            <ul class="list-unstyled">
+                <template repeat="{{ planet in planets }}">
+                    <li>
+                        <label>Running</label>
+                        <p>{{ planet['Name'] }}</p>
+                    </li>
+                </template>
+            </ul>
+        </div>
+        <div class="card col2">
+            <h4>Containers</h4>
+            <ul class="list-unstyled">
+                <template repeat="{{ key in keys(containers) }}">
+                    <li>
+                        <label>{{ containers[key]['Status'][3] }}</label>                    
+                        <p>{{ containers[key]['Names.0'][3] }}</p>
+
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </template>
+    <script>
+    Polymer('page-cosmos', {
+        created: function() {
+            this.containers = []; // type hint
+        },
+        ready: function() {
+
+        },
+        keys: function(obj) {
+            return Object.keys(obj);
+        }
+    });
+    </script>
+</polymer-element>
