@@ -136,14 +136,19 @@ func ConvertToPlanetSeries(token string, body []byte) (*influxdbc.Series, error)
 func ConvertFromContainerSeries(planet string, series []*influxdbc.Series) map[string]map[string]interface{} {
 	result := make(map[string]map[string]interface{})
 
-	for _, s := range series {
-		var comps []string
+	var regex *regexp.Regexp
+	if planet == "" {
+		regex = regexp.MustCompile("^(min|hour)?\\.?[^\\.]+\\.[^\\.]+\\.")
+	} else {
+		regex = regexp.MustCompile(fmt.Sprintf("^(min|hour)?\\.?[^\\.]+\\.%s\\.", planet))
+	}
 
-		if planet == "" {
-			comps = regexp.MustCompile("^(min|hour)?\\.?[^\\.]+\\.[^\\.]+\\.").Split(s.Name, -1)
-		} else {
-			comps = regexp.MustCompile(fmt.Sprintf("^(min|hour)?\\.?[^\\.]+\\.%s\\.", planet)).Split(s.Name, -1)
-		}
+	for _, s := range series {
+		fmt.Printf("SeriesName => %s", s.Name)
+		comps := regex.Split(s.Name, -1)
+		fmt.Println("Splited")
+		fmt.Println(comps)
+		fmt.Println("==========")
 
 		containerId := strings.Split(comps[1], ".")[0]
 
