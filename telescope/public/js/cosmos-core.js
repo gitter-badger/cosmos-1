@@ -57,9 +57,9 @@
         xhr.complete(complete)
       }
     },
-    getContainerInfo: function(planet, container, timeInterval, done, fail, complete) {
+    getContainerInfo: function(planet, containerName, timeInterval, done, fail, complete) {
       var xhr = $.ajax({
-        url: '/' + Cosmos.API_VER + '/planets/' + planet + '/containers/' + container,
+        url: '/' + Cosmos.API_VER + '/planets/' + planet + '/containers/' + containerName,
         method: 'GET',
         accept: 'application/json',
         dataType: 'json',
@@ -83,7 +83,7 @@
       labels: [],
       datasets: [
       {
-        label: "container metric",
+        label: "Metrics",
         fillColor: "rgba(33,133,117,0.2)",
         strokeColor: "rgba(33,133,117,1)",
         pointColor: "rgba(33,133,117,1)",
@@ -102,15 +102,18 @@
     }
 
 
-    var container = $('<div/>');
-    var chart = $('<canvas/>')
-    chart.attr({width: width});
-    chart.attr({height: height});
+    var container = $('<div/>').css({'text-align': 'center'});
+    var chart = $('<canvas/>').css({'display': 'inline-block'}).attr({'height': height});
     container.append(chart);
     $(selector).append(container);
 
     var ctx = chart[0].getContext("2d");
-    new Chart(ctx).Line(dataset);
+    var opt = {
+      responsive: true,
+      maintainAspectRatio: false
+    };
+
+    new Chart(ctx).Line(dataset, opt);
   };
 })();
 

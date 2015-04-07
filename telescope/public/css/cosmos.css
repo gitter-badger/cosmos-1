@@ -72,21 +72,17 @@ core-header-panel {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
 }
-
 core-toolbar {
     background: #222;
     color: white;
 }
-
 paper-tab {
     cursor: pointer;
 }
-
 core-pages .core-selected {
     position: relative;
     display: block;
 }
-
 #tabs {
     width: 100%;
     margin: 0;
@@ -96,40 +92,23 @@ core-pages .core-selected {
     user-select: none;
     text-transform: uppercase;
 }
-
 .page-container {
-    width: 800px;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
 }
-
 .paper-tabs-wrapper {
     width: 640px;
 }
-
 .card {
-    position: relative;
-    display: inline-block;
-    width: 100%;
     min-height: 50px;
-    vertical-align: top;
     background-color: #292929;
     -moz-border-radius: 4px;
     border-radius: 4px;
     border: 1px solid #323232;
     padding: 0 10px 10px 10px;
+    margin-bottom: 10px;
 }
-
-.card.col2 {
-    width: 380px;
-}
-
-.card.col3 {
-    width: 250px;
-}
-
-.card.l {
-    margin-right: 10px;
-}
-
 .page {
     padding: 20px 10px;
 }

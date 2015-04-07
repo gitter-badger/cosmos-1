@@ -2,6 +2,8 @@
 <link rel="import" href="/bower_components/paper-checkbox/paper-checkbox.html">
 <polymer-element name="page-container" attributes="containers">
     <template>
+        <link rel="stylesheet" type="text/css" href="/vendor/bootstrap-3.3.2/bootstrap.min-3.3.2.css">
+        <link rel="stylesheet" type="text/css" href="/css/cosmos.css">
         <style>
         :host #cpu {}
         
@@ -32,22 +34,20 @@
         </style>
         <script src="/vendor/chartjs-1.0.2/chart.min.js"></script>
         <div class="card col graph" id="graphContainer">
-            <div horizontal layout flex>
-                <div horizontal center-justified layout flex>
-                    <div>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6 col-xs-12" style="padding:10px">
                         <h5>CPU Usage (%)</h5>
                         <div id="cpu"></div>
                     </div>
-                </div>
-                <div horizontal center-justified layout flex>
-                    <div>
-                        <h5>Memory Usage (MB)</h5>
+                    <div class="col-md-6 col-xs-12" style="padding:10px">
+                        <h5>Memory Usage (MiB)</h5>
                         <div id="mem"></div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="card col c-table">
+        <div class="card c-table">
             <table>
                 <thead>
                     <tr>
@@ -102,8 +102,8 @@
             });
 
             if (checkCnt == 0) {
-            	$(self.$.graphContainer).hide();
-            	return ;
+                $(self.$.graphContainer).hide();
+                return;
             }
 
             Cosmos.request.getContainerInfo(container['Planet'], sender.id, "1m", function(json) {
@@ -131,9 +131,9 @@
                 Cosmos.drawGraph(self.$.cpu, 340, 250, timeLabel, cpuUsageData)
                 Cosmos.drawGraph(self.$.mem, 340, 250, timeLabel, memUsageData)
 
-            }, function() {
+            }, function(jqXHR) {
                 // failed
-
+                alert('request failed - ' + jqXHR.responseText);
             });
 
 

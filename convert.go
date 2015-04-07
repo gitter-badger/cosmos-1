@@ -83,7 +83,10 @@ func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.S
 
 	result := make([]*influxdbc.Series, 0)
 	for _, cont := range containers {
-		base := MakeContainerSeriesName(token, planet, *cont.Id)
+		cont.Names[0] = strings.TrimPrefix(cont.Names[0], "/")
+		cont.Names[0] = strings.Replace(strings.Replace(cont.Names[0], ".", "_", -1), "/", "|", -1)
+
+		base := MakeContainerSeriesName(token, planet, cont.Names[0])
 		// series := influxdbc.NewSeries(base, "value")
 		// series.AddPoint("")
 		// result = append(result, series)
@@ -150,30 +153,33 @@ func ConvertFromContainerSeries(planet string, series []*influxdbc.Series) map[s
 		fmt.Println(comps)
 		fmt.Println("==========")
 
-		containerId := strings.Split(comps[1], ".")[0]
+		cName := strings.Split(comps[1], ".")[0]
 
-		if result[containerId] == nil {
-			result[containerId] = make(map[string]interface{})
+		if result[cName] == nil {
+			result[cName] = make(map[string]interface{})
 		}
-		comps = regexp.MustCompile(fmt.Sprintf(".*%s\\.", containerId)).Split(s.Name, -1)
-		result[containerId][comps[1]] = s.Points[0]
+		comps = regexp.MustCompile(fmt.Sprintf(".*%s\\.", cName)).Split(s.Name, -1)
+		result[cName][comps[1]] = s.Points[0]
 
 		if planet == "" {
-			comps = strings.Split(s.Name, fmt.Sprintf(".%s", containerId))
+			comps = strings.Split(s.Name, fmt.Sprintf(".%s", cName))
 			comps = strings.Split(comps[0], ".")
 			planet = comps[len(comps)-1]
 		}
-		result[containerId]["Planet"] = planet
+		result[cName]["Planet"] = planet
 	}
 
 	return result
 }
 
-func ConvertFromContainerInfoSeries(containerId string, series []*influxdbc.Series) map[string][][]interface{} {
+func ConvertFromContainerInfoSeries(cName string, series []*influxdbc.Series) map[string][][]interface{} {
 	result := make(map[string][][]interface{})
 
+	var regex *regexp.Regexp
+	regex = regexp.MustCompile(fmt.Sprintf("^.*\\.%s\\.", cName))
+
 	for _, s := range series {
-		comps := regexp.MustCompile(fmt.Sprintf(".*%s\\.", containerId)).Split(s.Name, -1)
+		comps := regex.Split(s.Name, -1)
 		key := comps[1]
 
 		result[key] = s.Points

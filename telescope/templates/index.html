@@ -37,25 +37,22 @@
                         <paper-tab>Containers</paper-tab>
                     </paper-tabs>
                 </div>
+                <div flex></div>
             </div>
         </core-toolbar>
         <!-- main page content will go here -->
-        <div horizontal layout flex>
-            <div flex></div>
-            <div class="page-container">
-                <core-pages>
-                    <div class="page">
-                        <page-cosmos />
-                    </div>
-                    <div class="page">
-                        <page-planet />
-                    </div>
-                    <div class="page">
-                        <page-container />
-                    </div>
-                </core-pages>
-            </div>
-            <div flex></div>
+        <div class="page-container">
+            <core-pages>
+                <div class="page">
+                    <page-cosmos />
+                </div>
+                <div class="page">
+                    <page-planet />
+                </div>
+                <div class="page">
+                    <page-container />
+                </div>
+            </core-pages>
         </div>
         <footer>
             <ul class="list-unstyled list-inline">
