@@ -140,7 +140,7 @@ func ConvertFromContainerSeries(planet string, series []*influxdbc.Series) map[s
 		var comps []string
 
 		if planet == "" {
-			comps = regexp.MustCompile(fmt.Sprintf("^(min|hour)?\\.?[^\\.]+\\.%s\\.", "[^\\.]+")).Split(s.Name, -1)
+			comps = regexp.MustCompile("^(min|hour)?\\.?[^\\.]+\\.[^\\.]+\\.").Split(s.Name, -1)
 		} else {
 			comps = regexp.MustCompile(fmt.Sprintf("^(min|hour)?\\.?[^\\.]+\\.%s\\.", planet)).Split(s.Name, -1)
 		}
