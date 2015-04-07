@@ -44,3 +44,5 @@ Get metrics of container
 	[GET] /v1/planet/:planet/containers/:container_name [Accept:application/json]
 	Required parameters
 		- interval : time interval from now (ex, 30m, 1h, 7d)
+
+<img src="https://raw.githubusercontent.com/cosmos-io/cosmos/master/screenshot.png">
