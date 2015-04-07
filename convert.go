@@ -84,7 +84,7 @@ func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.S
 	result := make([]*influxdbc.Series, 0)
 	for _, cont := range containers {
 		cont.Names[0] = strings.TrimPrefix(cont.Names[0], "/")
-		cont.Names[0] = strings.Replace(strings.Replace(cont.Names[0], ".", "_", -1), "/", "|", -1)
+		cont.Names[0] = regexp.MustCompile("[./]").ReplaceAllString(cont.Names[0], "_")
 
 		base := MakeContainerSeriesName(token, planet, cont.Names[0])
 		// series := influxdbc.NewSeries(base, "value")
