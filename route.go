@@ -90,7 +90,7 @@ func getContainersOfPlanet(r render.Render, params martini.Params, req *http.Req
 	token := getToken(req)
 	planet := params["planet"]
 
-	dbQuery := fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s\\.%s/ LIMIT 1", token, planet)
+	dbQuery := fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s\\.%s\\./ LIMIT 1", token, planet)
 	series, err := logDb.Query(dbQuery, "s")
 	if err != nil {
 		fmt.Println(err)
@@ -109,7 +109,7 @@ func getContainerInfo(r render.Render, params martini.Params, req *http.Request)
 	containerName := params["container"]
 	seriesName := MakeContainerSeriesName(token, planet, containerName)
 
-	dbQuery := fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s/ LIMIT 10", seriesName)
+	dbQuery := fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s\\./ LIMIT 10", seriesName)
 	series, err := logDb.Query(dbQuery, "s")
 	if err != nil {
 		fmt.Println(err)
