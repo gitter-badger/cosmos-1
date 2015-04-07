@@ -176,7 +176,7 @@ func ConvertFromContainerInfoSeries(cName string, series []*influxdbc.Series) ma
 	result := make(map[string][][]interface{})
 
 	var regex *regexp.Regexp
-	regex = regexp.MustCompile(fmt.Sprintf("^.*\\.%s\\.", cName))
+	regex = regexp.MustCompile(fmt.Sprintf("^(min|hour)?\\.?[^\\.]+\\.[^\\.]+\\.%s\\.", cName))
 
 	for _, s := range series {
 		comps := regex.Split(s.Name, -1)
