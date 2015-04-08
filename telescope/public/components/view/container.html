@@ -73,7 +73,7 @@
                     <template repeat="{{key in keys(containers)}}">
                         <tr>
                             <td class="check">
-                                <paper-checkbox id="{{ key }}" checked?="{{ key == showKey }}" on-core-change="{{onCheckChanged}}"></paper-checkbox>
+                                <paper-checkbox id="{{ key }}" checked?="{{ key == _key }}" on-core-change="{{onCheckChanged}}"></paper-checkbox>
                             </td>
                             <td>{{ containerName(containers[key]['Names.0'][3]) }}</td>
                             <td>{{ planetName(key) }}</td>
@@ -90,6 +90,10 @@
         created: function() {
             this.containers = {}; // type hint
             this.showKey = undefined;
+            this._key = undefined;
+        },
+        showKeyChanged: function() {
+            this._key = this.showKey;
         },
         keys: function(obj) {
             return Object.keys(obj);
@@ -102,33 +106,17 @@
             return str.split('.')[0];
         },
         onCheckChanged: function(event, detail, sender) {
+            if (!sender.checked) {
+                $(self.$.graphContainer).hide();
+                return ;
+            }
+
             var container = this.containers[sender.id];
             var planetName = sender.id.split('.')[0];
             var containerName = sender.id.split('.')[1];
             var self = this;
 
-            var checkboxes = $(sender).closest('tbody').find('paper-checkbox');
-            var checkCnt = 0;
-            checkboxes.each(function(i, elem) {
-                if (elem != sender) {
-                    if (elem.checked) {
-                        elem.checked = false;
-                    }
-                }
-                if (elem.checked) {
-                    checkCnt += 1;
-                }
-            });
-
-            if (checkCnt == 0) {
-                $(self.$.graphContainer).hide();
-                self.showKey = false;
-                return;
-            }
-
-            if (self.showKey != sender.id) {
-                self.showKey = sender.id;
-            }
+            self._key = sender.id;
 
             Cosmos.request.getContainerInfo(planetName, containerName, function(json) {
                 // succeed

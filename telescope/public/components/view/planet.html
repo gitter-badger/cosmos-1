@@ -40,13 +40,13 @@
                     <template repeat="{{planet in planets}}">
                         <tr class="outer">
                             <td class="check">
-                                <paper-checkbox id="{{ planet['Name'] }}" checked?="{{ planet['Name'] == showKey }}" on-core-change="{{onCheckChanged}}"></paper-checkbox>
+                                <paper-checkbox id="{{ planet['Name'] }}" checked?="{{ planet['Name'] == _key }}" on-core-change="{{onCheckChanged}}"></paper-checkbox>
                             </td>
                             <td>
                                 <b>{{ planet['Name'] }}</b>
                             </td>
                         </tr>
-                        <tr class="inner" hidden?="{{ planet['Name'] != showKey  }}">
+                        <tr class="inner" hidden?="{{ planet['Name'] != _key  }}">
                             <td colspan="2">
                                 <template repeat="{{ key in keys(containers[planet['Name']]) }}">
                                     <div style="padding-bottom:10px;padding-left:30px;">
@@ -68,6 +68,7 @@
             this.planets = []; // type hint
             this.containers = {};
             this.showKey = undefined;
+            this._key = undefined;
         },
         keys: function(obj) {
             if (obj) {
@@ -76,6 +77,9 @@
                 return [];
             }
         },
+        showKeyChanged: function() {
+        	this._key = this.showKey;
+        }, 
         substr: function(str) {
             return str.substring(0, 10);
         },
@@ -93,27 +97,12 @@
         onCheckChanged: function(event, detail, sender) {
             var self = this;
             var checkboxes = $(sender).closest('tbody').find('paper-checkbox');
-            var checkCnt = 0;
-            checkboxes.each(function(i, elem) {
-                if (elem != sender) {
-                    if (elem.checked) {
-                        elem.checked = false;
-                    }
-                }
-                if (elem.checked) {
-                    checkCnt += 1;
-                }
-            });
+            var checkCnt = 0;   
 
-            if (checkCnt == 0) {
-                self.showKey = false;
-                return;
-            }
+            if (!sender.checked) return ;
 
-            if (self.showKey != sender.id) {
-	            self.showKey = sender.id;
-	        }
-	        
+            self._key = sender.id;
+
             Cosmos.request.getContainers(sender.id, function(json) {
                 self.containers[sender.id] = json;
             }, function(jqXHR) {

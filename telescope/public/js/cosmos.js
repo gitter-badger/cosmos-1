@@ -8,6 +8,14 @@
     tabs.addEventListener('core-select', function() {
         pages.selected = tabs.selected;
 
+        $('core-pages div.page').each(function(i, elem) {
+            if (i == pages.selected) {
+                $(elem).show();
+            } else if (i != pages.selected) {
+                $(elem).hide();
+            }
+        });
+
         switch (pages.selected) {
             case 0:
                 var pageCosmos = document.querySelector('page-cosmos');
