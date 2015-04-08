@@ -21,7 +21,7 @@ $ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --rm --name c
 
 ### InfluxDB
 
-[InfluxDB](http://influxdb.com) is also used in Cosmos. It is recommended to use [a InfluxDB container](https://registry.hub.docker.com/u/cosmosio/influxdb/) with Cosmos. Of course, you can install InfluxDB in your local machine directly. If you do, please follow [the instruction](http://influxdb.com/download/).
+[InfluxDB](http://influxdb.com) is used in Cosmos. It is recommended to use [a InfluxDB container](https://registry.hub.docker.com/u/cosmosio/influxdb/) with Cosmos. Of course, you can install InfluxDB in your local machine directly. If you do, please follow [the instruction](http://influxdb.com/download/).
 ```
 $ docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --rm --name influxdb cosmosio/influxdb
 ```
@@ -52,35 +52,62 @@ $ docker run -e COSMOS_HOST=127.0.0.1 --rm --name curiosity cosmosio/curiosity:n
 ```
 
 ## REST APIs
-Get all of the planet(host) information
-	[GET]  /v1/planets [Accept:application/json]
 
+### Planets
 
-Get container list of planet
-	[GET]  /v1/planet/:planet/containers [Accept:application/json]
-	Required Parameters
-		- ttl : time to live for containers (ex, 30m, 1h, 7d)
+```
+GET /v1/planets HTTP/1.1
+Accept: application/json
+```
 
-Post container metrics of planet
-	[POST] /v1/planet/:planet/containers [Content-Type:application/json, Accept:application/json]
-	Body : Raw
-	{ 
+### Containers
 
-	  "nginx" : {
-				"column" : "value",
-				...
-	  },
+* ttl : time to live for containers (ex, 30m, 1h, 7d)
 
-	  "mysql" : {
-	  			"column" : "value",
-	  			...
-	  }, 
-	  ...	  
-	}
+```
+GET /v1/planet/:planet/containers
+Accept: application/json
 
-Get metrics of container
-	[GET] /v1/planet/:planet/containers/:container_name [Accept:application/json]
-	Required parameters
-		- interval : time interval from now (ex, 30m, 1h, 7d)
+{"ttl":"30m"}
+```
+
+### Container
+
+* interval : time interval from now (ex, 30m, 1h, 7d)
+
+```
+GET /v1/planet/:planet/containers/:container
+Accept: application/json
+
+{"interval":"30m"}
+```
+
+### Create containers
+
+```
+POST /v1/planet/:planet/containers
+Accept: application/json
+Content-Type: application/json
+
+[
+  {
+    "Id": "52236af62ef96f960611b6a9276d3be9800a9f04a497d24a4a7dfb1c74b23be6",
+    "Image": "cosmosio/cosmos:latest",
+    "Status": "Up 2 minutes",
+    "Command": "bash",
+    "Created": "1428047585",
+    "Names": ["/cosmos"],
+    "Ports": [],
+    "Network": {"RxBytes": 8856494, "TxBytes: 102716"},
+    "Cpu": {"TotalUtilization": 0.00, "PerCpuUtilization": [0.00,0.00,0.00,0.00]},
+    "Memory": {"Limit": 2105901056, "Usage": 78176256}
+  }
+
+  ...
+  
+]
+```
+
+## Screenshot
 
 <img src="https://raw.githubusercontent.com/cosmos-io/cosmos/master/screenshot.png">
