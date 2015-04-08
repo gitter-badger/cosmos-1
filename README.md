@@ -2,18 +2,56 @@
 
 [![Build Status](https://travis-ci.org/cosmos-io/cosmos.svg?branch=master)](https://travis-ci.org/cosmos-io/cosmos)
 
-You are a DevOps engineer and also a pioneer to a Cosmos. Cosmos is a monitoring system for containers. Cosmos can aggregate metrics and logs from a drone called Curiosity to an InfluxDB and analyze the data. You can find out more about [Curiosity](https://github.com/cosmos-io/curiosity).
+Cosmos is a container monitoring system. Cosmos can aggregate metrics of containers with [Curiosity](https://github.com/cosmos-io/curiosity). It also supports a modern dashboard.
+
+## Quick start
+
+You can run Cosmos simply.
+
+```
+$ docker run -d --rm --name influxdb cosmosio/influxdb
+$ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --rm --name cosmos cosmosio/cosmos
+```
+
+## Requirements
+* InfluxDB (>= v0.8.8)
+* Docker (>= v1.5.0)
+
+## Debug
+
+### InfluxDB
+
+[InfluxDB](http://influxdb.com) is also used in Cosmos. It is recommended to use [a InfluxDB container](https://registry.hub.docker.com/u/cosmosio/influxdb/) with Cosmos. Of course, you can install InfluxDB in your local machine directly. If you do, please follow [the instruction](http://influxdb.com/download/).
+```
+$ docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --rm --name influxdb cosmosio/influxdb
+```
+
+### Go
+
+Cosmos is built with [Go](http://golang.org). [The latest version](https://golang.org/dl/) of Go is required when you debug.
+
+* Go (>= 1.4.2)
+
+```
+$ go get github.com/cosmos-io/cosmos
+```
 
 ## Run
-Docker is the best option to run Cosmos.
+
 ```
-$ docker run --rm --name influxdb cosmosio/influxdb
+$ docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --rm --name influxdb cosmosio/influxdb
 $ docker run --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --rm --name cosmos cosmosio/cosmos
-$ docker run --link cosmos:cosmos -e COSMOS_HOST=cosmos -e COSMOS_PLANET_NAME=Mars --rm --name curiosity cosmosio/curiosity
 ```
 
-Rest APIs
----------
+## Curiosity
+
+Curiosity is a container monitoring agent of Cosmos. You can run Curiosity simply with your COSMOS_HOST variable.
+
+```
+$ docker run -e COSMOS_HOST=127.0.0.1 --rm --name curiosity cosmosio/curiosity:nightly
+```
+
+## REST APIs
 Get all of the planet(host) information
 	[GET]  /v1/planets [Accept:application/json]
 
