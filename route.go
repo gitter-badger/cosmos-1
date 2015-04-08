@@ -106,7 +106,8 @@ func getContainerInfo(r render.Render, params martini.Params, req *http.Request)
 	token := getToken(req)
 
 	planet := params["planet"]
-	containerName := params["container"]
+	containerName := strings.Replace(params["container"], ".", "")
+
 	seriesName := MakeContainerSeriesName(token, planet, containerName)
 
 	dbQuery := fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s\\./ LIMIT 10", seriesName)
