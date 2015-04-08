@@ -108,7 +108,8 @@
     var ctx = chart[0].getContext("2d");
     var opt = {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      bezierCurve: false
     };
 
     new Chart(ctx).Line(dataset, opt);
