@@ -95,6 +95,8 @@
         },
         onCheckChanged: function(event, detail, sender) {
             var container = this.containers[sender.id];
+            var planetName = sender.id.split('.')[0];
+            var containerName = sender.id.split('.')[1];
             var self = this;
 
             var checkboxes = $(sender).closest('table').find('paper-checkbox');
@@ -116,7 +118,7 @@
                 return;
             }
 
-            Cosmos.request.getContainerInfo(container['Planet'], sender.id, function(json) {
+            Cosmos.request.getContainerInfo(planetName, containerName, function(json) {
                 // succeed
                 var cpuUsageData = [],
                     memUsageData = [],

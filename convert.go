@@ -136,39 +136,40 @@ func ConvertFromContainerSeries(planet string, series []*influxdbc.Series) map[s
 	result := make(map[string]map[string]interface{})
 
 	var regex *regexp.Regexp
+
 	if planet == "" {
 		regex = regexp.MustCompile("^(min|hour)?\\.?[^\\.]+\\.[^\\.]+\\.")
 	} else {
 		regex = regexp.MustCompile(fmt.Sprintf("^(min|hour)?\\.?[^\\.]+\\.%s\\.", planet))
 	}
 
+	planetName := planet
 	for _, s := range series {
 		comps := regex.Split(s.Name, -1)
-		cName := strings.Split(comps[1], ".")[0]
-
-		if result[cName] == nil {
-			result[cName] = make(map[string]interface{})
-		}
-		comps = regexp.MustCompile(fmt.Sprintf(".*%s\\.", cName)).Split(s.Name, -1)
-		result[cName][comps[1]] = s.Points[0]
+		containerName := strings.Split(comps[1], ".")[0]
 
 		if planet == "" {
-			comps = strings.Split(s.Name, fmt.Sprintf(".%s", cName))
+			comps = strings.Split(s.Name, fmt.Sprintf(".%s", containerName))
 			comps = strings.Split(comps[0], ".")
-			result[cName]["planet"] = comps[len(comps)-1]
-		} else {
-			result[cName]["Planet"] = planet
+			planetName = comps[len(comps)-1]
 		}
+
+		key := fmt.Sprintf("%s.%s", planetName, containerName)
+		if result[key] == nil {
+			result[key] = make(map[string]interface{})
+		}
+		comps = regexp.MustCompile(fmt.Sprintf(".*%s\\.", containerName)).Split(s.Name, -1)
+		result[key][comps[1]] = s.Points[0]
 	}
 
 	return result
 }
 
-func ConvertFromContainerInfoSeries(cName string, series []*influxdbc.Series) map[string][][]interface{} {
+func ConvertFromContainerInfoSeries(containerName string, series []*influxdbc.Series) map[string][][]interface{} {
 	result := make(map[string][][]interface{})
 
 	var regex *regexp.Regexp
-	regex = regexp.MustCompile(fmt.Sprintf("^(min|hour)?\\.?[^\\.]+\\.[^\\.]+\\.%s\\.", cName))
+	regex = regexp.MustCompile(fmt.Sprintf("^(min|hour)?\\.?[^\\.]+\\.[^\\.]+\\.%s\\.", containerName))
 
 	for _, s := range series {
 		comps := regex.Split(s.Name, -1)
