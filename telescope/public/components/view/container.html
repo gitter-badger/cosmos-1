@@ -1,6 +1,6 @@
 <link rel="import" href="/bower_components/polymer/polymer.html">
 <link rel="import" href="/bower_components/paper-checkbox/paper-checkbox.html">
-<polymer-element name="page-container" attributes="containers">
+<polymer-element name="page-container" attributes="containers showKey">
     <template>
         <link rel="stylesheet" type="text/css" href="/vendor/bootstrap-3.3.2/bootstrap.min-3.3.2.css">
         <link rel="stylesheet" type="text/css" href="/css/cosmos.css">
@@ -33,7 +33,7 @@
         }
         </style>
         <script src="/vendor/chartjs-1.0.2/chart.min.js"></script>
-        <div class="card col graph" id="graphContainer">
+        <div class="card graph" id="graphContainer">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-6 col-xs-12" style="padding:10px">
@@ -57,6 +57,7 @@
                 </div>
             </div>
         </div>
+        <h3>Containers</h3>
         <div class="card c-table">
             <table>
                 <thead>
@@ -72,7 +73,7 @@
                     <template repeat="{{key in keys(containers)}}">
                         <tr>
                             <td class="check">
-                                <paper-checkbox id="{{ key }}" on-change="{{onCheckChanged}}"></paper-checkbox>
+                                <paper-checkbox id="{{ key }}" checked?="{{ key == showKey }}" on-core-change="{{onCheckChanged}}"></paper-checkbox>
                             </td>
                             <td>{{ containerName(containers[key]['Names.0'][3]) }}</td>
                             <td>{{ planetName(key) }}</td>
@@ -87,9 +88,9 @@
     <script>
     Polymer('page-container', {
         created: function() {
-            this.containers = {};
+            this.containers = {}; // type hint
+            this.showKey = undefined;
         },
-        ready: function() {},
         keys: function(obj) {
             return Object.keys(obj);
         },
@@ -106,7 +107,7 @@
             var containerName = sender.id.split('.')[1];
             var self = this;
 
-            var checkboxes = $(sender).closest('table').find('paper-checkbox');
+            var checkboxes = $(sender).closest('tbody').find('paper-checkbox');
             var checkCnt = 0;
             checkboxes.each(function(i, elem) {
                 if (elem != sender) {
@@ -114,7 +115,6 @@
                         elem.checked = false;
                     }
                 }
-
                 if (elem.checked) {
                     checkCnt += 1;
                 }
@@ -122,7 +122,12 @@
 
             if (checkCnt == 0) {
                 $(self.$.graphContainer).hide();
+                self.showKey = false;
                 return;
+            }
+
+            if (self.showKey != sender.id) {
+                self.showKey = sender.id;
             }
 
             Cosmos.request.getContainerInfo(planetName, containerName, function(json) {
@@ -131,12 +136,12 @@
                     memUsageData = [],
                     networkRxData = [],
                     networkTxData = [],
-                    timeLabel = [];
-                var totalCpuUsageSet = json['Stats.Cpu.TotalUtilization'];
-                var memoryUsageSet = json['Stats.Memory.Usage'];
-                var networkRxUsageSet = json['Stats.Network.RxBytes'];
-                var networkTxUsageSet = json['Stats.Network.TxBytes'];
-                var KB = 1024 * 1024;
+                    timeLabel = [],
+                    totalCpuUsageSet = json['Stats.Cpu.TotalUtilization'],
+                    memoryUsageSet = json['Stats.Memory.Usage'],
+                    networkRxUsageSet = json['Stats.Network.RxBytes'],
+                    networkTxUsageSet = json['Stats.Network.TxBytes'],
+                    KB = 1024 * 1024;
 
                 if (!totalCpuUsageSet || !memoryUsageSet || !networkRxUsageSet || !networkTxUsageSet) {
                     return;
@@ -149,7 +154,7 @@
                     networkTxData.push(networkTxUsageSet[i][2]);
 
                     var d = new Date(totalCpuUsageSet[i][0] * 1000);
-                    timeLabel.push(d.getMonth() + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes());
+                    timeLabel.push(d.getMonth() + '/' + d.getDate() + ' ' + d.getHours() + ':' + (d.getMinutes() >= 10 ? d.getMinutes() : '0' + d.getMinutes()));
                 }
 
                 $(self.$.graphContainer).show();
@@ -158,10 +163,10 @@
                 $(self.$.networkRx).empty();
                 $(self.$.networkTx).empty();
 
-                Cosmos.drawGraph(self.$.cpu, 340, 250, timeLabel, cpuUsageData);
-                Cosmos.drawGraph(self.$.mem, 340, 250, timeLabel, memUsageData);
-                Cosmos.drawGraph(self.$.networkRx, 340, 250, timeLabel, networkRxData);
-                Cosmos.drawGraph(self.$.networkTx, 340, 250, timeLabel, networkTxData);
+                Cosmos.drawGraph(self.$.cpu, undefined, 250, timeLabel, cpuUsageData);
+                Cosmos.drawGraph(self.$.mem, undefined, 250, timeLabel, memUsageData);
+                Cosmos.drawGraph(self.$.networkRx, undefined, 250, timeLabel, networkRxData);
+                Cosmos.drawGraph(self.$.networkTx, undefined, 250, timeLabel, networkTxData);
 
             }, function(jqXHR) {
                 // failed

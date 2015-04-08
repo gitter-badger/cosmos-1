@@ -10,8 +10,15 @@
 		}
 
 		var locPaths = loc.split('/');
+		var match = false;
 		for (var i in this.routes) {
-			if (this.routes[i](locPaths)) break;
+			if (this.routes[i](locPaths)) {
+				match = true;
+				break;
+			}
+		}
+		if (match === false && typeof Route.defaultRoute === 'function') {
+			Route.defaultRoute();
 		}
 	};
 	Route.match = function(route, fn) {

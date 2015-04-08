@@ -8,7 +8,8 @@
             float: right;
         }
         
-        :host p {
+        :host .card a {
+            display: block;
             margin-right: 100px;
         }
         
@@ -25,8 +26,9 @@
                         <ul class="list-unstyled">
                             <template repeat="{{ planet in planets }}">
                                 <li>
-                                    <label>Running</label>
-                                    <p>{{ planet['Name'] }}</p>
+                                    <a href="#" id="{{ planet['Name'] }}" on-click="{{ onPlanetNameClick }}">
+                                        <p>{{ planet['Name'] }}</p>
+                                    </a>
                                 </li>
                             </template>
                         </ul>
@@ -39,7 +41,9 @@
                             <template repeat="{{ key in keys(containers) }}">
                                 <li>
                                     <label>{{ containers[key]['Status'][3] }}</label>
-                                    <p>{{ containers[key]['Names.0'][3] }}</p>
+                                    <a href="#" id="{{ key }}" on-click="{{ onContainerNameClick }}">
+                                        <p>{{ containerName(containers[key]['Names.0'][3]) }}</p>
+                                    </a>
                                 </li>
                             </template>
                         </ul>
@@ -58,6 +62,24 @@
         },
         keys: function(obj) {
             return Object.keys(obj);
+        },
+        containerName: function(str) {
+            var comps = str.split('/');
+            return comps[comps.length - 1];
+        },
+        onPlanetNameClick: function(event, detail, sender) {
+            var pagePlanet = document.querySelector('page-planet');
+            pagePlanet.showKey = sender.id
+
+            // Move to Planet Tab
+            window.CosmosTabs.selected = 1;
+        },
+        onContainerNameClick: function(event, detail, sender) {
+            var pageContainer = document.querySelector('page-container');
+            pageContainer.showKey = sender.id
+
+            // Move to Container Tab
+            window.CosmosTabs.selected = 2;
         }
     });
     </script>

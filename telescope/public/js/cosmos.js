@@ -3,35 +3,53 @@
     var tabs = document.querySelector('paper-tabs');
     var pages = document.querySelector('core-pages');
 
+    window.CosmosTabs = tabs;
+
     tabs.addEventListener('core-select', function() {
         pages.selected = tabs.selected;
 
         switch (pages.selected) {
             case 0:
-	            var pageCosmos = document.querySelector('page-cosmos');
+                var pageCosmos = document.querySelector('page-cosmos');
                 Cosmos.request.getPlanets(function(json) {
-                	pageCosmos.planets = json;
-                	console.log(pageCosmos.planets);
+                    pageCosmos.planets = json;
+                }, function(jqXHR) {
+                    // Failed
+                    alert('request failed - ' + jqXHR.responseText);
                 });
                 Cosmos.request.getContainers(null, function(json) {
                     // Succeed
                     pageCosmos.containers = json;
-                }, function() {
+                }, function(jqXHR) {
                     // Failed
-                    alert('request failed');
+                    alert('request failed - ' + jqXHR.responseText);
                 });
                 break;
 
             case 1:
+                var pagePlanet = document.querySelector('page-planet');
+                Cosmos.request.getPlanets(function(json) {
+                    // for (var key in json) {
+                    //     json[key]['containers'] = {
+                    //         'core.cosmos': {
+                    //             'Name': 'cosmos'
+                    //         }
+                    //     };
+                    // }
+                    pagePlanet.planets = json;
+                }, function(jqXHR) {
+                    // Failed
+                    alert('request failed - ' + jqXHR.responseText);
+                });
                 break;
             case 2:
+                var pageContainer = document.querySelector('page-container');
                 Cosmos.request.getContainers(null, function(json) {
                     // Succeed
-                    var pageContainer = document.querySelector('page-container');
                     pageContainer.containers = json;
-                }, function() {
+                }, function(jqXHR) {
                     // Failed                    
-                    alert('request failed');
+                    alert('request failed - ' + jqXHR.responseText);
                 })
                 break;
         }
@@ -51,6 +69,9 @@
         Route.match('/containers', function() {
             document.querySelector('#tabs').selected = 2;
         });
+        Route.defaultRoute = function() {
+            window.location.replace("/cosmos");
+        };
         Route.regist();
     });
 }());

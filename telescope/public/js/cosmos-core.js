@@ -99,19 +99,27 @@
       dataset.datasets[0].data = data;
     }
 
+    var container = $('<div/>').css({'text-align': 'center'});    
+    var chart = $('<canvas/>').css({'display': 'inline-block'}).attr('height', height);
+    var opt = { 
+      bezierCurve: false, 
+      pointHitDetectionRadius: 4, 
+      scaleLabel: "<%= ' ' + value%>",
+      scaleFontSize: 12,
+      scaleFontColor: '#888'
+    };    
 
-    var container = $('<div/>').css({'text-align': 'center'});
-    var chart = $('<canvas/>').css({'display': 'inline-block'}).attr({'height': height});
+    if (isNaN(width)) {      
+      opt['responsive'] = true;
+      opt['maintainAspectRatio'] = false;
+    } else {
+      chart.attr('width', width);
+    }
+
     container.append(chart);
     $(selector).append(container);
 
     var ctx = chart[0].getContext("2d");
-    var opt = {
-      responsive: true,
-      maintainAspectRatio: false,
-      bezierCurve: false
-    };
-
     new Chart(ctx).Line(dataset, opt);
   };
 })();
