@@ -83,7 +83,7 @@ func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.S
 
 	result := make([]*influxdbc.Series, 0)
 	for _, cont := range containers {
-		comps := strings.Split(s, "/")
+		comps := strings.Split(cont.Names[0], "/")
 		cName := strings.Replace(comps[len(comps)-1], ".", "_", -1)
 		base := MakeContainerSeriesName(token, planet, cName)
 
@@ -143,12 +143,7 @@ func ConvertFromContainerSeries(planet string, series []*influxdbc.Series) map[s
 	}
 
 	for _, s := range series {
-		fmt.Printf("SeriesName => %s", s.Name)
 		comps := regex.Split(s.Name, -1)
-		fmt.Println("Splited")
-		fmt.Println(comps)
-		fmt.Println("==========")
-
 		cName := strings.Split(comps[1], ".")[0]
 
 		if result[cName] == nil {
@@ -160,9 +155,10 @@ func ConvertFromContainerSeries(planet string, series []*influxdbc.Series) map[s
 		if planet == "" {
 			comps = strings.Split(s.Name, fmt.Sprintf(".%s", cName))
 			comps = strings.Split(comps[0], ".")
-			planet = comps[len(comps)-1]
+			result[cName]["planet"] = comps[len(comps)-1]
+		} else {
+			result[cName]["Planet"] = planet
 		}
-		result[cName]["Planet"] = planet
 	}
 
 	return result

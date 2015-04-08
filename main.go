@@ -39,8 +39,6 @@ func contentTypeRouter() martini.Handler {
 	return func(r render.Render, req *http.Request, c martini.Context) {
 		accept := strings.ToLower(req.Header.Get("Accept"))
 		if strings.Contains(accept, "text/html") {
-			//topPath := strings.Split(req.URL.Path, "/")[1]
-			//			r.HTML(http.StatusOK, "index", topPath)
 			r.HTML(http.StatusOK, "index", nil)
 
 		}
@@ -121,19 +119,19 @@ func startServer() {
 			getAllContainers)
 
 		// post container informations
-		r.Post("/planets/:planet/containers",
+		r.Post("/planets/:planetName/containers",
 			strict.Accept("application/json"),
 			strict.ContentType("application/json"),
 			addContainersOfPlanet)
 
 		// get container list of planet
-		r.Get("/planets/:planet/containers",
+		r.Get("/planets/:planetName/containers",
 			strict.Accept("application/json"),
 			//requiredParams("ttl"),
 			getContainersOfPlanet)
 
 		// get metrics of container
-		r.Get("/planets/:planet/containers/:container",
+		r.Get("/planets/:planetName/containers/:containerName",
 			strict.Accept("application/json"),
 			//requiredParams("interval"),
 			getContainerInfo)

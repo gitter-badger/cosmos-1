@@ -53,7 +53,7 @@ func getAllContainers(r render.Render, req *http.Request) {
 func addContainersOfPlanet(r render.Render, params martini.Params, req *http.Request) {
 	req.ParseForm()
 	token := getToken(req)
-	planet := params["planet"]
+	planet := params["planetName"]
 
 	body, err := GetBodyFromRequest(req)
 	if err != nil {
@@ -86,9 +86,8 @@ func addContainersOfPlanet(r render.Render, params martini.Params, req *http.Req
 }
 
 func getContainersOfPlanet(r render.Render, params martini.Params, req *http.Request) {
-	// ttl := req.URL.Query().Get("ttl")
 	token := getToken(req)
-	planet := params["planet"]
+	planet := params["planetName"]
 
 	dbQuery := fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s\\.%s\\./ LIMIT 1", token, planet)
 	series, err := logDb.Query(dbQuery, "s")
@@ -102,11 +101,10 @@ func getContainersOfPlanet(r render.Render, params martini.Params, req *http.Req
 }
 
 func getContainerInfo(r render.Render, params martini.Params, req *http.Request) {
-	// interval := req.URL.Query().Get("interval")
 	token := getToken(req)
 
-	planet := params["planet"]
-	containerName := strings.Replace(params["container"], ".", "")
+	planet := params["planetName"]
+	containerName := strings.Replace(params["containerName"], ".", "_", -1)
 
 	seriesName := MakeContainerSeriesName(token, planet, containerName)
 

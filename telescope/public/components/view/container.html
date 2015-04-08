@@ -45,6 +45,16 @@
                         <div id="mem"></div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-6 col-xs-12" style="padding:10px">
+                        <h5>Network Rx (Bytes)</h5>
+                        <div id="networkRx"></div>
+                    </div>
+                    <div class="col-md-6 col-xs-12" style="padding:10px">
+                        <h5>Network Tx (Bytes)</h5>
+                        <div id="networkTx"></div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card c-table">
@@ -106,30 +116,47 @@
                 return;
             }
 
-            Cosmos.request.getContainerInfo(container['Planet'], sender.id, "1m", function(json) {
+            Cosmos.request.getContainerInfo(container['Planet'], sender.id, function(json) {
                 // succeed
                 var cpuUsageData = [],
                     memUsageData = [],
+                    networkRxData = [],
+                    networkTxData = [],
                     timeLabel = [];
-                var set = json['Stats.Cpu.TotalUtilization'];
+                var totalCpuUsageSet = json['Stats.Cpu.TotalUtilization'];
+                var memoryUsageSet = json['Stats.Memory.Usage'];
+                var networkRxUsageSet = json['Stats.Network.RxBytes'];
+                var networkTxUsageSet = json['Stats.Network.TxBytes'];
+                var KB = 1024 * 1024;
 
-                for (var i = set.length - 1; i >= 0; i--) {
-                    cpuUsageData.push(set[i][2]);
-                    var d = new Date(set[i][0] * 1000)
+                for (var i = totalCpuUsageSet.length - 1; i >= 0; i--) {
+                    if (totalCpuUsageSet) {
+                        cpuUsageData.push(parseInt(totalCpuUsageSet[i][2] * 100) / 100);
+                    }
+                    if (memoryUsageSet) {
+                        memUsageData.push(parseInt(memoryUsageSet[i][2] / KB));
+                    }
+                    if (networkRxUsageSet) {
+                        networkRxData.push(networkRxUsageSet[i][2]);
+                    }
+                    if (networkTxUsageSet) {
+                        networkTxData.push(networkTxUsageSet[i][2]);
+                    }
+
+                    var d = new Date(totalCpuUsageSet[i][0] * 1000);
                     timeLabel.push(d.getMonth() + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes());
-                }
-
-                set = json['Stats.Memory.Usage'];
-                var kb = 1024 * 1024;
-                for (var i = set.length - 1; i >= 0; i--) {
-                    memUsageData.push(parseInt(set[i][2] / kb));
                 }
 
                 $(self.$.graphContainer).show();
                 $(self.$.cpu).empty();
                 $(self.$.mem).empty();
-                Cosmos.drawGraph(self.$.cpu, 340, 250, timeLabel, cpuUsageData)
-                Cosmos.drawGraph(self.$.mem, 340, 250, timeLabel, memUsageData)
+                $(self.$.networkRx).empty();
+                $(self.$.networkTx).empty();
+
+                Cosmos.drawGraph(self.$.cpu, 340, 250, timeLabel, cpuUsageData);
+                Cosmos.drawGraph(self.$.mem, 340, 250, timeLabel, memUsageData);
+                Cosmos.drawGraph(self.$.networkRx, 340, 250, timeLabel, networkRxData);
+                Cosmos.drawGraph(self.$.networkTx, 340, 250, timeLabel, networkTxData);
 
             }, function(jqXHR) {
                 // failed

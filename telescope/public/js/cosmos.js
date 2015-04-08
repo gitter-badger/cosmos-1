@@ -13,11 +13,11 @@
                 	pageCosmos.planets = json;
                 	console.log(pageCosmos.planets);
                 });
-                Cosmos.request.getContainers(null, "1m", function(json) {
+                Cosmos.request.getContainers(null, function(json) {
                     // Succeed
                     pageCosmos.containers = json;
                 }, function() {
-                    // Failed                    
+                    // Failed
                     alert('request failed');
                 });
                 break;
@@ -25,7 +25,7 @@
             case 1:
                 break;
             case 2:
-                Cosmos.request.getContainers(null, "1m", function(json) {
+                Cosmos.request.getContainers(null, function(json) {
                     // Succeed
                     var pageContainer = document.querySelector('page-container');
                     pageContainer.containers = json;
