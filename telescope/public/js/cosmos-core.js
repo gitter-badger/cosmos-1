@@ -31,7 +31,7 @@
         xhr.complete(complete)
       }
     },
-    getContainers: function(planet, timeToLive, done, fail, complete) {
+    getContainers: function(planet, done, fail, complete) {
       var url = '/' + Cosmos.API_VER;
       if (planet) {
         url =  url + '/planets/' + planet + '/containers';
@@ -43,8 +43,7 @@
         url: url,
         method: 'GET',
         accept: 'application/json',
-        dataType: 'json',
-        data: {ttl: timeToLive}
+        dataType: 'json'
       });
 
       if (typeof done == 'function') {
@@ -57,13 +56,12 @@
         xhr.complete(complete)
       }
     },
-    getContainerInfo: function(planet, containerName, timeInterval, done, fail, complete) {
+    getContainerInfo: function(planet, containerName, done, fail, complete) {
       var xhr = $.ajax({
         url: '/' + Cosmos.API_VER + '/planets/' + planet + '/containers/' + containerName,
         method: 'GET',
         accept: 'application/json',
-        dataType: 'json',
-        data: {interval: timeInterval}
+        dataType: 'json'
       });
 
       if (typeof done == 'function') {
@@ -116,67 +114,3 @@
     new Chart(ctx).Line(dataset, opt);
   };
 })();
-
-/*
-var Page = {};
-Page.planetList = function() {
-    Cosmos.request.getPlanets(function(json, textStatus, jqXHR) {
-      var page = $('#page');
-      page.addClass('planet-list');
-      page.append($('<h4/>').text('Planets'));
-
-      var divRow = $('<div/>').addClass('row');
-
-      for (var i = 0; i < 12; i++) {
-        var divCol = $('<div/>').addClass('col-md-1 col-xs-2');
-        var a = $('<a/>', {href: '#'});
-        a.text(json[0].name).click(function(e) {
-          return false;
-        });
-        divCol.append(a);
-        divRow.append(divCol);
-      }
-      page.append(divRow);
-    }, function(jqXHR, textStatus, errorThrown) {
-      console.log(jqXHR.responseText);
-    });
-
-};
-
-Page.planetDetail = function() {
-
-
-    var page = $('#page');
-    page.addClass('planet-detail');
-
-    page.append($('<h4/>').text(Route.params['planet']));
-    Cosmos.request.getContainers(Route.params['planet'], '7d', function(json, textStatus, jqXHR) {
-      var divRow = $('<div/>').addClass('row');
-      var divLeft = $('<div/>').addClass('col-md-4');
-      var divRight = $('<div/>').addClass('col-md-8');
-
-      divRow.append(divLeft).append(divRight);
-
-      var ul = $('<ul />');
-      ul.addClass('list');
-      for (var i = 0;i < json.length; i++) {
-        var li = $('<li/>');
-        var a = $('<a/>', {href: '#'});
-        a.text(json[i].name).click(function(e) {
-          Cosmos.drawGraph(divRight);
-          return false;
-        });
-        li.append(a);
-        ul.append(li);
-      }
-
-      divLeft.append(ul);
-      page.append(divRow);
-    },
-    function(jqXHR, textStatus, errorThrown) {
-      console.log(errorThrown);
-    })
-
-    //Cosmos.drawGraph('#page');
-};
-*/
