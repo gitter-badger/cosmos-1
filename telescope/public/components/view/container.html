@@ -74,8 +74,8 @@
                             <td class="check">
                                 <paper-checkbox id="{{ key }}" on-change="{{onCheckChanged}}"></paper-checkbox>
                             </td>
-                            <td>{{ name(containers[key]) }}</td>
-                            <td>{{ key.split('.')[0] }}</td>
+                            <td>{{ containerName(containers[key]['Names.0'][3]) }}</td>
+                            <td>{{ planetName(key) }}</td>
                             <td>{{ containers[key]['Command'][3] }}</td>
                             <td>{{ containers[key]['Status'][3] }}</td>
                         </tr>
@@ -93,9 +93,12 @@
         keys: function(obj) {
             return Object.keys(obj);
         },
-        name: function(obj) {
-            var comps = obj['Names.0'][3].split('/');
+        containerName: function(str) {
+            var comps = str.split('/');
             return comps[comps.length - 1];
+        },
+        planetName: function(str) {
+            return str.split('.')[0];
         },
         onCheckChanged: function(event, detail, sender) {
             var container = this.containers[sender.id];
