@@ -1,5 +1,7 @@
 (function() {
     // Tab click event listener
+
+    /*
     var tabs = document.querySelector('paper-tabs');
     var pages = document.querySelector('core-pages');
 
@@ -63,22 +65,25 @@
         }
     });
 
+*/
+
+
     // Route configuration
     $(function() {
         Route.match('/', function() {
-            window.location.replace("/cosmos");
+
         });
         Route.match('/cosmos', function() {
-            document.querySelector('#tabs').selected = 0;
+//            document.querySelector('#tabs').selected = 0;
         });
         Route.match('/planets', function() {
-            document.querySelector('#tabs').selected = 1;
+//            document.querySelector('#tabs').selected = 1;
         });
         Route.match('/containers', function() {
-            document.querySelector('#tabs').selected = 2;
+//            document.querySelector('#tabs').selected = 2;
         });
         Route.defaultRoute = function() {
-            window.location.replace("/cosmos");
+            window.location.replace("/");
         };
         Route.regist();
     });

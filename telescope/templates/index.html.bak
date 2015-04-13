@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="description" content="Cosmos is a container monitoring system.">
+    <meta name="author" content="Cosmos">
+    <title>Cosmos</title>
+    <script src="/bower_components/webcomponentsjs/webcomponents.min.js"></script>
+    
+    <link rel="import" href="/components/view/cosmos.html">
+    <link rel="import" href="/components/view/container.html">
+    <link rel="import" href="/components/view/planet.html">
+    
+    <link rel="stylesheet" type="text/css" href="/vendor/bootstrap-3.3.2/bootstrap.min-3.3.2.css">
+    <link rel="stylesheet" type="text/css" href="/css/cosmos.css" shim-shadowdom>
+</head>
+
+<body unresolved>
+     <!-- 
+   he unresolved attribute on the <body> element is used to prevent a flash of unstyled content (FOUC) on browsers that lack native support for custom elements. For details, see the Polymer styling reference. https://www.polymer-project.org/0.5/docs/polymer/styling.html#fouc-prevention
+      -->
+    <core-header-panel>
+        <core-toolbar>
+            <div horizontal layout flex>
+                <div flex></div>
+                <div class="paper-tabs-wrapper">
+                    <paper-tabs id="tabs">
+                        <paper-tab>Cosmos</paper-tab>
+                        <paper-tab>Planets</paper-tab>
+                        <paper-tab>Containers</paper-tab>
+                    </paper-tabs>
+                </div>
+                <div flex></div>
+            </div>
+        </core-toolbar>
+        <div class="page-container">
+            <core-pages>
+                <div class="page">
+                    <page-cosmos />
+                </div>
+                <div class="page">
+                    <page-planet />
+                </div>
+                <div class="page">
+                    <page-container />
+                </div>
+            </core-pages>
+        </div>
+        <footer>
+            <ul class="list-unstyled list-inline">
+                <li><a href="https://doc.cosmos.io/" title="Documentaion is available here">Docs</a></li>
+                <li><a href="https://github.com/cosmos-io/" title="Fork us on GitHub">GitHub</a></li>
+                <li><a href="https://twitter.com/cosmospioneer/" title="Follow us on Twitter">Twitter</a></li>
+                <li><a href="https://www.facebook.com/pages/Cosmosio/1411438119146311" title="Follow us on Facebook">Facebook</a></li>
+                <li><a href="https://stackoverflow.com/questions/tagged/cosmos?sort=newest" title="#cosmos on Stackoverflow">Stackoverflow</a></li>
+                <li><a href="mailto:founders@cosmos.io" title="Contact to us">Contact</a></li>
+            </ul>
+            <p>&copy Cosmos 2015, all rights reserved.</p>
+        </footer>
+    </core-header-panel>
+    <script src="/vendor/jquery-2.1.3/jquery.min-2.1.3.js"></script>
+    <script src="/js/cosmos-core.js"></script>
+    <script src="/js/route.js"></script>
+    <script src="/js/cosmos.js"></script>
+</body>
+
+</html>
