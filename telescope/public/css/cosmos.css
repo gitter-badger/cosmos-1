@@ -2,6 +2,11 @@
  * Tabs
  */
 
+core-toolbar {
+  background-color: #222;
+  color: #fff;
+}
+
 #tabs {
     width: 100%;
     margin: 0;
@@ -16,19 +21,18 @@ paper-tab {
     cursor: pointer;
 }
 
-paper-tabs #selectionBar {
-    background-color: #489dff;
+paper-tabs.cosmos #selectionBar {
+  background-color: #489dff;
+}
+
+paper-tabs.cosmos paper-tab #ink {
+  color: #489dff;
 }
 
 core-header-panel {
     height: 100%;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
-}
-
-core-toolbar {
-    background: #222;
-    color: white;
 }
 
 core-pages .core-selected {
