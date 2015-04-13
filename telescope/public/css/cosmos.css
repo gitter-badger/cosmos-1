@@ -72,10 +72,6 @@ footer {
  * Footer
  */
 
-footer p {
-    color: #999;
-}
-
 .card {
     min-height: 50px;
     background-color: #292929;
@@ -88,4 +84,4 @@ footer p {
 
 .page {
     padding: 20px 10px;
-}
+

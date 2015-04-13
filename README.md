@@ -9,8 +9,8 @@ Cosmos is a container monitoring system. Cosmos can aggregate metrics of contain
 You can run Cosmos simply.
 
 ```
-$ docker run -d --rm --name influxdb cosmosio/influxdb
-$ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --rm --name cosmos cosmosio/cosmos
+$ docker run -d --name influxdb cosmosio/influxdb
+$ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --name cosmos cosmosio/cosmos
 ```
 
 ## Requirements
