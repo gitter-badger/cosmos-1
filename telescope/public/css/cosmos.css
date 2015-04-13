@@ -1,54 +1,8 @@
-/*
- * Tabs
- */
-
-core-toolbar {
-  background-color: #222;
-  color: #fff;
+footer p {
+    color: #999;
 }
 
-#tabs {
-    width: 100%;
-    margin: 0;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    text-transform: uppercase;
-}
 
-paper-tab {
-    cursor: pointer;
-}
-
-paper-tabs.cosmos #selectionBar {
-  background-color: #489dff;
-}
-
-paper-tabs.cosmos paper-tab #ink {
-  color: #489dff;
-}
-
-core-header-panel {
-    height: 100%;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-core-pages .core-selected {
-    position: relative;
-    display: block;
-}
-
-.page-container {
-    max-width: 800px;
-    width: 100%;
-    margin: 0 auto;
-}
-
-.paper-tabs-wrapper {
-    width: 640px;
-}
 
 .card {
     min-height: 50px;
@@ -62,4 +16,4 @@ core-pages .core-selected {
 
 .page {
     padding: 20px 10px;
-}
+

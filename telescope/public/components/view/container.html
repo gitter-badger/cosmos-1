@@ -1,20 +1,18 @@
 <link rel="import" href="/bower_components/polymer/polymer.html">
 <link rel="import" href="/bower_components/paper-checkbox/paper-checkbox.html">
+
 <polymer-element name="page-container" attributes="containers showKey">
     <template>
-        <link rel="stylesheet" type="text/css" href="/vendor/bootstrap-3.3.2/bootstrap.min-3.3.2.css">
         <link rel="stylesheet" type="text/css" href="/css/cosmos.css">
         <style>
-        :host #cpu {}
+        :host table {
+            width: 100%;
+        }
         
         :host .card.graph {
             display: none;
             margin-bottom: 10px;
             padding-top: 10px;
-        }
-        
-        :host table {
-            width: 100%;
         }
         
         :host thead > tr {
@@ -108,7 +106,7 @@
         onCheckChanged: function(event, detail, sender) {
             if (!sender.checked) {
                 $(self.$.graphContainer).hide();
-                return ;
+                return;
             }
 
             var container = this.containers[sender.id];

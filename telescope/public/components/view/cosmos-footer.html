@@ -1,0 +1,26 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/layout/layout.html">
+<dom-module id="cosmos-footer">
+    <style>
+    /* CSS rules for your element */
+    /* Extra markup and styles for table-esque vertical and horizontal centering */
+    </style>
+    <template>
+        <!-- local DOM for your element -->
+        <footer>
+            <ul class="list-unstyled list-inline">
+                <li><a href="https://doc.cosmos.io/" title="Documentaion is available here">Docs</a></li>
+                <li><a href="https://github.com/cosmos-io/" title="Fork us on GitHub">GitHub</a></li>
+                <li><a href="https://stackoverflow.com/questions/tagged/cosmos?sort=newest" title="#cosmos on Stackoverflow">Stackoverflow</a></li>
+                <li><a href="mailto:founders@cosmos.io" title="Contact to us">Contact</a></li>
+            </ul>
+            <p>&copy Cosmos 2015, all rights reserved.</p>
+        </footer>
+    </template>
+</dom-module>
+<script>
+// element registration
+Polymer({
+    is: "cosmos-footer",
+});
+</script>

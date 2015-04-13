@@ -17,6 +17,7 @@ import (
 var (
 	logDb *influxdbc.InfluxDB
 
+	//	cosmosEnv   = getEnv("COSMOS_ENV", "development")
 	cosmosPort  = getEnv("COSMOS_PORT", "8080")
 	dbHost      = getEnv("INFLUXDB_HOST", "localhost")
 	dbPort      = getEnv("INFLUXDB_PORT", "8086")
@@ -36,13 +37,30 @@ func getEnv(key, defVal string) string {
 }
 
 func contentTypeRouter() martini.Handler {
+	var (
+		index []byte
+		err   error
+	)
+	if martini.Env == "production" {
+		index, err = ioutil.ReadFile("telescope/templates/index-build.html")
+	}
+
+	if err != nil {
+		fmt.Printf("\nFailed to read index file - %s\n\n", err.Error())
+	}
+
 	return func(r render.Render, req *http.Request, c martini.Context) {
 		accept := strings.ToLower(req.Header.Get("Accept"))
-		if strings.Contains(accept, "text/html") {
-			r.HTML(http.StatusOK, "index", nil)
 
+		if strings.Contains(accept, "text/html") {
+			if martini.Env == "development" {
+				index, err = ioutil.ReadFile("telescope/templates/index.html")
+			}
+			r.Header().Set(render.ContentType, "text/html; charset=utf-8")
+			r.Data(http.StatusOK, index)
 		}
 	}
+
 }
 
 func requiredParams(params ...string) http.HandlerFunc {
@@ -104,6 +122,7 @@ func startServer() {
 		render.Renderer(render.Options{
 			Extensions: []string{".tmpl", ".html"},
 			Directory:  "telescope/templates",
+			Delims:     render.Delims{Left: "{{%", Right: "%}}"},
 		}),
 		contentTypeRouter(),
 	)
@@ -145,27 +164,6 @@ func startServer() {
 }
 
 func main() {
-	// obj := model.Container{Id: "ContainerId"}
-	// obj.Ports = make([]*model.Port, 1)
-	// privatePort := 80
-	// publicPort := 80
-	// //	portType := "TCP"
-
-	// obj.Ports[0] = &model.Port{PrivatePort: &privatePort, PublicPort: &publicPort, Type: nil}
-
-	// fmt.Println(obj)
-	// t := reflect.TypeOf(obj)
-	// v := reflect.ValueOf(obj)
-	// tField := t.Field(0)
-	// vField := v.Field(0)
-
-	// fmt.Println(tField.Name)
-	// fmt.Println(vField.Interface())
-
-	// vals := MakeFieldPathAndValue(obj, ".")
-	// for _, v := range vals {
-	// 	fmt.Println(v)
-	// }
 
 	createDBConn()
 	startServer()

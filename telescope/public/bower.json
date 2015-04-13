@@ -15,13 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.5.5",
-    "core-header-panel": "Polymer/core-header-panel#~0.5.5",
-    "core-toolbar": "Polymer/core-toolbar#~0.5.5",
-    "paper-tabs": "Polymer/paper-tabs#~0.5.5",
-    "font-roboto": "Polymer/font-roboto#~0.5.5",
-    "core-ajax": "Polymer/core-ajax#~0.5.5",
-    "core-pages": "Polymer/core-pages#~0.5.5",
-    "core-media-query": "Polymer/core-media-query#~0.5.5"
+    "polymer": "Polymer/polymer#^0.8.0-rc.2",
+    "layout": "Polymer/layout"
   }
 }

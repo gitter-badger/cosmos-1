@@ -5,6 +5,7 @@ ENV PATH /go/bin:$PATH
 
 COPY ./shard_config.json /shard_config.json
 
+ENV MARTINI_ENV=production
 ENV COSMOS_PORT 8080
 ENV INFLUXDB_HOST influxdb
 ENV INFLUXDB_PORT 8086
