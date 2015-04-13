@@ -23,14 +23,13 @@
                     pageCosmos.planets = json;
                 }, function(jqXHR) {
                     // Failed
-                    alert('request failed - ' + jqXHR.responseText);
+                    console.log('request failed - ' + jqXHR.responseText);
                 });
                 Cosmos.request.getContainers(null, function(json) {
                     // Succeed
                     pageCosmos.containers = json;
                 }, function(jqXHR) {
-                    // Failed
-                    alert('request failed - ' + jqXHR.responseText);
+                    console.log('request failed - ' + jqXHR.responseText);
                 });
                 break;
 
@@ -47,7 +46,7 @@
                     pagePlanet.planets = json;
                 }, function(jqXHR) {
                     // Failed
-                    alert('request failed - ' + jqXHR.responseText);
+                    console.log('request failed - ' + jqXHR.responseText);
                 });
                 break;
             case 2:
@@ -56,8 +55,8 @@
                     // Succeed
                     pageContainer.containers = json;
                 }, function(jqXHR) {
-                    // Failed                    
-                    alert('request failed - ' + jqXHR.responseText);
+                    // Failed
+                    console.log('request failed - ' + jqXHR.responseText);
                 })
                 break;
         }
