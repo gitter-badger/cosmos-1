@@ -72,17 +72,21 @@ core-header-panel {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
 }
+
 core-toolbar {
     background: #222;
     color: white;
 }
+
 paper-tab {
     cursor: pointer;
 }
+
 core-pages .core-selected {
     position: relative;
     display: block;
 }
+
 #tabs {
     width: 100%;
     margin: 0;
@@ -92,14 +96,17 @@ core-pages .core-selected {
     user-select: none;
     text-transform: uppercase;
 }
+
 .page-container {
     max-width: 800px;
     width: 100%;
     margin: 0 auto;
 }
+
 .paper-tabs-wrapper {
     width: 640px;
 }
+
 .card {
     min-height: 50px;
     background-color: #292929;
@@ -109,6 +116,24 @@ core-pages .core-selected {
     padding: 0 10px 10px 10px;
     margin-bottom: 10px;
 }
+
+core-toolbar {
+    height: 40px;
+}
+
+html /deep/ .toolbar-tools {
+    height: 40px;
+}
+
+paper-tabs {
+    height: 24px;
+}
+
+core-toolbar {
+    padding: 0;
+    margin: 0;
+}
+
 .page {
     padding: 20px 10px;
 }
