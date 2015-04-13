@@ -67,90 +67,7 @@ footer {
     text-align: center;
 }
 
-/* Extra markup and styles for table-esque vertical and horizontal centering */
 
-.header-nav > li {
-    display: inline-block;
-}
-
-.header-nav > li + li {
-    margin-left: 20px;
-}
-
-.header-nav > li > a {
-    padding-right: 0;
-    padding-left: 0;
-    font-size: 14px;
-    font-weight: 200;
-    color: #fff;
-    /* IE8 proofing */
-    
-    border-bottom: 1px solid transparent;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.header-nav > li > a:hover,
-.header-nav > li > a:focus {
-    color: #489dff;
-    background-color: transparent;
-    border-bottom-color: #489dff;
-}
-/*
- * Branding
- */
-
-.branding {
-    padding: 20px;
-    color: #999;
-    font-size: 16px;
-}
-/*
- * Cover
- */
-
-.cover {
-    padding-top: 100px;
-}
-
-.cover-headline {
-    font-size: 20px;
-    font-weight: 100;
-}
-
-.cover-headline-logo {
-    font-weight: 500;
-    text-transform: uppercase;
-}
-
-.cover-desc {
-    font-size: 16px;
-    font-weight: 300;
-}
-
-.cover-inner {
-    padding: 20px;
-}
-
-@media (min-width: 768px) {
-    /* Handle the widths */
-    
-    .cover-headline {
-        font-size: 40px;
-    }
-    .cover-desc {
-        font-size: 20px;
-    }
-}
-
-@media (min-width: 992px) {
-    .cover-headline {
-        font-size: 60px;
-    }
-    .cover-desc {
-        font-size: 25px;
-    }
-}
 /*
  * Footer
  */
@@ -158,25 +75,6 @@ footer {
 footer p {
     color: #999;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .card {
     min-height: 50px;
