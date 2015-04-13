@@ -23,15 +23,14 @@
 </head>
 
 <body unresolved>
-    <!-- 
-   he unresolved attribute on the <body> element is used to prevent a flash of unstyled content (FOUC) on browsers that lack native support for custom elements. For details, see the Polymer styling reference. https://www.polymer-project.org/0.5/docs/polymer/styling.html#fouc-prevention
-      -->
     <core-header-panel>
+
+        <!-- tabs start -->
         <core-toolbar>
             <div horizontal layout flex>
                 <div flex></div>
                 <div class="paper-tabs-wrapper">
-                    <paper-tabs id="tabs">
+                    <paper-tabs id="tabs" class="cosmos">
                         <paper-tab>Cosmos</paper-tab>
                         <paper-tab>Planets</paper-tab>
                         <paper-tab>Containers</paper-tab>
@@ -40,6 +39,8 @@
                 <div flex></div>
             </div>
         </core-toolbar>
+        <!-- tabs end -->
+
         <!-- main page content will go here -->
         <div class="page-container">
             <core-pages>
