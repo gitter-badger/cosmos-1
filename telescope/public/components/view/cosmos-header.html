@@ -71,12 +71,6 @@ Polymer({
     handleCosmos: function(e) {
       e.preventDefault();
       history.pushState(null, 'cosmos', '/');
-
-      Polymer.import(['/components/view/dynamic-element.html'], function() {
-          console.log('callback');
-        //document.querySelector('dynamic-element').description = 'a dynamic import';
-      });
-
     },
     handlePlanets: function(e) {
       e.preventDefault();
