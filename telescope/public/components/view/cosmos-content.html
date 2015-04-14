@@ -7,13 +7,20 @@
     </style>
     <template>
         <!-- local DOM for your element -->
-        <page-cosmos></page-cosmos>
+
     </template>
 </dom-module>
 <script>
 // element registration
 Polymer({
     is: "cosmos-content",
+    properties: {
+        page: {
+            type: String,
+            value: '',
+            observer: 'pageChanged'
+        }
+    },
     ready: function() {
         var currPath = window.location.pathname.split('/')[1].toLowerCase();
         switch (currPath) {
@@ -28,6 +35,12 @@ Polymer({
                 // Page containers
 
                 break;
+        }
+    },
+    pageChanged: function(newVal, oldVal) {
+        if (newVal == '') {
+            var elem = document.createElement('page-cosmos');
+            Polymer.dom(this.root).appendChild(elem);
         }
     }
 });
