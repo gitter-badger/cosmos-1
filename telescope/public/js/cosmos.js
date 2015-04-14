@@ -70,7 +70,6 @@
     // Route configuration
     $(function() {
         Route.match('/', function() {
-
         });
         Route.match('/cosmos', function() {
 //            document.querySelector('#tabs').selected = 0;
