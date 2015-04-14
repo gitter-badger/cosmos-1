@@ -1,5 +1,6 @@
 <link rel="import" href="/bower_components/polymer/polymer.html">
 <link rel="import" href="/bower_components/layout/layout.html">
+<link rel="import" href="/bower_components/import/polymer-import.html">
 <dom-module id="cosmos-header">
     <style>
     /* CSS rules for your element */
@@ -60,25 +61,31 @@
 <script>
 // element registration
 Polymer({
-    is: "cosmos-header",
+    is: 'cosmos-header',
     // add properties and methods on the element's prototype
     properties: {
         // declare properties for the element's public API
     },
     ready: function() {
-      
+
     },
     handleCosmos: function(e) {
       e.preventDefault();
-      history.pushState(null, "cosmos", "/");
+      history.pushState(null, 'cosmos', '/');
+
+      Polymer.import(['/components/view/dynamic-element.html'], function() {
+          console.log('callback');
+        //document.querySelector('dynamic-element').description = 'a dynamic import';
+      });
+
     },
     handlePlanets: function(e) {
       e.preventDefault();
-      history.pushState(null, "planets", "/planets");
+      history.pushState(null, 'planets', '/planets');
     },
     handleContainers: function(e) {
       e.preventDefault();
-      history.pushState(null, "containers", "/containers");
+      history.pushState(null, 'containers', '/containers');
     }
 });
 </script>
