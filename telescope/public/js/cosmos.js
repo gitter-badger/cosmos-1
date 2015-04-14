@@ -70,15 +70,13 @@
     // Route configuration
     $(function() {
         Route.match('/', function() {
-        });
-        Route.match('/cosmos', function() {
-//            document.querySelector('#tabs').selected = 0;
+
         });
         Route.match('/planets', function() {
-//            document.querySelector('#tabs').selected = 1;
+
         });
         Route.match('/containers', function() {
-//            document.querySelector('#tabs').selected = 2;
+
         });
         Route.defaultRoute = function() {
             window.location.replace("/");
