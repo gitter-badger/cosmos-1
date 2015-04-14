@@ -9,17 +9,17 @@
     .header-nav a:hover {
         text-decoration: none;
     }
-    
+
     .header-nav > li {}
-    
+
     .header-nav > li {
         display: inline-block;
     }
-    
+
     .header-nav > li + li {
         margin-left: 20px;
     }
-    
+
     .header-nav > li > a {
         padding-right: 0;
         padding-left: 0;
@@ -27,12 +27,12 @@
         font-weight: 200;
         color: #fff;
         /* IE8 proofing */
-        
+
         border-bottom: 1px solid transparent;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
-    
+
     .header-nav > li > a:hover,
     .header-nav > li > a:focus,
     .header-nav > li > a.selected {
@@ -47,9 +47,9 @@
             <div class="flex"></div>
             <nav>
                 <ul class="header-nav nav" id="nav">
-                    <li id="home"><a href="/">Cosmos</a></li>
-                    <li id="planets"><a href="/planets">Planets</a></li>
-                    <li id="containers"><a href="/containers">Containers</a></li>
+                    <li><a href="/" on-click="handleCosmos">Cosmos</a></li>
+                    <li><a href="/planets" on-click="handlePlanets">Planets</a></li>
+                    <li><a href="/containers" on-click="handleContainers">Containers</a></li>
                 </ul>
             </nav>
             <div class="flex"></div>
@@ -62,24 +62,23 @@
 Polymer({
     is: "cosmos-header",
     // add properties and methods on the element's prototype
-
     properties: {
-        // declare properties for the element's public API     
+        // declare properties for the element's public API
     },
     ready: function() {
-        $('#nav a').removeClass('selected');
-        var currPath = window.location.pathname.split('/')[1].toLowerCase();
-        switch (currPath) {
-            case "":
-                $('#home a').addClass('selected');
-                break;
-            case "planets":
-                $('#planets a').addClass('selected');
-                break;
-            case "containers":
-                $('#containers a').addClass('selected');
-                break;
-        }
+      
+    },
+    handleCosmos: function(e) {
+      e.preventDefault();
+      history.pushState(null, "cosmos", "/");
+    },
+    handlePlanets: function(e) {
+      e.preventDefault();
+      history.pushState(null, "planets", "/planets");
+    },
+    handleContainers: function(e) {
+      e.preventDefault();
+      history.pushState(null, "containers", "/containers");
     }
 });
 </script>
