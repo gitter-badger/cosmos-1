@@ -10,54 +10,23 @@
     <title>Cosmos</title>
 
     <script src="/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
-    <script src="/vendor/jquery-2.1.3/jquery.min-2.1.3.js"></script>    
+    <script src="/vendor/jquery-2.1.3/jquery.min-2.1.3.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/vendor/bootstrap-3.3.2/bootstrap.min-3.3.2.css">
-    <link rel="stylesheet" type="text/css" href="/css/cosmos.css" >
-    <link rel="import" href="/components/view/cosmos-header.html">   
-    <link rel="import" href="/components/view/cosmos-footer.html">        
-</head>
-
-<body>
-    <cosmos-header></cosmos-header>
-    <cosmos-footer></cosmos-footer>
-<!--
-    <core-header-panel>
-        <core-toolbar>
-            <div horizontal layout flex>
-                <div flex></div>
-                <div class="paper-tabs-wrapper">
-                    <paper-tabs id="tabs" class="cosmos">
-                        <paper-tab>Cosmos</paper-tab>
-                        <paper-tab>Planets</paper-tab>
-                        <paper-tab>Containers</paper-tab>
-                    </paper-tabs>
-                </div>
-                <div flex></div>
-            </div>
-        </core-toolbar>
-
-        <div class="page-container">
-            <core-pages>
-                <div class="page">
-                    <page-cosmos />
-                </div>
-                <div class="page">
-                    <page-planet />
-                </div>
-                <div class="page">
-                    <page-container />
-                </div>
-            </core-pages>
-        </div>
-     
-    </core-header-panel>
--->
+    <link rel="stylesheet" type="text/css" href="/css/cosmos.css">
+    <link rel="import" href="/components/view/cosmos-header.html">
+    <link rel="import" href="/components/view/cosmos-content.html">    
+    <link rel="import" href="/components/view/cosmos-footer.html">
 
     <script src="/js/cosmos-core.js"></script>
     <script src="/js/route.js"></script>
     <script src="/js/cosmos.js"></script>
+</head>
 
+<body>
+    <cosmos-header></cosmos-header>
+    <cosmos-content></cosmos-content>
+    <cosmos-footer></cosmos-footer>
 </body>
 
 </html>

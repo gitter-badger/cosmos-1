@@ -67,7 +67,6 @@ Polymer({
         // declare properties for the element's public API     
     },
     ready: function() {
-        $('#nav a').removeClass('selected');
         var currPath = window.location.pathname.split('/')[1].toLowerCase();
         switch (currPath) {
             case "":
