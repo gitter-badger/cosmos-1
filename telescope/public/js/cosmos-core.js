@@ -51,7 +51,7 @@
                     delete(json[k][inK]);
                     json[k][newK] = val
                 }
-                json[k]['Key'] = k;                
+                json[k]['Key'] = k;
                 var comps = k.split('.');
                 json[k]['Planet'] = comps[0];
                 json[k]['Container'] = comps[1];

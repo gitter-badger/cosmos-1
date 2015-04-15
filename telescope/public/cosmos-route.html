@@ -1,0 +1,104 @@
+<link rel="import" href="/vendor/polymer/polymer.html">
+<dom-module id="cosmos-route">
+    <template></template>
+</dom-module>
+<script>
+Polymer({
+    is: 'cosmos-route',
+    routes: [],
+    defaultRoute: function() {},
+    regist: function() {
+        var loc;
+        if (location.pathname.length > 1 && location.pathname[location.pathname.length - 1] == '/') {
+            loc = location.pathname.slice(0, location.pathname.length - 1);
+        } else {
+            loc = location.pathname;
+        }
+
+        var locPaths = loc.split('/');
+        var match = false;
+        for (var i in this.routes) {
+            if (this.routes[i](locPaths)) {
+                match = true;
+                break;
+            }
+        }
+        if (match === false && typeof this.defaultRoute === 'function') {
+            this.defaultRoute();
+        }
+    },
+    match: function(route, fn) {
+        var self = this;
+        this.routes.push(function(locPaths) {
+            if (typeof fn == 'function') {
+                var routePaths = route.split('/');
+
+                if (locPaths.length != routePaths.length) {
+                    return false;
+                }
+
+                var params = {};
+                for (var i in routePaths) {
+                    var p = routePaths[i];
+                    if (p.indexOf(':') == 0) {
+                        p = p.slice(1, p.length);
+                        params[p] = locPaths[i];
+                    } else {
+                        if (p != locPaths[i]) {
+                            return false;
+                        }
+                    }
+                }
+
+                // Invoke handler after DOM ready
+                self.params = params;
+                fn();
+
+                return true;
+            }
+        });
+    },
+    changePage: function(page) {
+        switch (page) {
+            case 'cosmos':
+                document.querySelector('cosmos-content').page = 'cosmos';
+                document.querySelector('cosmos-header').page = 'cosmos';                
+                break;
+            case 'planet':
+                document.querySelector('cosmos-content').page = 'planet';
+                document.querySelector('cosmos-header').page = 'planet';                                
+                break;
+            case 'container':
+                document.querySelector('cosmos-content').page = 'container';
+                document.querySelector('cosmos-header').page = 'container';                                
+                break;
+        }
+    },
+    ready: function() {
+        var self = this;
+
+        $(window).on('pushstate', function(e, param) {
+            if (!param) return;
+            self.changePage(param.page);
+        }).on('popstate', function(e) {
+            if (!e.originalEvent || !e.originalEvent.state) return;
+            self.changePage(e.originalEvent.state.page);
+        });
+
+        this.match('/', function() {
+            self.changePage('cosmos');
+        });
+        this.match('/planets', function() {
+            self.changePage('planet');
+        });
+        this.match('/containers', function() {
+            self.changePage('container');
+        });
+        this.defaultRoute = function() {
+            window.location.replace("/");
+        };
+        this.regist();
+
+    }
+});
+</script>

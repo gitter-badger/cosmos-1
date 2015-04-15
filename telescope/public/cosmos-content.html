@@ -1,5 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/page-cosmos.html">
+<link rel="import" href="/page-container.html">
 <dom-module id="cosmos-content">
     <style>
     /* CSS rules for your element */
@@ -23,7 +24,7 @@ Polymer({
         console.log('page changed - ' + newVal);
         var elem;
         switch (newVal) {
-            case '':
+            case 'cosmos':
                 elem = document.createElement('page-cosmos');
                 break;
             case 'planet':
@@ -34,7 +35,12 @@ Polymer({
                 break;
         }
         if (elem) {
-            Polymer.dom(this.root).appendChild(elem);
+            var self = this;
+            setTimeout(function() {
+                $(self).empty();
+                Polymer.dom(self.root).appendChild(elem);
+            }, 10);
+
         }
     }
 

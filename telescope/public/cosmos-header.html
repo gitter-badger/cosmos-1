@@ -67,35 +67,53 @@ Polymer({
     // add properties and methods on the element's prototype
     properties: {
         // declare properties for the element's public API
+        page: {
+            type: String,
+            observer: 'pageChanged'
+        }
     },
-    ready: function() {
-        var currPath = window.location.pathname.split('/')[1].toLowerCase();
-        switch (currPath) {
-            case "":
-                $('#home a').addClass('selected');
+    ready: function() {},
+    pageChanged: function(newValue) {
+        var self = this;        
+        $(self.$.nav).find('a').removeClass('selected');
+        switch (newValue) {
+            case "cosmos":            
+                $(self.$.nav).find('a:eq(0)').addClass('selected');
                 break;
-            case "planets":
-                $('#planets a').addClass('selected');
+            case "planet":
+                $(self.$.nav).find('a:eq(1)').addClass('selected');            
                 break;
-            case "containers":
-                $('#containers a').addClass('selected');
+            case "container":
+                $(self.$.nav).find('a:eq(2)').addClass('selected');            
                 break;
         }
     },
     handleCosmos: function(e) {
         e.preventDefault();
-        history.pushState({page: "cosmos"}, 'cosmos', '/');
-        $(window).trigger('pushstate', { 'page': 'cosmos'});
+        history.pushState({
+            page: "cosmos"
+        }, 'cosmos', '/');
+        $(window).trigger('pushstate', {
+            'page': 'cosmos'
+        });
     },
     handlePlanets: function(e) {
         e.preventDefault();
-        history.pushState({page: "planets"}, 'planets', '/planets');
-        $(window).trigger('pushstate', { 'page': 'planets'});        
+        history.pushState({
+            page: "planets"
+        }, 'planets', '/planets');
+        $(window).trigger('pushstate', {
+            'page': 'planet'
+        });
     },
     handleContainers: function(e) {
         e.preventDefault();
-        history.pushState({page: "containers"}, 'containers', '/containers');
-        $(window).trigger('pushstate', { 'page': 'containers'});        
+        history.pushState({
+            page: "containers"
+        }, 'containers', '/containers');
+        $(window).trigger('pushstate', {
+            'page': 'container'
+        });
     }
 });
 </script>
