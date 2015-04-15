@@ -59,6 +59,17 @@
             }
             return data;
         },
+        _convertContainerInfoResponse: function(json) {
+            var keys = Object.keys(json);
+            for (var i = 0; i < keys.length; i++) {
+                var k = keys[i];
+                var newK = k.replace(/\./g, "");
+                var val = json[k];
+                delete(json[k]);
+                json[newK] = val
+            }
+            return json;
+        },
         getContainers: function(planet, done, fail, complete) {
             var self = this;
             var url = '/' + Cosmos.API_VER;
@@ -98,7 +109,7 @@
 
             if (typeof done == 'function') {
                 xhr.done(function(json) {
-                    done(self._convertContainerResponse(json));
+                    done(self._convertContainerInfoResponse(json));
                 });
             }
             if (typeof fail == 'function') {

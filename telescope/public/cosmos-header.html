@@ -93,27 +93,20 @@ Polymer({
         history.pushState({
             page: "cosmos"
         }, 'cosmos', '/');
-        $(window).trigger('pushstate', {
-            'page': 'cosmos'
-        });
     },
     handlePlanets: function(e) {
         e.preventDefault();
         history.pushState({
             page: "planet"
         }, 'planet', '/planets');
-        $(window).trigger('pushstate', {
-            'page': 'planet'
-        });
+
     },
     handleContainers: function(e) {
         e.preventDefault();
         history.pushState({
             page: "container"
         }, 'container', '/containers');
-        $(window).trigger('pushstate', {
-            'page': 'container'
-        });
+
     }
 });
 </script>

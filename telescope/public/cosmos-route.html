@@ -79,6 +79,14 @@ Polymer({
     ready: function() {
         var self = this;
 
+        var pushState = history.pushState;
+        history.pushState = function(state) {
+            $(window).trigger('pushstate', state);
+            // ... whatever else you want to do
+            // maybe call onhashchange e.handler
+            return pushState.apply(history, arguments);
+        }
+
         $(window).on('pushstate', function(e, param) {
             if (!param) return;
             self.changePage(param.page);

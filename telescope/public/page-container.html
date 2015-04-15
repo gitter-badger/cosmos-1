@@ -35,7 +35,7 @@
                 <template is="x-repeat" items="{{data}}">
                     <tr>
                         <td class="check">
-                            <input type="checkbox" onchange="onCheckChanged(this)" />
+                            <input type="checkbox" value="{{item.Key}}" on-change="onCheckChanged" />
                         </td>
                         <td>{{item.Names0[3]}}</td>
                         <td>{{item.Planet}}</td>
@@ -53,64 +53,186 @@ Polymer({
     properties: {
         data: {
             type: Array,
-            value: []
+            value: [],
+            observer: 'dataChanged'
+        },
+        key: String,
+        isChecked: {
+            type: Boolean,
+            computed: 'isChecked(key)'
         }
+    },
+    _first: true,
+    isChecked: function(k) {
+        return false;
+    },
+    dataChanged: function(newValue, oldValue) {
+        if (this._first && newValue.length > 0) {
+            return;
+            this._first = false;
+            var jqElem = $(this);
+            var checkboxes = jqElem.find('input[type=checkbox]');
+            console.log(checkboxes);
+            checkboxes.each(function(i, elem) {
+                var input = $(elem);
+                if (input.val() == history.state.key) {
+                    alert('check');
+                    input.prop('checked', true);
+                }
+            });
+        }
+    },
+    attached: function() {
+        if (this.data.length > 0 && history.state && history.state.key) {
+            var jqElem = $(this);
+            var self = this;
+
+            var fn = function() {
+                var checkboxes = jqElem.find('input[type=checkbox]');
+                console.log(checkboxes);
+                if (checkboxes.size() > 0) {
+                    checkboxes.each(function(i, elem) {
+                        var input = $(elem);
+                        if (input.val() == history.state.key) {
+                            input.prop('checked', true);                            
+                            self.onCheckChanged({target:elem});
+                        }                        
+                    });
+                } else {
+                    console.log('waiting...');
+                    setTimeout(fn, 10);
+                }
+            };
+
+            setTimeout(fn, 10);
+
+
+
+        }
+    },
+    onCheckChanged: function(e) {
+        var target = e.target ? e.target : e.srcElement;
+        var self = this;
+
+        if (!target.checked) {
+            $('#graphContainer').hide();
+            return;
+        }
+
+        var container = this.data[target.value];
+        var planetName = target.value.split('.')[0];
+        var containerName = target.value.split('.')[1];
+
+        self._key = target.value;
+
+
+        Cosmos.request.getContainerInfo(planetName, containerName, function(json) {
+            // succeed
+
+            var cpuUsageData = [],
+                memUsageData = [],
+                networkRxData = [],
+                networkTxData = [],
+                timeLabel = [],
+                totalCpuUsageSet = json['StatsCpuTotalUtilization'],
+                memoryUsageSet = json['StatsMemoryUsage'],
+                networkRxUsageSet = json['StatsNetworkRxBytes'],
+                networkTxUsageSet = json['StatsNetworkTxBytes'],
+                KB = 1024 * 1024;
+            console.log(json);
+
+            if (!totalCpuUsageSet || !memoryUsageSet || !networkRxUsageSet || !networkTxUsageSet) {
+                return;
+            }
+
+            for (var i = totalCpuUsageSet.length - 1; i >= 0; i--) {
+                cpuUsageData.push(parseInt(totalCpuUsageSet[i][2] * 100) / 100);
+                memUsageData.push(parseInt(memoryUsageSet[i][2] / KB));
+                networkRxData.push(networkRxUsageSet[i][2]);
+                networkTxData.push(networkTxUsageSet[i][2]);
+
+                var d = new Date(totalCpuUsageSet[i][0] * 1000);
+                timeLabel.push(d.getMonth() + '/' + d.getDate() + ' ' + d.getHours() + ':' + (d.getMinutes() >= 10 ? d.getMinutes() : '0' + d.getMinutes()));
+            }
+
+            $('#graphContainer').show();
+            var cpu = $('#cpu');
+            cpu.empty();
+
+            var mem = $('#mem');
+            mem.empty();
+
+            var nRx = $('#networkRx');
+            nRx.empty();
+
+            var nTx = $('#networkTx');
+            nTx.empty();
+
+            console.log(cpu);
+
+            Cosmos.drawGraph(cpu, undefined, 250, timeLabel, cpuUsageData);
+            Cosmos.drawGraph(mem, undefined, 250, timeLabel, memUsageData);
+            Cosmos.drawGraph(nRx, undefined, 250, timeLabel, networkRxData);
+            Cosmos.drawGraph(nTx, undefined, 250, timeLabel, networkTxData);
+
+        }, function(jqXHR) {
+            // failed
+            alert('request failed - ' + jqXHR.responseText);
+        });
     }
 });
 </script>
 <dom-module id="page-container">
     <style>
-    :host {
-        padding: 0 10px;
-    }
     :host .card.graph {
         display: none;
         margin-bottom: 10px;
         padding-top: 10px;
     }
+    
+    :host > div {
+        padding: 0 10px;
+    }
     </style>
     <template>
         <script src="/vendor/chartjs-1.0.2/chart.min.js"></script>
-        <div class="card graph" id="graphContainer">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-6 col-xs-12" style="padding:10px">
-                        <h5>CPU Usage (%)</h5>
-                        <div id="cpu"></div>
+        <div>
+            <div class="card graph" id="graphContainer">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6 col-xs-12" style="padding:10px">
+                            <h5>CPU Usage (%)</h5>
+                            <div id="cpu"></div>
+                        </div>
+                        <div class="col-md-6 col-xs-12" style="padding:10px">
+                            <h5>Memory Usage (MiB)</h5>
+                            <div id="mem"></div>
+                        </div>
                     </div>
-                    <div class="col-md-6 col-xs-12" style="padding:10px">
-                        <h5>Memory Usage (MiB)</h5>
-                        <div id="mem"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 col-xs-12" style="padding:10px">
-                        <h5>Network Rx (Bytes)</h5>
-                        <div id="networkRx"></div>
-                    </div>
-                    <div class="col-md-6 col-xs-12" style="padding:10px">
-                        <h5>Network Tx (Bytes)</h5>
-                        <div id="networkTx"></div>
+                    <div class="row">
+                        <div class="col-md-6 col-xs-12" style="padding:10px">
+                            <h5>Network Rx (Bytes)</h5>
+                            <div id="networkRx"></div>
+                        </div>
+                        <div class="col-md-6 col-xs-12" style="padding:10px">
+                            <h5>Network Tx (Bytes)</h5>
+                            <div id="networkTx"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <h3>Containers</h3>
-        <div class="card" id="container">
+            <h3>Containers</h3>
+            <div class="card" id="container">
+            </div>
         </div>
     </template>
 </dom-module>
 <script>
 Polymer({
     is: 'page-container',
+
     properties: {
-        containers: {
-            type: Array
-        },
-        showKey: {
-            type: String,
-            observer: 'showKeyChanged'
-        }
+
     },
     ready: function() {
         this.reload();
@@ -124,74 +246,6 @@ Polymer({
         }, function(jqXHR) {
             console.log('request failed - ' + jqXHR.responseText);
         });
-    },
-    showKeyChanged: function() {
-        this._key = this.showKey;
-    },
-    containerName: function(str) {
-        var comps = str.split('/');
-        return comps[comps.length - 1];
-    },
-    planetName: function(str) {
-        return str.split('.')[0];
-    },
-    onCheckChanged: function(event, detail, sender) {
-        alert('changed');
-        console.log(event);
-        // if (!sender.checked) {
-        //     $(self.$.graphContainer).hide();
-        //     return;
-        // }
-
-        // var container = this.containers[sender.id];
-        // var planetName = sender.id.split('.')[0];
-        // var containerName = sender.id.split('.')[1];
-        // var self = this;
-
-        // self._key = sender.id;
-
-        // Cosmos.request.getContainerInfo(planetName, containerName, function(json) {
-        //     // succeed
-        //     var cpuUsageData = [],
-        //         memUsageData = [],
-        //         networkRxData = [],
-        //         networkTxData = [],
-        //         timeLabel = [],
-        //         totalCpuUsageSet = json['Stats.Cpu.TotalUtilization'],
-        //         memoryUsageSet = json['Stats.Memory.Usage'],
-        //         networkRxUsageSet = json['Stats.Network.RxBytes'],
-        //         networkTxUsageSet = json['Stats.Network.TxBytes'],
-        //         KB = 1024 * 1024;
-
-        //     if (!totalCpuUsageSet || !memoryUsageSet || !networkRxUsageSet || !networkTxUsageSet) {
-        //         return;
-        //     }
-
-        //     for (var i = totalCpuUsageSet.length - 1; i >= 0; i--) {
-        //         cpuUsageData.push(parseInt(totalCpuUsageSet[i][2] * 100) / 100);
-        //         memUsageData.push(parseInt(memoryUsageSet[i][2] / KB));
-        //         networkRxData.push(networkRxUsageSet[i][2]);
-        //         networkTxData.push(networkTxUsageSet[i][2]);
-
-        //         var d = new Date(totalCpuUsageSet[i][0] * 1000);
-        //         timeLabel.push(d.getMonth() + '/' + d.getDate() + ' ' + d.getHours() + ':' + (d.getMinutes() >= 10 ? d.getMinutes() : '0' + d.getMinutes()));
-        //     }
-
-        //     $(self.$.graphContainer).show();
-        //     $(self.$.cpu).empty();
-        //     $(self.$.mem).empty();
-        //     $(self.$.networkRx).empty();
-        //     $(self.$.networkTx).empty();
-
-        //     Cosmos.drawGraph(self.$.cpu, undefined, 250, timeLabel, cpuUsageData);
-        //     Cosmos.drawGraph(self.$.mem, undefined, 250, timeLabel, memUsageData);
-        //     Cosmos.drawGraph(self.$.networkRx, undefined, 250, timeLabel, networkRxData);
-        //     Cosmos.drawGraph(self.$.networkTx, undefined, 250, timeLabel, networkTxData);
-
-        // }, function(jqXHR) {
-        //     // failed
-        //     alert('request failed - ' + jqXHR.responseText);
-        // });
     }
 });
 </script>

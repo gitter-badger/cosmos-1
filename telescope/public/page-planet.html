@@ -1,114 +1,163 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<polymer-element name="page-planet" attributes="planets showkey">
+<dom-module id="planet-containers">
+    <style></style>
     <template>
-        <!-- <link rel="stylesheet" type="text/css" href="/vendor/bootstrap-3.3.2/bootstrap.min-3.3.2.css">
-        <link rel="stylesheet" type="text/css" href="/css/cosmos.css"> -->
-        <style>
-        :host table {
-            width: 100%;
+        <template is="x-repeat" items="{{data}}">
+            <div style="padding-bottom:10px; padding-left:30px;">
+                <span>
+                <a href="{{item.Key}}" on-click="onContainerNameClicked">{{item.Names0[3]}}</a>
+            </span>
+                <span>{{item.Id[3]}}</span>
+                <span>{{item.Status[3]}}</span>
+            </div>
+        </template>
+    </template>
+</dom-module>
+<script>
+Polymer({
+    is: 'planet-containers',
+    properties: {
+        data: {
+            type: Array,
+            value: []
         }
-        
-        :host thead > tr {
-            border-bottom: 2px solid #575757;
-            height: 48px;
-        }
-        
-        :host tbody > tr.outer {
-            height: 48px;
-            color: #bebebe;
-        }
-        
-        :host tbody > tr.inner {
-            border-bottom: 1px solid #424242;
-            color: #bebebe;
-        }
-        
-        :host tbody > tr > td > paper-checkbox {
-            margin-top: 7px;
-        }
-        </style>
-        <h3>Planets</h3>
-        <div class="card">
-            <table>
-                <thead>
-                    <tr>
-                        <th width="30"></th>
-                        <th>Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template repeat="{{planet in planets}}">
-                        <tr class="outer">
-                            <td class="check">
-                                <paper-checkbox id="{{ planet['Name'] }}" checked?="{{ planet['Name'] == _key }}" on-core-change="{{onCheckChanged}}"></paper-checkbox>
-                            </td>
-                            <td>
-                                <b>{{ planet['Name'] }}</b>
-                            </td>
+    },
+    onContainerNameClicked: function(event) {
+        event.preventDefault();
+        var target = event.target ? event.target : event.srcElement;
+        var key = $(target).attr('href');
+
+        history.pushState({
+            page: "container",
+            key: key
+        }, 'container', '/containers');
+            //        var pageContainer = document.querySelector('page-container');
+            //        pageContainer.showKey = sender.id;
+            // Move to Container Tab
+            //        window.CosmosTabs.selected = 2;
+    }
+});
+</script>
+<dom-module id="page-planet">
+    <style>
+    :host > div {
+        padding: 0 10px;
+    }
+    
+    :host table {
+        width: 100%;
+    }
+    
+    :host thead > tr {
+        border-bottom: 2px solid #575757;
+        height: 48px;
+    }
+    
+    :host tbody > tr.outer {
+        height: 48px;
+        color: #bebebe;
+    }
+    
+    :host tbody > tr.inner {
+        border-bottom: 1px solid #424242;
+        color: #bebebe;
+        display: none;
+    }
+    
+    :host tbody > tr > td > paper-checkbox {
+        margin-top: 7px;
+    }
+    </style>
+    <template>
+        <div>
+            <h3>Planets</h3>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="30"></th>
+                            <th>Name</th>
                         </tr>
-                        <tr class="inner" hidden?="{{ planet['Name'] != _key  }}">
-                            <td colspan="2">
-                                <template repeat="{{ key in keys(containers[planet['Name']]) }}">
-                                    <div style="padding-bottom:10px;padding-left:30px;">
-                                        <span><a id="{{ key }}" href="#" on-click="{{ onContainerNameClick }}">{{ containerName(containers[planet['Name']][key]['Names.0'][3]) }}</a></span>
-                                        <span>{{ substr(containers[planet['Name']][key]['Id'][3]) }}</span>
-                                        <span>{{ containers[planet['Name']][key]['Status'][3] }}</span>
-                                    </div>
-                                </template>
-                            </td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <template id="planetTemplate" is="x-repeat" items="{{planets}}">
+                            <tr class="outer">
+                                <td class="check">
+                                    <input type="checkbox" value="{{item.Name}}" on-change="onCheckChanged">
+                                    </paper-checkbox>
+                                </td>
+                                <td>
+                                    <b>{{item.Name}}</b>
+                                </td>
+                            </tr>
+                            <tr class="inner">
+                                <td colspan="2">
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </template>
-    <script>
-    Polymer('page-planet', {
-        created: function() {
-            this.planets = []; // type hint
-            this.containers = {};
-            this.showKey = undefined;
-            this._key = undefined;
-        },
-        keys: function(obj) {
-            if (obj) {
-                return Object.keys(obj);
-            } else {
-                return [];
-            }
-        },
-        showKeyChanged: function() {
-        	this._key = this.showKey;
-        }, 
-        substr: function(str) {
-            return str.substring(0, 10);
-        },
-        containerName: function(str) {
-            var comp = str.split('/');
-            return comp[comp.length - 1];
-        },
-        onContainerNameClick: function(event, detail, sender) {
-            var pageContainer = document.querySelector('page-container');
-            pageContainer.showKey = sender.id
+</dom-module>
+<script>
+Polymer({
+    is: 'page-planet',
+    properties: {
+        showKey: {
+            type: String,
+            observer: 'showKeyChanged'
+        }
+    },
+    ready: function() {
+        var self = this;
+        Cosmos.request.getPlanets(function(json) {
+            self.planets = json;
+            console.log(self.$.planetTemplate);
 
-            // Move to Container Tab
-            window.CosmosTabs.selected = 2;
-        },
-        onCheckChanged: function(event, detail, sender) {
-            var self = this;
-            var checkboxes = $(sender).closest('tbody').find('paper-checkbox');
-            var checkCnt = 0;   
+        }, function(jqXHR) {
+            console.log('request faield - ' + jqXHR.responseText);
+        });
+    },
+    showKeyChanged: function() {
+        this._key = this.showKey;
+    },
+    substr: function(str) {
+        return str.substring(0, 10);
+    },
+    containerName: function(str) {
+        var comp = str.split('/');
+        return comp[comp.length - 1];
+    },
+    onCheckChanged: function(e) {
+        var self = this;
+        var sender = event.target ? event.target : event.srcElement;
+        var checkboxes = $(sender).closest('tbody').find('input[type=checkbox]');
 
-            if (!sender.checked) return ;
+        if (!sender.checked) {
+            var innerTr = $(sender).closest('tr').next();
+            innerTr.hide();
+            innerTr.find('td').empty();
+        } else {
+            Cosmos.request.getContainers(sender.value, function(json) {
+                var elem = document.createElement('planet-containers');
+                elem.data = json;
+                var innerTr = $(sender).closest('tr').next();
+                innerTr.show();
+                Polymer.dom(innerTr.find('td')[0]).appendChild(elem);
 
-            self._key = sender.id;
-
-            Cosmos.request.getContainers(sender.id, function(json) {
-                self.containers[sender.id] = json;
+                //self.containers[sender.value] = json;
+                //var template = document.querySelector('template'); // Use specific selector here
+                //template.iterator_.updateIteratedValue(); // Force Polymer to refresh template
             }, function(jqXHR) {
                 alert('request failed - ' + jqXHR.responseText);
             });
         }
-    });
-    </script>
-</polymer-element>
+
+        self._key = sender.value;
+
+
+    }
+});
+</script>

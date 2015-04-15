@@ -1,5 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/page-cosmos.html">
+<link rel="import" href="/page-planet.html">
 <link rel="import" href="/page-container.html">
 <dom-module id="cosmos-content">
     <style>
@@ -21,7 +22,6 @@ Polymer({
         }
     },
     pageChanged: function(newVal, oldVal) {
-        console.log('page changed - ' + newVal);
         var elem;
         switch (newVal) {
             case 'cosmos':
