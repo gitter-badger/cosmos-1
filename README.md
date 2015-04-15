@@ -107,7 +107,3 @@ Content-Type: application/json
   
 ]
 ```
-
-## Screenshot
-
-<img src="https://raw.githubusercontent.com/cosmos-io/cosmos/master/screenshot.png">

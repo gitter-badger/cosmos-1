@@ -6,7 +6,7 @@ ENV PATH /go/bin:$PATH
 COPY ./shard_config.json /shard_config.json
 
 ENV MARTINI_ENV=production
-ENV COSMOS_PORT 8080
+ENV COSMOS_PORT 8888
 ENV INFLUXDB_HOST influxdb
 ENV INFLUXDB_PORT 8086
 ENV INFLUXDB_USERNAME root
@@ -14,8 +14,7 @@ ENV INFLUXDB_PASSWORD root
 ENV INFLUXDB_DATABASE cosmos
 ENV INFLUXDB_SHARD_CONF ./shard_config.json
 
-EXPOSE 8080
-
+EXPOSE 8888
 
 # Install Godep
 RUN go get github.com/tools/godep
