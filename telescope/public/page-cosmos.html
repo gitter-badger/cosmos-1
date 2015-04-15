@@ -3,22 +3,33 @@
 <link rel="import" href="/container-item.html">
 <dom-module id="page-cosmos">
     <style>
-    :host /deep/ label {
-        float: right;
-    }
-    
-    :host .card /deep/ a {
-        display: block;
-        margin-right: 100px;
-    }
-    
-    :host /deep/ h4 {
-        border-bottom: 1px solid #373737;
-        padding-bottom: 8px;
-    }
+      .row {
+        margin-bottom: 15px;
+      }
+
+      .header h4 {
+        margin: 0;
+      }
+
+      .header span {
+        color: #999;
+      }
+
+      .stream {
+        padding: 10px;
+        background-color: #292929;
+        border: 1px solid #323232;
+        border-radius: 2px;
+        -moz-border-radius: 2px;
+        -webkit-border-radius: 2px;
+      }
+
+      .stream p {
+        margin-top: 20px;
+      }
     </style>
     <template>
-        <div class="container-fluid">
+        <!--<div class="container-fluid">
             <div class="row">
                 <div class="col-md-6 col-xs-12">
                     <div class="card">
@@ -33,6 +44,62 @@
                     </div>
                 </div>
             </div>
+        </div>-->
+
+        <div class="container-fluid">
+
+          <div class="row">
+              <div class="col-md-12 col-xs-12">
+                <div class="stream">
+                <div class="header">
+                  <a class="btn btn-primary pull-right">View Metrics</a>
+                  <h4><a href="#">Curiosity</a></h4>
+                  <span>2 hrs</span>
+                </div>
+                <p>CPU usage is over 60%.</p>
+              </div>
+              </div>
+          </div>
+
+          <div class="row">
+              <div class="col-md-12 col-xs-12">
+                <div class="stream">
+                <div class="header">
+                  <a class="btn btn-primary pull-right">View Metrics</a>
+                  <h4><a href="#">Curiosity</a></h4>
+                  <span>2 hrs</span>
+                </div>
+                <p>Memory usage is over 40%.</p>
+              </div>
+              </div>
+          </div>
+
+          <div class="row">
+              <div class="col-md-12 col-xs-12">
+                <div class="stream">
+                <div class="header">
+                  <a class="btn btn-primary pull-right">View Metrics</a>
+                  <h4><a href="#">Curiosity</a></h4>
+                  <span>2 hrs</span>
+                </div>
+                <p>Memory usage is over 40%.</p>
+              </div>
+              </div>
+          </div>
+
+          <div class="row">
+              <div class="col-md-12 col-xs-12">
+                <div class="stream">
+                <div class="header">
+                  <a class="btn btn-primary pull-right">View Metrics</a>
+                  <h4><a href="#">Curiosity</a></h4>
+                  <span>2 hrs</span>
+                </div>
+                <p>Memory usage is over 40%.</p>
+              </div>
+              </div>
+          </div>
+
         </div>
     </template>
 </dom-module>
@@ -43,7 +110,7 @@ Polymer({
         this.reload();
     },
     reload: function() {
-        var self = this;
+        /*var self = this;
 
         Cosmos.request.getPlanets(function(json) {
             var elem = document.createElement('planet-item');
@@ -60,7 +127,7 @@ Polymer({
         }, function(jqXHR) {
             // Failed
             console.log('request failed - ' + jqXHR.responseText);
-        });
+        });*/
     },
     onPlanetNameClick: function(event, detail, sender) {
         var pagePlanet = document.querySelector('page-planet');
