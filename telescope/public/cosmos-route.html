@@ -60,9 +60,15 @@
 (function() {
     // Route configuration
     $(function() {
-        Route.match('/', function() {});
-        Route.match('/planets', function() {});
-        Route.match('/containers', function() {});
+        Route.match('/', function() {
+					console.log("cosmos page");
+				});
+        Route.match('/planets', function() {
+					console.log("planets page");
+				});
+        Route.match('/containers', function() {
+					console.log("containers page");
+				});
         Route.defaultRoute = function() {
             window.location.replace("/");
         };

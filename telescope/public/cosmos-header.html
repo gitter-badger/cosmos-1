@@ -84,18 +84,18 @@ Polymer({
     },
     handleCosmos: function(e) {
         e.preventDefault();
-        history.pushState({page: "cosmos"}, 'cosmos', '/');
-        $(window).trigger('pushstate', {'page': 'cosmos'});
+        history.pushState({page: 'cosmos'}, 'cosmos', '/');
+        $(window).trigger('pushstate', {page: 'cosmos'});
     },
     handlePlanets: function(e) {
         e.preventDefault();
-        history.pushState({page: "planets"}, 'planets', '/planets');
-        $(window).trigger('pushstate', {'page': 'planets'});
+        history.pushState({page: 'planets'}, 'planets', '/planets');
+        $(window).trigger('pushstate', {page: 'planets'});
     },
     handleContainers: function(e) {
         e.preventDefault();
-        history.pushState({page: "containers"}, 'containers', '/containers');
-        $(window).trigger('pushstate', {'page': 'containers'});
+        history.pushState({page: 'containers'}, 'containers', '/containers');
+        $(window).trigger('pushstate', {page: 'containers'});
     }
 });
 </script>
