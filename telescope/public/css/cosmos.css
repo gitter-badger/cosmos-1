@@ -18,38 +18,42 @@ a:hover {
     border: 1px solid #fff;
 }
 
-.btn-github-fork,
-.btn-github-fork:hover,
-.btn-github-fork:focus {
-    padding-left: 50px;
-    padding-right: 50px;
-    font-size: 16px;
-    color: #fff;
-    background-color: #489dff;
-    text-decoration: none;
-    border: none;
+.btn-primary {
+  background-color: #489dff;
+  color: #fff;
 }
 
-.btn-github-fork:hover,
-.btn-github-fork:focus {
-    background-color: #418fe8;
+.btn-primary:hover,
+.btn-primary:focus {
+  color: #489dff;
+  background-color: #fff;
+  border: 1px solid #fff;
 }
 
-@media (min-width: 768px) {
-    .btn-github-fork,
-    .btn-github-fork:hover,
-    .btn-github-fork:focus {
-        font-size: 20px;
-    }
+h1 {
+
 }
 
-@media (min-width: 992px) {
-    .btn-github-fork,
-    .btn-github-fork:hover,
-    .btn-github-fork:focus {
-        font-size: 25px;
-    }
+h2 {
+
 }
+
+h3 {
+
+}
+
+h4 {
+
+}
+
+h5 {
+
+}
+
+h6 {
+
+}
+
 /*
  * Base structure
  */
@@ -75,13 +79,13 @@ footer {
 .card {
     min-height: 50px;
     background-color: #292929;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
     border: 1px solid #323232;
     padding: 0 10px 10px 10px;
     margin-bottom: 10px;
+    border-radius: 2px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
 }
 
 .page {
     padding: 20px 10px;
-
