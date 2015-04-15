@@ -17,8 +17,7 @@ import (
 var (
 	logDb *influxdbc.InfluxDB
 
-	//	cosmosEnv   = getEnv("COSMOS_ENV", "development")
-	cosmosPort  = getEnv("COSMOS_PORT", "8080")
+	cosmosPort  = getEnv("COSMOS_PORT", "8888")
 	dbHost      = getEnv("INFLUXDB_HOST", "localhost")
 	dbPort      = getEnv("INFLUXDB_PORT", "8086")
 	dbUsername  = getEnv("INFLUXDB_USERNAME", "root")
@@ -42,7 +41,7 @@ func contentTypeRouter() martini.Handler {
 		err   error
 	)
 	if martini.Env == "production" {
-		index, err = ioutil.ReadFile("telescope/templates/index-build.html")
+		index, err = ioutil.ReadFile("telescope/public/index.html")
 	}
 
 	if err != nil {
@@ -54,13 +53,12 @@ func contentTypeRouter() martini.Handler {
 
 		if strings.Contains(accept, "text/html") {
 			if martini.Env == "development" {
-				index, err = ioutil.ReadFile("telescope/templates/index.html")
+				index, err = ioutil.ReadFile("telescope/public/index.html")
 			}
 			r.Header().Set(render.ContentType, "text/html; charset=utf-8")
 			r.Data(http.StatusOK, index)
 		}
 	}
-
 }
 
 func requiredParams(params ...string) http.HandlerFunc {
@@ -119,10 +117,8 @@ func startServer() {
 		martini.Logger(),
 		martini.Static("telescope/public"),
 		strict.Strict,
-		render.Renderer(render.Options{
-			Extensions: []string{".tmpl", ".html"},
-			Directory:  "telescope/templates",
-			Delims:     render.Delims{Left: "{{%", Right: "%}}"},
+		render.Renderer(render.Options {
+			Delims: render.Delims {Left: "{{%", Right: "%}}"},
 		}),
 		contentTypeRouter(),
 	)
@@ -156,15 +152,10 @@ func startServer() {
 			getContainerInfo)
 	})
 
-	if cosmosPort == "" {
-		m.RunOnAddr(":3000")
-	} else {
-		m.RunOnAddr(":" + cosmosPort)
-	}
+    m.RunOnAddr(":" + cosmosPort)
 }
 
 func main() {
-
 	createDBConn()
 	startServer()
 }
