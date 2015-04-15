@@ -1,0 +1,47 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/components/view/page-cosmos.html">
+<dom-module id="cosmos-content">
+    <style>
+    /* CSS rules for your element */
+    /* Extra markup and styles for table-esque vertical and horizontal centering */
+    </style>
+    <template>
+        <!-- local DOM for your element -->
+
+    </template>
+</dom-module>
+<script>
+// element registration
+Polymer({
+    is: "cosmos-content",
+    properties: {
+        page: {
+            type: String,
+            value: '',
+            observer: 'pageChanged'
+        }
+    },
+    ready: function() {
+        var currPath = window.location.pathname.split('/')[1].toLowerCase();
+        switch (currPath) {
+            case "":
+                // Page cosmos 
+                break;
+            case "planets":
+                // Page planets
+
+                break;
+            case "containers":
+                // Page containers
+
+                break;
+        }
+    },
+    pageChanged: function(newVal, oldVal) {
+        if (newVal == '') {
+            var elem = document.createElement('page-cosmos');
+            Polymer.dom(this.root).appendChild(elem);
+        }
+    }
+});
+</script>

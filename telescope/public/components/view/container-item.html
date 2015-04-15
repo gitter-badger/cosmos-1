@@ -1,0 +1,31 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<dom-module id="container-item">
+    <template>
+        <h4>Containers</h4>
+        <ul class="list-unstyled">
+            <template is="x-repeat" items="{{data}}">
+                <li>
+                    <label>{{item.Status[3]}}</label>
+                    <a href="#" on-click="onContainerNameClick">
+                        <p>{{item.Planet}}</p>
+                    </a>
+                </li>
+            </template>
+        </ul>
+    </template>
+</dom-module>
+<script>
+Polymer({
+    is: 'container-item',
+    properties: {
+        data: {
+            type: Array,
+            value: []
+        }
+    },
+    getContainerName: function(str) {
+        var comps = str.split('/');
+        return comps[comps.length - 1];
+    }
+});
+</script>
