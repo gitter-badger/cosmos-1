@@ -93,9 +93,6 @@ func createDBConn() {
 		os.Exit(1)
 	}
 
-	fmt.Println("[database sharding configuration]")
-	fmt.Println(string(file))
-
 	var conf influxdbc.ShardConfig
 	err = json.Unmarshal(file, &conf)
 	if err != nil {
