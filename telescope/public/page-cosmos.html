@@ -1,7 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/planet-item.html">
 <link rel="import" href="/container-item.html">
-
 <dom-module id="page-cosmos">
     <style>
     :host /deep/ label {
@@ -22,10 +21,16 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-6 col-xs-12">
-                    <div class="card" id="planets"></div>
+                    <div class="card">
+                        <h4>Planets</h4>
+                        <div id="planets"></div>
+                    </div>
                 </div>
-                <div class="col-md-6 col-xs-12">                
-                    <div class="card" id="containers"></div>
+                <div class="col-md-6 col-xs-12">
+                    <div class="card">
+                        <h4>Containers</h4>
+                        <div id="containers"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -49,7 +54,6 @@ Polymer({
             console.log('request failed - ' + jqXHR.responseText);
         });
         Cosmos.request.getContainers(null, function(json) {
-            console.log(json);
             var elem = document.createElement('container-item');
             elem.data = json;
             Polymer.dom(self.$.containers).appendChild(elem);

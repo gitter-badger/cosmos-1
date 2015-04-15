@@ -1,14 +1,8 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<dom-module id="page-container">
+<dom-module id="container-table">
     <style>
     :host table {
         width: 100%;
-    }
-    
-    :host .card.graph {
-        display: none;
-        margin-bottom: 10px;
-        padding-top: 10px;
     }
     
     :host thead > tr {
@@ -22,8 +16,55 @@
         color: #bebebe;
     }
     
-    :host tbody > tr > td > paper-checkbox {
+    :host tbody > tr > td > input {
         margin-top: 7px;
+    }
+    </style>
+    <template>
+        <table>
+            <thead>
+                <tr>
+                    <th width="30"></th>
+                    <th>Name</th>
+                    <th>Planet</th>
+                    <th>Command</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template is="x-repeat" items="{{data}}">
+                    <tr>
+                        <td class="check">
+                            <input type="checkbox" onchange="onCheckChanged(this)" />
+                        </td>
+                        <td>{{item.Names0[3]}}</td>
+                        <td>{{item.Planet}}</td>
+                        <td>{{item.Command[3]}}</td>
+                        <td>{{item.Status[3]}}</td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </template>
+</dom-module>
+<script>
+Polymer({
+    is: 'container-table',
+    properties: {
+        data: {
+            type: Array,
+            value: []
+        }
+    }
+});
+</script>
+
+<dom-module id="page-container">
+    <style>
+    :host .card.graph {
+        display: none;
+        margin-bottom: 10px;
+        padding-top: 10px;
     }
     </style>
     <template>
@@ -53,31 +94,7 @@
             </div>
         </div>
         <h3>Containers</h3>
-        <div class="card c-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th width="30"></th>
-                        <th>Name</th>
-                        <th>Planet</th>
-                        <th>Command</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template repeat="{{key in keys(containers)}}">
-                        <tr>
-                            <td class="check">
-                                <input type="checkbox" id="{{ key }}" checked?="{{ key == _key }}" onchange="onCheckChanged(this)" />
-                            </td>
-                            <td>{{ containerName(containers[key]['Names.0'][3]) }}</td>
-                            <td>{{ planetName(key) }}</td>
-                            <td>{{ containers[key]['Command'][3] }}</td>
-                            <td>{{ containers[key]['Status'][3] }}</td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
+        <div class="card" id="container">
         </div>
     </template>
 </dom-module>
@@ -89,21 +106,25 @@ Polymer({
             type: Array
         },
         showKey: {
-            type: Boolean,
+            type: String,
             observer: 'showKeyChanged'
-
         }
     },
-    created: function() {
-        this.containers = {}; // type hint
-        this.showKey = undefined;
-        this._key = undefined;
+    ready: function() {
+        this.reload();
+    },
+    reload: function() {
+        var self = this;
+        Cosmos.request.getContainers(undefined, function(json) {
+            var elem = document.createElement('container-table');
+            elem.data = json;
+            Polymer.dom(self.$.container).appendChild(elem);
+        }, function(jqXHR) {
+            console.log('request failed - ' + jqXHR.responseText);
+        });
     },
     showKeyChanged: function() {
         this._key = this.showKey;
-    },
-    keys: function(obj) {
-        return Object.keys(obj);
     },
     containerName: function(str) {
         var comps = str.split('/');
@@ -113,6 +134,8 @@ Polymer({
         return str.split('.')[0];
     },
     onCheckChanged: function(event, detail, sender) {
+        alert('changed');
+        console.log(event);
         // if (!sender.checked) {
         //     $(self.$.graphContainer).hide();
         //     return;

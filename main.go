@@ -114,8 +114,8 @@ func startServer() {
 		martini.Logger(),
 		martini.Static("telescope/public"),
 		strict.Strict,
-		render.Renderer(render.Options {
-			Delims: render.Delims {Left: "{{%", Right: "%}}"},
+		render.Renderer(render.Options{
+			Delims: render.Delims{Left: "{{%", Right: "%}}"},
 		}),
 		contentTypeRouter(),
 	)
@@ -139,17 +139,15 @@ func startServer() {
 		// get container list of planet
 		r.Get("/planets/:planetName/containers",
 			strict.Accept("application/json"),
-			//requiredParams("ttl"),
 			getContainersOfPlanet)
 
 		// get metrics of container
 		r.Get("/planets/:planetName/containers/:containerName",
 			strict.Accept("application/json"),
-			//requiredParams("interval"),
 			getContainerInfo)
 	})
 
-    m.RunOnAddr(":" + cosmosPort)
+	m.RunOnAddr(":" + cosmosPort)
 }
 
 func main() {

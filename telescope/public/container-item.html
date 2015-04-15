@@ -1,13 +1,12 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <dom-module id="container-item">
     <template>
-        <h4>Containers</h4>
         <ul class="list-unstyled">
             <template is="x-repeat" items="{{data}}">
                 <li>
                     <label>{{item.Status[3]}}</label>
                     <a href="#" on-click="onContainerNameClick">
-                        <p>{{item.Planet}}</p>
+                        <p>{{item.Container}}</p>
                     </a>
                 </li>
             </template>

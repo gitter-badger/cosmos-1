@@ -1,4 +1,4 @@
-<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/page-cosmos.html">
 <dom-module id="cosmos-content">
     <style>
@@ -7,7 +7,6 @@
     </style>
     <template>
         <!-- local DOM for your element -->
-
     </template>
 </dom-module>
 <script>
@@ -17,31 +16,27 @@ Polymer({
     properties: {
         page: {
             type: String,
-            value: '',
             observer: 'pageChanged'
         }
     },
-    ready: function() {
-        var currPath = window.location.pathname.split('/')[1].toLowerCase();
-        switch (currPath) {
-            case "":
-                // Page cosmos 
+    pageChanged: function(newVal, oldVal) {
+        console.log('page changed - ' + newVal);
+        var elem;
+        switch (newVal) {
+            case '':
+                elem = document.createElement('page-cosmos');
                 break;
-            case "planets":
-                // Page planets
-
+            case 'planet':
+                elem = document.createElement('page-planet');
                 break;
-            case "containers":
-                // Page containers
-
+            case 'container':
+                elem = document.createElement('page-container');
                 break;
         }
-    },
-    pageChanged: function(newVal, oldVal) {
-        if (newVal == '') {
-            var elem = document.createElement('page-cosmos');
+        if (elem) {
             Polymer.dom(this.root).appendChild(elem);
         }
     }
+
 });
 </script>
