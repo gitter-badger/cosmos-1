@@ -4,25 +4,39 @@
         <!-- <link rel="stylesheet" type="text/css" href="/vendor/bootstrap-3.3.2/bootstrap.min-3.3.2.css">
         <link rel="stylesheet" type="text/css" href="/css/cosmos.css"> -->
         <style>
+        label {
+            float: right;
+        }
+
+        a {
+            display: block;
+            margin-right: 100px;
+        }
+
+        h4 {
+            border-bottom: 1px solid #373737;
+            padding-bottom: 8px;
+        }
+
         :host table {
             width: 100%;
         }
-        
+
         :host thead > tr {
             border-bottom: 2px solid #575757;
             height: 48px;
         }
-        
+
         :host tbody > tr.outer {
             height: 48px;
             color: #bebebe;
         }
-        
+
         :host tbody > tr.inner {
             border-bottom: 1px solid #424242;
             color: #bebebe;
         }
-        
+
         :host tbody > tr > td > paper-checkbox {
             margin-top: 7px;
         }
@@ -79,7 +93,7 @@
         },
         showKeyChanged: function() {
         	this._key = this.showKey;
-        }, 
+        },
         substr: function(str) {
             return str.substring(0, 10);
         },
@@ -97,7 +111,7 @@
         onCheckChanged: function(event, detail, sender) {
             var self = this;
             var checkboxes = $(sender).closest('tbody').find('paper-checkbox');
-            var checkCnt = 0;   
+            var checkCnt = 0;
 
             if (!sender.checked) return ;
 
