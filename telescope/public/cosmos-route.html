@@ -1,3 +1,5 @@
+<script>
+// element registration
 (function(){
 	window.Route = {};
 	Route.routes = [];
@@ -41,8 +43,8 @@
 							return false;
 						}
 					}
-				}				
-				
+				}
+
 				// Invoke handler after DOM ready
 				Route.params = params;
 				$(function() {
@@ -54,3 +56,28 @@
 		});
 	};
 })();
+
+(function() {
+    // Route configuration
+    $(function() {
+        Route.match('/', function() {});
+        Route.match('/planets', function() {});
+        Route.match('/containers', function() {});
+        Route.defaultRoute = function() {
+            window.location.replace("/");
+        };
+        Route.regist();
+    });
+
+    $(window).on('pushstate', function(e, param) {
+        if (param) {
+            console.log(param.page);
+        }
+    });
+    window.addEventListener('popstate', function(e) {
+        if (e.state) {
+            console.log(e.state.page);
+        }
+    });
+}());
+</script>
