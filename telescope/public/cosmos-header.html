@@ -74,17 +74,17 @@ Polymer({
     },
     ready: function() {},
     pageChanged: function(newValue) {
-        var self = this;        
+        var self = this;
         $(self.$.nav).find('a').removeClass('selected');
         switch (newValue) {
-            case "cosmos":            
+            case "cosmos":
                 $(self.$.nav).find('a:eq(0)').addClass('selected');
                 break;
             case "planet":
-                $(self.$.nav).find('a:eq(1)').addClass('selected');            
+                $(self.$.nav).find('a:eq(1)').addClass('selected');
                 break;
             case "container":
-                $(self.$.nav).find('a:eq(2)').addClass('selected');            
+                $(self.$.nav).find('a:eq(2)').addClass('selected');
                 break;
         }
     },
@@ -100,8 +100,8 @@ Polymer({
     handlePlanets: function(e) {
         e.preventDefault();
         history.pushState({
-            page: "planets"
-        }, 'planets', '/planets');
+            page: "planet"
+        }, 'planet', '/planets');
         $(window).trigger('pushstate', {
             'page': 'planet'
         });
@@ -109,8 +109,8 @@ Polymer({
     handleContainers: function(e) {
         e.preventDefault();
         history.pushState({
-            page: "containers"
-        }, 'containers', '/containers');
+            page: "container"
+        }, 'container', '/containers');
         $(window).trigger('pushstate', {
             'page': 'container'
         });

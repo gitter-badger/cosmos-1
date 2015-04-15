@@ -59,20 +59,22 @@ Polymer({
         });
     },
     changePage: function(page) {
-        switch (page) {
-            case 'cosmos':
-                document.querySelector('cosmos-content').page = 'cosmos';
-                document.querySelector('cosmos-header').page = 'cosmos';                
-                break;
-            case 'planet':
-                document.querySelector('cosmos-content').page = 'planet';
-                document.querySelector('cosmos-header').page = 'planet';                                
-                break;
-            case 'container':
-                document.querySelector('cosmos-content').page = 'container';
-                document.querySelector('cosmos-header').page = 'container';                                
-                break;
-        }
+        setTimeout(function() {
+            switch (page) {
+                case 'cosmos':
+                    document.querySelector('cosmos-content').page = 'cosmos';
+                    document.querySelector('cosmos-header').page = 'cosmos';
+                    break;
+                case 'planet':
+                    document.querySelector('cosmos-content').page = 'planet';
+                    document.querySelector('cosmos-header').page = 'planet';
+                    break;
+                case 'container':
+                    document.querySelector('cosmos-content').page = 'container';
+                    document.querySelector('cosmos-header').page = 'container';
+                    break;
+            }
+        }, 50);
     },
     ready: function() {
         var self = this;

@@ -36,10 +36,8 @@ Polymer({
         }
         if (elem) {
             var self = this;
-            setTimeout(function() {
-                $(self).empty();
-                Polymer.dom(self.root).appendChild(elem);
-            }, 10);
+            $(self).empty();
+            Polymer.dom(self.root).appendChild(elem);
 
         }
     }
