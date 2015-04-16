@@ -21,6 +21,7 @@
 
     Cosmos.request = {
         getPlanets: function(done, fail, complete) {
+            var self = this;
             var xhr = $.ajax({
                 url: '/' + Cosmos.API_VER + '/planets',
                 method: 'GET',
@@ -28,7 +29,9 @@
                 dataType: 'json'
             });
             if (typeof done == 'function') {
-                xhr.done(done);
+                xhr.done(function(json) {
+                    done(self._convertPlanetResponse(json));
+                });
             }
             if (typeof fail == 'function') {
                 xhr.fail(fail);
@@ -36,6 +39,25 @@
             if (typeof complete == 'function') {
                 xhr.complete(complete)
             }
+        },
+        _convertPlanetResponse: function(json) {
+            var data = [];
+            var keys = Object.keys(json);
+            for (var i = 0; i < keys.length; i++) {
+                var k = keys[i];
+                var inKeys = Object.keys(json[k]);
+
+                for (var j = 0; j < inKeys.length; j++) {
+                    var inK = inKeys[j];
+                    var newK = inK.replace(/\./g, "");
+                    var val = json[k][inK];
+                    delete(json[k][inK]);
+                    json[k][newK] = val
+                }
+                json[k]['Planet'] = k;
+                data.push(json[k]);
+            }
+            return data;
         },
         _convertContainerResponse: function(json) {
             var data = [];

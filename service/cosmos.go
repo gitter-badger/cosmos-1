@@ -17,12 +17,12 @@ func NewCosmosService(dbc *influxdbc.InfluxDB) *CosmosService {
 }
 
 func (this *CosmosService) GetContainers(token string) (interface{}, error) {
-	series, err := this.dbc.Query(fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s\\..*/ WHERE time > now() - %s LIMIT 1", token, this.lifeTime), "s")
+	series, err := this.dbc.Query(fmt.Sprintf("SELECT num_value, txt_value FROM /^MIN\\.CONTAINER\\.%s\\./ WHERE time > now() - %s LIMIT 1", token, this.lifeTime), "s")
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.ConvertFromContainerSeries("", series), nil
+	return converter.ConvertFromContainerSeries(token, "", series), nil
 }
 
 func (this *CosmosService) AddContainersOfPlanet(token, planet string, data []byte) error {
@@ -33,8 +33,8 @@ func (this *CosmosService) AddContainersOfPlanet(token, planet string, data []by
 	}
 
 	// Host metrics
-	planetSeries := influxdbc.NewSeries(fmt.Sprintf("%s.%s", token, planet), "value")
-	planetSeries.AddPoint("")
+	planetSeries := influxdbc.NewSeries(fmt.Sprintf("PLANET.%s.%s.Name", token, planet), "txt_value", "num_value")
+	planetSeries.AddPoint(planet, nil)
 	series = append(series, planetSeries)
 
 	err = this.dbc.WriteSeries(series, "s")
@@ -46,32 +46,32 @@ func (this *CosmosService) AddContainersOfPlanet(token, planet string, data []by
 }
 
 func (this *CosmosService) GetContainersOfPlanet(token, planet string) (interface{}, error) {
-	dbQuery := fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s\\.%s\\./ WHERE time > now() - %s LIMIT 1", token, planet, this.lifeTime)
+	dbQuery := fmt.Sprintf("SELECT num_value, txt_value FROM /^MIN\\.CONTAINER\\.%s\\.%s\\./ WHERE time > now() - %s LIMIT 1", token, planet, this.lifeTime)
 	series, err := this.dbc.Query(dbQuery, "s")
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.ConvertFromContainerSeries(planet, series), nil
+	return converter.ConvertFromContainerSeries(token, planet, series), nil
 }
 
 func (this *CosmosService) GetContainerInfo(token, planetName, containerName string) (interface{}, error) {
 	seriesName := converter.MakeContainerSeriesName(token, planetName, containerName)
 
-	dbQuery := fmt.Sprintf("SELECT txt_value, num_value FROM /^min\\.%s\\./ WHERE time > now() - %s LIMIT 10", seriesName, this.lifeTime)
+	dbQuery := fmt.Sprintf("SELECT num_value, txt_value FROM /^MIN\\.CONTAINER\\.%s\\./ WHERE time > now() - %s LIMIT 10", seriesName, this.lifeTime)
 	series, err := this.dbc.Query(dbQuery, "s")
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.ConvertFromContainerInfoSeries(containerName, series), nil
+	return converter.ConvertFromContainerInfoSeries(token, planetName, containerName, series), nil
 }
 
 func (this *CosmosService) GetPlanets(token string) (interface{}, error) {
-	series, err := this.dbc.Query(fmt.Sprintf("SELECT * FROM /^%s\\.[^\\.]+$/ WHERE time > now() - %s LIMIT 1", token, this.lifeTime), "s")
+	series, err := this.dbc.Query(fmt.Sprintf("SELECT num_value, txt_value FROM /^MIN\\.PLANET\\.%s\\./ WHERE time > now() - %s LIMIT 1", token, this.lifeTime), "s")
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.ConvertFromPlanetSeries(series), nil
+	return converter.ConvertFromPlanetSeries(token, series), nil
 }

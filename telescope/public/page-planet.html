@@ -32,10 +32,6 @@ Polymer({
             page: "container",
             key: key
         }, 'container', '/containers');
-            //        var pageContainer = document.querySelector('page-container');
-            //        pageContainer.showKey = sender.id;
-            // Move to Container Tab
-            //        window.CosmosTabs.selected = 2;
     }
 });
 </script>
@@ -84,11 +80,11 @@ Polymer({
                         <template id="planetTemplate" is="x-repeat" items="{{planets}}">
                             <tr class="outer">
                                 <td class="check">
-                                    <input type="checkbox" value="{{item.Name}}" on-change="onCheckChanged">
+                                    <input type="checkbox" value="{{item.Planet}}" on-change="onCheckChanged">
                                     </paper-checkbox>
                                 </td>
                                 <td>
-                                    <b>{{item.Name}}</b>
+                                    <b>{{item.Planet}}</b>
                                 </td>
                             </tr>
                             <tr class="inner">
@@ -116,7 +112,7 @@ Polymer({
         var self = this;
         Cosmos.request.getPlanets(function(json) {
             self.planets = json;
-            console.log(self.$.planetTemplate);
+            console.log(json);
 
         }, function(jqXHR) {
             console.log('request faield - ' + jqXHR.responseText);

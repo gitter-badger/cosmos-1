@@ -1,40 +1,36 @@
 {
-  "spaces": [
-    {
-      "name": "container",
-      "retentionPolicy": "1d",
-      "shardDuration": "1h",
-      "regex": "/^[^\\.]+\\.[^\\.]+\\.[^\\.]+/",
-      "replicationFactor": 1,
-      "split": 1
-    },
-    {
-      "name": "planet",
-      "retentionPolicy": "inf",
-      "shardDuration": "1h",
-      "regex": "/^[^\\.]+\\.[^\\.]+$/",
-      "replicationFactor": 1,
-      "split": 1
-    },
-    {
-      "name": "min_rollup",
-      "retentionPolicy": "30d",
-      "shardDuration": "1h",
-      "regex": "/^min.*/",
-      "replicationFactor": 1,
-      "split": 1
-    },
-    {
-      "name": "hour_rollup",
-      "retentionPolicy": "60d",
-      "shardDuration": "1h",
-      "regex": "/^hour.*/",
-      "replicationFactor": 1,
-      "split": 1
-    }
-  ],
-  "continuousQueries": [
-      "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^[^min|hour][^\\.]+\\.[^\\.]+\\.[^\\.]+\\..*$/ group by time(1m) into min.:series_name",
-      "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^[^min|hour][^\\.]+\\.[^\\.]+\\.[^\\.]+\\..*$/ group by time(1h) into hour.:series_name"
-  ]
+    "spaces": [{
+        "name": "planet",
+        "retentionPolicy": "24h",
+        "shardDuration": "1h",
+        "regex": "/^PLANET\\..*/",
+        "replicationFactor": 1,
+        "split": 1
+    }, {
+        "name": "container",
+        "retentionPolicy": "24h",
+        "shardDuration": "1h",
+        "regex": "/^CONTAINER\\..*/",
+        "replicationFactor": 1,
+        "split": 1
+    }, {
+        "name": "min_rollup",
+        "retentionPolicy": "90d",
+        "shardDuration": "1h",
+        "regex": "/^MIN\\.(PLANET|CONTAINER)\\..*/",
+        "replicationFactor": 1,
+        "split": 1
+    }, {
+        "name": "hour_rollup",
+        "retentionPolicy": "90d",
+        "shardDuration": "1h",
+        "regex": "/^HOUR\\.(PLANET|CONTAINER)\\..*/",
+        "replicationFactor": 1,
+        "split": 1
+    }],
+    "continuousQueries": [
+        "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^CONTAINER\\..*$/ group by time(1m) into MIN.:series_name",
+        "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^CONTAINER\\..*$/ group by time(1h) into HOUR.:series_name",
+        "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^PLANET\\..*$/ group by time(1m) into MIN.:series_name"
+    ]
 }
