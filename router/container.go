@@ -50,7 +50,7 @@ func GetContainersOfPlanet(r render.Render, params martini.Params, req *http.Req
 	token := util.GetToken(req)
 	planet := params["planetName"]
 
-	result, err := cosmos.GetContainersOfPlanet(token, planet)
+	result, err := cosmos.GetContainersOfPlanet(token, planet, true)
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)
