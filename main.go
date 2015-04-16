@@ -9,14 +9,14 @@ import (
 	"strings"
 
 	"github.com/attilaolah/strict"
+	"github.com/cosmos-io/cosmos/router"
+	"github.com/cosmos-io/cosmos/service"
 	"github.com/cosmos-io/influxdbc"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 )
 
 var (
-	logDb *influxdbc.InfluxDB
-
 	cosmosPort  = getEnv("COSMOS_PORT", "8888")
 	dbHost      = getEnv("INFLUXDB_HOST", "localhost")
 	dbPort      = getEnv("INFLUXDB_PORT", "8086")
@@ -85,8 +85,8 @@ func requiredParams(params ...string) http.HandlerFunc {
 	}
 }
 
-func createDBConn() {
-	logDb = influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbDatabase, dbUsername, dbPassword)
+func createInfluxDBClient() *influxdbc.InfluxDB {
+	dbc := influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbDatabase, dbUsername, dbPassword)
 	file, err := ioutil.ReadFile(dbShardConf)
 	if err != nil {
 		fmt.Println(err)
@@ -98,12 +98,22 @@ func createDBConn() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	_, err = logDb.CreateDatabase(conf)
+	_, err = dbc.CreateDatabase(conf)
 	if err != nil {
-		fmt.Println("Failed to create database")
-		fmt.Println(err)
+		fmt.Println("Failed to create database - " + err.Error())
 	} else {
-		fmt.Println("database 'cosmos' is created with sharding configuration")
+		fmt.Println("Database has been created with sharding configuration")
+	}
+
+	return dbc
+}
+
+func cosmosService() martini.Handler {
+	cosmos := service.NewCosmosService(createInfluxDBClient())
+
+	return func(c martini.Context) {
+		c.Map(cosmos)
+		c.Next()
 	}
 }
 
@@ -118,39 +128,39 @@ func startServer() {
 			Delims: render.Delims{Left: "{{%", Right: "%}}"},
 		}),
 		contentTypeRouter(),
+		cosmosService(),
 	)
 
 	m.Group("/v1", func(r martini.Router) {
 		// get planet list
 		r.Get("/planets",
 			strict.Accept("application/json"),
-			getAllPlanets)
+			router.GetPlanets)
 
 		r.Get("/containers",
 			strict.Accept("application/json"),
-			getAllContainers)
+			router.GetContainers)
 
 		// post container informations
 		r.Post("/planets/:planetName/containers",
 			strict.Accept("application/json"),
 			strict.ContentType("application/json"),
-			addContainersOfPlanet)
+			router.AddContainersOfPlanet)
 
 		// get container list of planet
 		r.Get("/planets/:planetName/containers",
 			strict.Accept("application/json"),
-			getContainersOfPlanet)
+			router.GetContainersOfPlanet)
 
 		// get metrics of container
 		r.Get("/planets/:planetName/containers/:containerName",
 			strict.Accept("application/json"),
-			getContainerInfo)
+			router.GetContainerInfo)
 	})
 
 	m.RunOnAddr(":" + cosmosPort)
 }
 
 func main() {
-	createDBConn()
 	startServer()
 }

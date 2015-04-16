@@ -1,4 +1,4 @@
-package main
+package converter
 
 import (
 	"encoding/json"
@@ -176,6 +176,15 @@ func ConvertFromContainerInfoSeries(containerName string, series []*influxdbc.Se
 		key := comps[1]
 
 		result[key] = s.Points
+	}
+	return result
+}
+
+func ConvertFromPlanetSeries(series []*influxdbc.Series) []map[string]interface{} {
+	result := make([]map[string]interface{}, len(series))
+	for i, s := range series {
+		result[i] = make(map[string]interface{})
+		result[i]["Name"] = strings.Split(s.Name, ".")[1]
 	}
 	return result
 }
