@@ -81,6 +81,11 @@ func (this *NewsFeedService) checkContainersStopped(token, planet string, savedC
 			}
 		} else {
 			removed = true
+
+			// if curiosity can't send existed container info, then make one explicity
+			statusSeries := influxdbc.NewSeries(fmt.Sprintf("CONTAINER.%s.%s.Status", token, key), "txt_value", "num_value")
+			statusSeries.AddPoint("Exited", nil)
+			series = append(series, statusSeries)
 		}
 		if removed {
 			// Removed one
