@@ -98,11 +98,11 @@ Polymer({
                         }                        
                     });
                 } else {
-                    setTimeout(fn, 10);
+                    setTimeout(fn, 100);
                 }
             };
 
-            setTimeout(fn, 10);
+            setTimeout(fn, 100);
 
 
 
@@ -189,7 +189,7 @@ Polymer({
             }
 
             for (var i = totalCpuUsageSet.length - 1; i >= 0; i--) {
-                cpuUsageData.push(parseInt(totalCpuUsageSet[i][2] * 100) / 100);
+                cpuUsageData.push(parseInt(totalCpuUsageSet[i][2] * 1000) / 1000);
                 memUsageData.push(parseInt(memoryUsageSet[i][2] / KB));
                 networkRxData.push(networkRxUsageSet[i][2]);
                 networkTxData.push(networkTxUsageSet[i][2]);
