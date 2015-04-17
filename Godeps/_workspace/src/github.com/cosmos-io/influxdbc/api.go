@@ -32,9 +32,9 @@ func (db *InfluxDB) QueryURL(query, timePrecision string) string {
 	return fmt.Sprintf("http://%s/db/%s/series?u=%s&p=%s&q=%s&time_precision=%s", db.host, escape(db.database), escape(db.username), escape(db.password), escape(query), escape(timePrecision))
 }
 
-func (db *InfluxDB) WriteSeries(s []*Series, tp string) error {
+func (db *InfluxDB) WriteSeries(s []*Series, tp string) (string, error) {
 	url := db.SeriesURL(tp)
-	_, err := PostStruct(url, s)
+	resp, err := PostStruct(url, s)
 	return err
 }
 

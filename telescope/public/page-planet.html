@@ -23,9 +23,9 @@ Polymer({
 
         }
     },
-    onContainerNameClicked: function(event) {
+    onContainerNameClicked: function(e) {
         event.preventDefault();
-        var target = event.target ? event.target : event.srcElement;
+        var target = e.target ||  e.srcElement;
         var key = $(target).attr('href');
 
         history.pushState({
@@ -77,7 +77,7 @@ Polymer({
                         </tr>
                     </thead>
                     <tbody>
-                        <template id="planetTemplate" is="x-repeat" items="{{planets}}">
+                        <template id="planetTemplate" is="x-repeat" items="{{data}}">
                             <tr class="outer">
                                 <td class="check">
                                     <input type="checkbox" value="{{item.Planet}}" on-change="onCheckChanged">
@@ -97,40 +97,52 @@ Polymer({
             </div>
         </div>
     </template>
-
 </dom-module>
 <script>
 Polymer({
     is: 'page-planet',
     properties: {
-        showKey: {
-            type: String,
-            observer: 'showKeyChanged'
+        data: {
+            type: Array,
+            value: []
         }
     },
     ready: function() {
         var self = this;
-        Cosmos.request.getPlanets(function(json) {
-            self.planets = json;
-            console.log(json);
-
+        Cosmos.getPlanets(function(json) {
+            self.data = json;
+            self.attached();
         }, function(jqXHR) {
             console.log('request faield - ' + jqXHR.responseText);
         });
     },
-    showKeyChanged: function() {
-        this._key = this.showKey;
-    },
-    substr: function(str) {
-        return str.substring(0, 10);
-    },
-    containerName: function(str) {
-        var comp = str.split('/');
-        return comp[comp.length - 1];
+    attached: function() {
+        if (this.data.length > 0 && history.state && history.state.key) {
+            var jqElem = $(this);
+            var self = this;
+
+            var fn = function() {
+                var checkboxes = jqElem.find('input[type=checkbox]');
+                if (checkboxes.size() > 0) {
+                    checkboxes.each(function(i, elem) {
+                        var input = $(elem);
+                        if (input.val() == history.state.key) {
+                            input.prop('checked', true);
+                            self.onCheckChanged({
+                                target: elem
+                            });
+                        }
+                    });
+                } else {
+                    setTimeout(fn, 10);
+                }
+            };
+            setTimeout(fn, 10);
+        }
     },
     onCheckChanged: function(e) {
         var self = this;
-        var sender = event.target ? event.target : event.srcElement;
+        var sender = e.target || e.srcElement;
         var checkboxes = $(sender).closest('tbody').find('input[type=checkbox]');
 
         if (!sender.checked) {
@@ -138,24 +150,17 @@ Polymer({
             innerTr.hide();
             innerTr.find('td').empty();
         } else {
-            Cosmos.request.getContainers(sender.value, function(json) {
+            Cosmos.getContainers(sender.value, function(json) {
                 var elem = document.createElement('planet-containers');
                 elem.data = json;
                 var innerTr = $(sender).closest('tr').next();
                 innerTr.show();
                 Polymer.dom(innerTr.find('td')[0]).appendChild(elem);
 
-                //self.containers[sender.value] = json;
-                //var template = document.querySelector('template'); // Use specific selector here
-                //template.iterator_.updateIteratedValue(); // Force Polymer to refresh template
             }, function(jqXHR) {
                 alert('request failed - ' + jqXHR.responseText);
             });
         }
-
-        self._key = sender.value;
-
-
     }
 });
 </script>

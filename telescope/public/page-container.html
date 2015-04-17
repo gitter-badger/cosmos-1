@@ -89,7 +89,6 @@ Polymer({
 
             var fn = function() {
                 var checkboxes = jqElem.find('input[type=checkbox]');
-                console.log(checkboxes);
                 if (checkboxes.size() > 0) {
                     checkboxes.each(function(i, elem) {
                         var input = $(elem);
@@ -99,7 +98,6 @@ Polymer({
                         }                        
                     });
                 } else {
-                    console.log('waiting...');
                     setTimeout(fn, 10);
                 }
             };
@@ -109,6 +107,54 @@ Polymer({
 
 
         }
+    },
+    drawGraph: function(selector, width, height, labels, data) {
+        var dataset = {
+            labels: [],
+            datasets: [{
+                label: "Metrics",
+                fillColor: "rgba(33,133,117,0.2)",
+                strokeColor: "rgba(33,133,117,1)",
+                pointColor: "rgba(33,133,117,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(33,133,117,1)",
+                data: []
+            }]
+        };
+        if (labels) {
+            dataset.labels = labels;
+        }
+        if (data) {
+            dataset.datasets[0].data = data;
+        }
+
+        var container = $('<div/>').css({
+            'text-align': 'center'
+        });
+        var chart = $('<canvas/>').css({
+            'display': 'inline-block'
+        }).attr('height', height);
+        var opt = {
+            bezierCurve: false,
+            pointHitDetectionRadius: 4,
+            scaleLabel: "<%= ' ' + value%>",
+            scaleFontSize: 12,
+            scaleFontColor: '#888'
+        };
+
+        if (isNaN(width)) {
+            opt['responsive'] = true;
+            opt['maintainAspectRatio'] = false;
+        } else {
+            chart.attr('width', width);
+        }
+
+        container.append(chart);
+        $(selector).append(container);
+
+        var ctx = chart[0].getContext("2d");
+        new Chart(ctx).Line(dataset, opt);
     },
     onCheckChanged: function(e) {
         var target = e.target ? e.target : e.srcElement;
@@ -123,10 +169,7 @@ Polymer({
         var planetName = target.value.split('.')[0];
         var containerName = target.value.split('.')[1];
 
-        self._key = target.value;
-
-
-        Cosmos.request.getContainerInfo(planetName, containerName, function(json) {
+        Cosmos.getContainerInfo(planetName, containerName, function(json) {
             // succeed
 
             var cpuUsageData = [],
@@ -139,7 +182,7 @@ Polymer({
                 networkRxUsageSet = json['StatsNetworkRxBytes'],
                 networkTxUsageSet = json['StatsNetworkTxBytes'],
                 KB = 1024 * 1024;
-            console.log(json);
+
 
             if (!totalCpuUsageSet || !memoryUsageSet || !networkRxUsageSet || !networkTxUsageSet) {
                 return;
@@ -168,12 +211,10 @@ Polymer({
             var nTx = $('#networkTx');
             nTx.empty();
 
-            console.log(cpu);
-
-            Cosmos.drawGraph(cpu, undefined, 250, timeLabel, cpuUsageData);
-            Cosmos.drawGraph(mem, undefined, 250, timeLabel, memUsageData);
-            Cosmos.drawGraph(nRx, undefined, 250, timeLabel, networkRxData);
-            Cosmos.drawGraph(nTx, undefined, 250, timeLabel, networkTxData);
+            self.drawGraph(cpu, undefined, 250, timeLabel, cpuUsageData);
+            self.drawGraph(mem, undefined, 250, timeLabel, memUsageData);
+            self.drawGraph(nRx, undefined, 250, timeLabel, networkRxData);
+            self.drawGraph(nTx, undefined, 250, timeLabel, networkTxData);
 
         }, function(jqXHR) {
             // failed
@@ -239,7 +280,7 @@ Polymer({
     },
     reload: function() {
         var self = this;
-        Cosmos.request.getContainers(undefined, function(json) {
+        Cosmos.getContainers(undefined, function(json) {
             var elem = document.createElement('container-table');
             elem.data = json;
             Polymer.dom(self.$.container).appendChild(elem);

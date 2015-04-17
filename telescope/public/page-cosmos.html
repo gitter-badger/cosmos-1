@@ -1,147 +1,92 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<link rel="import" href="/planet-item.html">
-<link rel="import" href="/container-item.html">
 <dom-module id="page-cosmos">
     <style>
-      .row {
+    .row {
         margin-bottom: 15px;
-      }
-
-      .header h4 {
+    }    
+    .header h4 {
         margin: 0;
-      }
-
-      .header span {
+    }    
+    .header span {
+        display: inline-block;
+    }    
+    .header span.ago {
         color: #999;
-      }
-
-      .stream {
+    }    
+    .header span.date {
+        color: #666;
+        font-size: 11px;
+        margin-left: 10px;
+    }    
+    .stream {
         padding: 10px;
         background-color: #292929;
         border: 1px solid #323232;
         border-radius: 2px;
         -moz-border-radius: 2px;
         -webkit-border-radius: 2px;
-      }
-
-      .stream p {
+    }    
+    .stream > p {
         margin-top: 20px;
-      }
+    }
     </style>
     <template>
-        <!--<div class="container-fluid">
-            <div class="row">
-                <div class="col-md-6 col-xs-12">
-                    <div class="card">
-                        <h4>Planets</h4>
-                        <div id="planets"></div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xs-12">
-                    <div class="card">
-                        <h4>Containers</h4>
-                        <div id="containers"></div>
-                    </div>
-                </div>
-            </div>
-        </div>-->
-
         <div class="container-fluid">
-
-          <div class="row">
-              <div class="col-md-12 col-xs-12">
-                <div class="stream">
-                <div class="header">
-                  <a class="btn btn-primary pull-right">View Metrics</a>
-                  <h4><a href="#">Curiosity</a></h4>
-                  <span>2 hrs</span>
+            <template is="x-repeat" items="{{newsfeeds}}">
+                <div class="row">
+                    <div class="col-md-12 col-xs-12">
+                        <div class="stream">
+                            <div class="header">
+                                <a href="#" class="btn btn-primary pull-right">View Metrics</a>
+                                <h4><a href="{{item.Planet}}" on-click="onPlanetClicked">{{item.Planet}}</a>.<a href="{{item.Key}}" on-click="onContainerClicked">{{item.Container}}</a></h4>
+                                <p><span class="ago">{{item.AgoLabel}}</span><span class="date">{{item.TimeLabel}}</span></p>
+                            </div>
+                            <p>{{item.Content}}</p>
+                        </div>
+                    </div>
                 </div>
-                <p>CPU usage is over 60%.</p>
-              </div>
-              </div>
-          </div>
-
-          <div class="row">
-              <div class="col-md-12 col-xs-12">
-                <div class="stream">
-                <div class="header">
-                  <a class="btn btn-primary pull-right">View Metrics</a>
-                  <h4><a href="#">Curiosity</a></h4>
-                  <span>2 hrs</span>
-                </div>
-                <p>Memory usage is over 40%.</p>
-              </div>
-              </div>
-          </div>
-
-          <div class="row">
-              <div class="col-md-12 col-xs-12">
-                <div class="stream">
-                <div class="header">
-                  <a class="btn btn-primary pull-right">View Metrics</a>
-                  <h4><a href="#">Curiosity</a></h4>
-                  <span>2 hrs</span>
-                </div>
-                <p>Memory usage is over 40%.</p>
-              </div>
-              </div>
-          </div>
-
-          <div class="row">
-              <div class="col-md-12 col-xs-12">
-                <div class="stream">
-                <div class="header">
-                  <a class="btn btn-primary pull-right">View Metrics</a>
-                  <h4><a href="#">Curiosity</a></h4>
-                  <span>2 hrs</span>
-                </div>
-                <p>Memory usage is over 40%.</p>
-              </div>
-              </div>
-          </div>
-
+            </template>
         </div>
     </template>
 </dom-module>
 <script>
 Polymer({
     is: 'page-cosmos',
+    properties: {
+        newsfeeds: Array
+    },
     ready: function() {
         this.reload();
     },
-    reload: function() {
-        /*var self = this;
+    onPlanetClicked: function(e) {
+        e.preventDefault();
+        var target = e.target || e.srcElement;
+        history.pushState({
+            page: "planet",
+            key: $(target).attr('href')
+        }, 'planet', '/planets');
 
-        Cosmos.request.getPlanets(function(json) {
-            var elem = document.createElement('planet-item');
-            elem.data = json;
-            Polymer.dom(self.$.planets).appendChild(elem);
+    },
+    onContainerClicked: function(e) {
+        e.preventDefault();
+        var target = e.target || e.srcElement;
+        history.pushState({
+            page: "container",
+            key: $(target).attr('href')
+        }, 'container', '/containers');
+    },
+    reload: function() {
+        var self = this;
+        Cosmos.getNewsFeeds(function(json) {
+            for (var i = 0; i < json.length; i++) {
+                json[i].TimeLabel = moment(json[i].Time * 1000).format("YYYY-MM-DD HH:mm");
+                json[i].AgoLabel = moment(json[i].Time * 1000).fromNow();
+            }
+
+            self.newsfeeds = json;
         }, function(jqXHR) {
-            // Failed
             console.log('request failed - ' + jqXHR.responseText);
         });
-        Cosmos.request.getContainers(null, function(json) {
-            var elem = document.createElement('container-item');
-            elem.data = json;
-            Polymer.dom(self.$.containers).appendChild(elem);
-        }, function(jqXHR) {
-            // Failed
-            console.log('request failed - ' + jqXHR.responseText);
-        });*/
-    },
-    onPlanetNameClick: function(event, detail, sender) {
-        var pagePlanet = document.querySelector('page-planet');
-        pagePlanet.showKey = sender.id
-
-        // Move to Planet Tab
-        window.CosmosTabs.selected = 1;
-    },
-    onContainerNameClick: function(event, detail, sender) {
-        //var pageContainer = document.querySelector('page-container');
-        //pageContainer.showKey = sender.id
-
-        // Move to Container Tab
-        //window.CosmosTabs.selected = 2;
     }
 });
 </script>

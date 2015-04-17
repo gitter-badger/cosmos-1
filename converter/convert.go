@@ -196,3 +196,11 @@ func ConvertFromPlanetSeries(token string, series []*influxdbc.Series) map[strin
 	}
 	return result
 }
+
+func ConvertFromNewsFeedSeries(series []*influxdbc.Series) [][]interface{} {
+	if len(series) > 0 {
+		return series[0].Points
+	} else {
+		return [][]interface{}{}
+	}
+}

@@ -73,7 +73,7 @@ func requiredParams(params ...string) http.HandlerFunc {
 			}
 		}
 		if valid == false {
-			res := NewErrorJson(0, fmt.Sprintf("required parameter '%s' is missing", param))
+			res := map[string]interface{}{"error": fmt.Sprintf("required parameter '%s' is missing", param)}
 			data, err := json.Marshal(res)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
@@ -132,6 +132,10 @@ func startServer() {
 	)
 
 	m.Group("/v1", func(r martini.Router) {
+		// get newsfeed
+		r.Get("/newsfeeds",
+			strict.Accept("application/json"),
+			router.GetNewsFeeds)
 		// get planet list
 		r.Get("/planets",
 			strict.Accept("application/json"),

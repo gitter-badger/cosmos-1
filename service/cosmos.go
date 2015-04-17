@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/cosmos-io/cosmos/converter"
@@ -9,8 +8,9 @@ import (
 )
 
 type CosmosService struct {
-	dbc      *influxdbc.InfluxDB
-	lifeTime string
+	dbc             *influxdbc.InfluxDB
+	newsFeedService *NewsFeedService
+	lifeTime        string
 }
 
 var (
@@ -19,63 +19,7 @@ var (
 )
 
 func NewCosmosService(dbc *influxdbc.InfluxDB) *CosmosService {
-	return &CosmosService{dbc: dbc, lifeTime: "10m"}
-}
-
-func (this *CosmosService) postContainerNewsFeedIfNeeded(token, planet string, series []*influxdbc.Series) error {
-	savedContainers, err := this.GetContainersOfPlanet(token, planet, false)
-	if err != nil {
-		return err
-	}
-
-	newContainers := converter.ConvertFromContainerSeries(token, planet, series)
-
-	for key, _ := range newContainers {
-		if _, ok := savedContainers[key]; !ok {
-			// Add new one
-			var msg = "New CONTAINER is added! - " + key
-			fmt.Println(msg)
-			data := make(map[string]interface{})
-			data["content"] = msg
-			this.AddNewsFeedOfContainer(token, key, FEED_TYPE_ADD_CONTAINER, data)
-		}
-	}
-
-	for key, _ := range savedContainers {
-		if _, ok := newContainers[key]; !ok {
-			// Removed one
-			// FeedType 1
-			var msg = "CONTAINER is removed - " + key
-			fmt.Println(msg)
-			data := make(map[string]interface{})
-			data["content"] = msg
-			this.AddNewsFeedOfContainer(token, key, FEED_TYPE_REMOVE_CONTAINER, data)
-		}
-	}
-
-	return nil
-}
-
-func (this *CosmosService) AddNewsFeedOfContainer(token, key string, feedType int, data interface{}) error {
-	raw, err := json.Marshal(data)
-	if err != nil {
-		return err
-	}
-
-	jsonData := string(raw)
-
-	feedSeries := influxdbc.NewSeries(fmt.Sprintf("NEWSFEED.%s.%s", token, key), "type", "value")
-	feedSeries.AddPoint(feedType, jsonData)
-
-	series := make([]*influxdbc.Series, 1)
-	series[0] = feedSeries
-
-	err = this.dbc.WriteSeries(series, "s")
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return &CosmosService{dbc: dbc, lifeTime: "10m", newsFeedService: NewNewsFeedService(dbc)}
 }
 
 func (this *CosmosService) GetContainers(token string) (map[string]map[string]interface{}, error) {
@@ -95,14 +39,30 @@ func (this *CosmosService) AddContainersOfPlanet(token, planet string, data []by
 	}
 
 	// Post newsfeed for new container if needed
-	this.postContainerNewsFeedIfNeeded(token, planet, series)
+	savedContainers, err := this.GetContainersOfPlanet(token, planet, false)
+	if err != nil {
+		return err
+	}
+	newContainers := converter.ConvertFromContainerSeries(token, planet, series)
+	feedSeries, err := this.newsFeedService.PostContainerNewsFeedIfNeeded(token, planet, savedContainers, newContainers)
+	if err != nil {
+		return err
+	}
 
-	// Host metrics
+	series = append(series, feedSeries...)
+
+	// Add Host metric series
 	planetSeries := influxdbc.NewSeries(fmt.Sprintf("PLANET.%s.%s.Name", token, planet), "txt_value", "num_value")
 	planetSeries.AddPoint(planet, nil)
+	_, err = this.dbc.WriteSeries([]*influxdbc.Series{planetSeries}, "s")
+	if err != nil {
+		return err
+	}
+
 	series = append(series, planetSeries)
 
-	err = this.dbc.WriteSeries(series, "s")
+	// Add Container series
+	_, err = this.dbc.WriteSeries(series, "s")
 	if err != nil {
 		return err
 	}
@@ -145,4 +105,17 @@ func (this *CosmosService) GetPlanets(token string) (interface{}, error) {
 	}
 
 	return converter.ConvertFromPlanetSeries(token, series), nil
+}
+
+func (this *CosmosService) GetNewsFeeds(token, time string) (interface{}, error) {
+	cond := ""
+	if time != "" {
+		cond = fmt.Sprintf("WHERE time > %s", time)
+	}
+	series, err := this.dbc.Query(fmt.Sprintf("SELECT value FROM merge(/^NEWSFEED\\.%s\\..*/) %s LIMIT 30", token, cond), "s")
+	if err != nil {
+		return nil, err
+	}
+
+	return converter.ConvertFromNewsFeedSeries(series), nil
 }

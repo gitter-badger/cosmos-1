@@ -1,5 +1,12 @@
 {
     "spaces": [{
+        "name": "newsfeed",
+        "retentionPolicy": "inf",
+        "shardDuration": "1h",
+        "regex": "/^NEWSFEED\\..*/",
+        "replicationFactor": 1,
+        "split": 1
+    }, {
         "name": "planet",
         "retentionPolicy": "24h",
         "shardDuration": "1h",
@@ -15,16 +22,16 @@
         "split": 1
     }, {
         "name": "min_rollup",
-        "retentionPolicy": "90d",
+        "retentionPolicy": "30d",
         "shardDuration": "1h",
-        "regex": "/^MIN\\.(PLANET|CONTAINER)\\..*/",
+        "regex": "/^MIN\\..*/",
         "replicationFactor": 1,
         "split": 1
     }, {
         "name": "hour_rollup",
-        "retentionPolicy": "90d",
+        "retentionPolicy": "30d",
         "shardDuration": "1h",
-        "regex": "/^HOUR\\.(PLANET|CONTAINER)\\..*/",
+        "regex": "/^HOUR\\..*/",
         "replicationFactor": 1,
         "split": 1
     }],
