@@ -67,23 +67,7 @@ Polymer({
         return false;
     },
     dataChanged: function(newValue, oldValue) {
-        if (this._first && newValue.length > 0) {
-            return;
-            this._first = false;
-            var jqElem = $(this);
-            var checkboxes = jqElem.find('input[type=checkbox]');
-            console.log(checkboxes);
-            checkboxes.each(function(i, elem) {
-                var input = $(elem);
-                if (input.val() == history.state.key) {
-                    alert('check');
-                    input.prop('checked', true);
-                }
-            });
-        }
-    },
-    attached: function() {
-        if (this.data.length > 0 && history.state && history.state.key) {
+        if (newValue.length > 0 && history.state && history.state.key) {
             var jqElem = $(this);
             var self = this;
 
@@ -93,17 +77,25 @@ Polymer({
                     checkboxes.each(function(i, elem) {
                         var input = $(elem);
                         if (input.val() == history.state.key) {
-                            input.prop('checked', true);                            
-                            self.onCheckChanged({target:elem});
-                        }                        
+                            if (input.prop('checked') != true) {
+                                input.prop('checked', true);
+                                self.onCheckChanged({
+                                    target: elem
+                                });
+                            }
+                            return false;
+                        }
                     });
                 } else {
-                    setTimeout(fn, 100);
+                    setTimeout(fn, 50);
                 }
             };
 
-            setTimeout(fn, 100);
+            setTimeout(fn, 50);
+        }
 
+        if (this._first && newValue.length > 0) {
+            this._first = false;
 
 
         }
@@ -264,6 +256,7 @@ Polymer({
             </div>
             <h3>Containers</h3>
             <div class="card" id="container">
+                <container-table></container-table>
             </div>
         </div>
     </template>
@@ -281,9 +274,8 @@ Polymer({
     reload: function() {
         var self = this;
         Cosmos.getContainers(undefined, function(json) {
-            var elem = document.createElement('container-table');
+            var elem = document.querySelector('container-table');
             elem.data = json;
-            Polymer.dom(self.$.container).appendChild(elem);
         }, function(jqXHR) {
             console.log('request failed - ' + jqXHR.responseText);
         });
