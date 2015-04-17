@@ -34,8 +34,7 @@ func (db *InfluxDB) QueryURL(query, timePrecision string) string {
 
 func (db *InfluxDB) WriteSeries(s []*Series, tp string) (string, error) {
 	url := db.SeriesURL(tp)
-	resp, err := PostStruct(url, s)
-	return err
+	return PostStruct(url, s)
 }
 
 func (db *InfluxDB) Query(query, tp string) ([]*Series, error) {
