@@ -1,6 +1,6 @@
 # Cosmos
 
-[![Build Status](https://travis-ci.org/cosmos-io/cosmos.svg?branch=master)](https://travis-ci.org/cosmos-io/cosmos)
+[![Build Status](https://travis-ci.org/cosmos-io/cosmos.svg?branch=master)](https://travis-ci.org/cosmos-io/cosmos) [![GoDoc](https://godoc.org/github.com/cosmos-io/cosmos?status.svg)](https://godoc.org/github.com/cosmos-io/cosmos)
 
 Cosmos is a container monitoring system. Cosmos can aggregate metrics of containers with [Curiosity](https://github.com/cosmos-io/curiosity). It also supports a modern dashboard.
 
