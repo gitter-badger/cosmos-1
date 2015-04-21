@@ -30,8 +30,6 @@ func AddContainersOfPlanet(r render.Render, params martini.Params, req *http.Req
 	planet := params["planetName"]
 
 	body, err := util.GetBodyFromRequest(req)
-	fmt.Println("=== Request BODY ===")
-	fmt.Println(string(body))
 
 	if err != nil {
 		fmt.Println(err)

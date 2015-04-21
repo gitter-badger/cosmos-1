@@ -4,11 +4,7 @@
     <template>
         <template is="x-repeat" items="{{data}}">
             <div style="padding-bottom:10px; padding-left:30px;">
-                <span>
                 <a href="{{item.Key}}" on-click="onContainerNameClicked">{{item.Names0[3]}}</a>
-            </span>
-                <span>{{item.Id[3]}}</span>
-                <span>{{item.Status[3]}}</span>
             </div>
         </template>
     </template>
@@ -25,7 +21,7 @@ Polymer({
     },
     onContainerNameClicked: function(e) {
         event.preventDefault();
-        var target = e.target ||  e.srcElement;
+        var target = e.target || e.srcElement;
         var key = $(target).attr('href');
 
         history.pushState({
@@ -50,6 +46,14 @@ Polymer({
         height: 48px;
     }
     
+    :host tbody > tr:hover {
+        background-color: #222;
+    }
+    
+    :host tbody > tr > td {
+        cursor: pointer;
+    }
+    
     :host tbody > tr.outer {
         height: 48px;
         color: #bebebe;
@@ -61,34 +65,33 @@ Polymer({
         display: none;
     }
     
-    :host tbody > tr > td > paper-checkbox {
-        margin-top: 7px;
+    :host th:nth-child(1),
+    :host td:nth-child(1) {
+        padding-left: 10px;
+    }
+    
+    :host .card {
+        padding: 0;
     }
     </style>
     <template>
         <div>
-            <h3>Planets</h3>
             <div class="card">
                 <table>
                     <thead>
                         <tr>
-                            <th width="30"></th>
-                            <th>Name</th>
+                            <th>Planet</th>
                         </tr>
                     </thead>
                     <tbody>
                         <template id="planetTemplate" is="x-repeat" items="{{data}}">
-                            <tr class="outer">
-                                <td class="check">
-                                    <input type="checkbox" value="{{item.Planet}}" on-change="onCheckChanged">
-                                    </paper-checkbox>
-                                </td>
+                            <tr class="outer" on-click="onCellClicked">
                                 <td>
                                     <b>{{item.Planet}}</b>
                                 </td>
                             </tr>
                             <tr class="inner">
-                                <td colspan="2">
+                                <td>
                                 </td>
                             </tr>
                         </template>
@@ -116,6 +119,17 @@ Polymer({
             console.log('request faield - ' + jqXHR.responseText);
         });
     },
+    onCellClicked: function(e) {
+        var target = $(e.target || e.srcElement);
+        var selectedTr = target.parent();
+        var allTr = target.closest('tbody').find('tr');
+
+        allTr.removeClass('selected');
+        selectedTr.addClass('selected');
+        var key = selectedTr.find('td:first').text()
+
+        this.showContainers(key, e);
+    },
     attached: function() {
         if (this.data.length > 0 && history.state && history.state.key) {
             var jqElem = $(this);
@@ -140,27 +154,22 @@ Polymer({
             setTimeout(fn, 50);
         }
     },
-    onCheckChanged: function(e) {
+    showContainers: function(key, e) {
         var self = this;
         var sender = e.target || e.srcElement;
-        var checkboxes = $(sender).closest('tbody').find('input[type=checkbox]');
 
-        if (!sender.checked) {
+        Cosmos.getContainers(key, function(json) {
+            var elem = document.createElement('planet-containers');
+            elem.data = json;
             var innerTr = $(sender).closest('tr').next();
-            innerTr.hide();
+            innerTr.show();
             innerTr.find('td').empty();
-        } else {
-            Cosmos.getContainers(sender.value, function(json) {
-                var elem = document.createElement('planet-containers');
-                elem.data = json;
-                var innerTr = $(sender).closest('tr').next();
-                innerTr.show();
-                Polymer.dom(innerTr.find('td')[0]).appendChild(elem);
+            Polymer.dom(innerTr.find('td')[0]).appendChild(elem);
 
-            }, function(jqXHR) {
-                alert('request failed - ' + jqXHR.responseText);
-            });
-        }
+        }, function(jqXHR) {
+            alert('request failed - ' + jqXHR.responseText);
+        });
+        // }
     }
 });
 </script>
