@@ -98,9 +98,18 @@
             for (var i = 0; i < json.length; i++) {
                 var j = JSON.parse(json[i][2])
                 j['Time'] = json[i][0];
-                j['Key'] = j.Planet + '.' + j.Container
+                j['Key'] = j.Planet;
+                if (j.Container) {
+                    j['Key'] += '.' + j.Container;
+                } 
+                if (j['Type'] == 2 || j['Type'] == 3) {
+                    // Planet NewsFeed
+                    // set hidden property to TRUE
+                    j['Hidden'] = true;
+                }
                 data.push(j);
             }
+            console.log(data);
             return data;
         },
         _convertPlanetResponse: function(json) {

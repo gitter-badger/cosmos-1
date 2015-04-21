@@ -9,8 +9,10 @@ import (
 	"strings"
 
 	"github.com/attilaolah/strict"
+	"github.com/cosmos-io/cosmos/dao"
 	"github.com/cosmos-io/cosmos/router"
 	"github.com/cosmos-io/cosmos/service"
+	"github.com/cosmos-io/cosmos/worker"
 	"github.com/cosmos-io/influxdbc"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
@@ -109,7 +111,12 @@ func createInfluxDBClient() *influxdbc.InfluxDB {
 }
 
 func cosmosService() martini.Handler {
-	cosmos := service.NewCosmosService(createInfluxDBClient())
+	dbc := createInfluxDBClient()
+	dao.Initialize(dbc)
+	cosmos := service.NewCosmosService(5)
+
+	newsFeedWorker := worker.NewNewsFeedWorker(cosmos.LifeTime, 30)
+	newsFeedWorker.Run()
 
 	return func(c martini.Context) {
 		c.Map(cosmos)

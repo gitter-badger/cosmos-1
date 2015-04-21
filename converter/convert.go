@@ -107,31 +107,6 @@ func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.S
 	return result, nil
 }
 
-func ConvertToPlanetSeries(token string, body []byte) (*influxdbc.Series, error) {
-	var raw map[string]interface{}
-	err := json.Unmarshal(body, &raw)
-	if err != nil {
-		return nil, err
-	}
-
-	cols := make([]string, len(raw))
-	points := make([][]interface{}, 1)
-
-	series := influxdbc.NewSeries(token)
-	series.Columns = cols
-	series.Points = points
-	points[0] = make([]interface{}, len(raw))
-
-	i := 0
-	for k, v := range raw {
-		cols[i] = k
-		points[0][i] = v
-		i = i + 1
-	}
-
-	return series, nil
-}
-
 func ConvertFromContainerSeries(token, planet string, series []*influxdbc.Series) map[string]map[string]interface{} {
 	result := make(map[string]map[string]interface{})
 

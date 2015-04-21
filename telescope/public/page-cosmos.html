@@ -38,7 +38,7 @@
                         <div class="stream">
                             <div class="header">
                                 <a href="#" class="btn btn-primary pull-right">View Metrics</a>
-                                <h4><a href="{{item.Planet}}" on-click="onPlanetClicked">{{item.Planet}}</a>.<a href="{{item.Key}}" on-click="onContainerClicked">{{item.Container}}</a></h4>
+                                <h4><a href="{{item.Planet}}" on-click="onPlanetClicked">{{item.Planet}}</a><span hidden$="{{item.Hidden}}">.</span><a href="{{item.Key}}" on-click="onContainerClicked" hidden$="{{item.Hidden}}">{{item.Container}}</a></h4>
                                 <p><span class="ago">{{item.AgoLabel}}</span><span class="date">{{item.TimeLabel}}</span></p>
                             </div>
                             <p>{{item.Content}}</p>
