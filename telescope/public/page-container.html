@@ -48,12 +48,19 @@ Polymer({
     <style>
     :host .card.list {
         padding: 0;
-    }
+    }    
     
-    :host > div {
-        width: 992px;
-        margin: 0 auto;
+    @media (min-width: 768px) {
+        :host > div {
+            width: 100%;
+        }
     }
+    @media (min-width: 1024px) {
+        :host > div {
+            width: 992px;
+            margin: 0 auto;
+        }
+    }    
     
     :host container-item {
         cursor: pointer;
@@ -108,28 +115,6 @@ Polymer({
                         <div id="networkRx"></div>
                         <h5>Network Out (KB)</h5>
                         <div id="networkTx"></div>
-                        <!--                        <div class="container-fluid">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h5>CPU Utilization (%)</h5>
-                                    <div id="cpu"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5>Memory Usage (MB)</h5>
-                                    <div id="mem"></div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h5>Network In (KB)</h5>
-                                    <div id="networkRx"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5>Network Out (KB)</h5>
-                                    <div id="networkTx"></div>
-                                </div>
-                            </div>
-                        </div> -->
                     </div>
                 </div>
             </div>
