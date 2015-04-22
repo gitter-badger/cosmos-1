@@ -73,7 +73,7 @@ func (this *CosmosService) GetContainersOfPlanet(token, planet string, useRollup
 }
 
 func (this *CosmosService) GetContainerInfo(token, planetName, containerName string) (map[string]interface{}, error) {
-	series, err := dao.Container.GetContainerInfo(token, planetName, containerName, this.LifeTime)
+	series, err := dao.Container.GetContainerInfo(token, planetName, containerName)
 	if err != nil {
 		return nil, err
 	}

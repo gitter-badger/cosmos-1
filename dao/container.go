@@ -36,9 +36,9 @@ func (this *ContainerDao) GetContainersOfPlanet(token, planet string, useRollup 
 	return series, nil
 }
 
-func (this *ContainerDao) GetContainerInfo(token, planetName, containerName string, lifeTime int) ([]*influxdbc.Series, error) {
+func (this *ContainerDao) GetContainerInfo(token, planetName, containerName string) ([]*influxdbc.Series, error) {
 	seriesName := converter.MakeContainerSeriesName(token, planetName, containerName)
-	dbQuery := fmt.Sprintf("SELECT num_value, txt_value FROM /^MIN\\.CONTAINER\\.%s\\./ WHERE time > now() - %dm LIMIT 10", seriesName, lifeTime)
+	dbQuery := fmt.Sprintf("SELECT num_value, txt_value FROM /^MIN\\.CONTAINER\\.%s\\./ LIMIT 10", seriesName)
 	series, err := this.dbc.Query(dbQuery, "s")
 	if err != nil {
 		return nil, err

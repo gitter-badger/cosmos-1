@@ -1,133 +1,219 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<dom-module id="container-table">
+<dom-module id="container-item">
     <style>
-    :host table {
-        width: 100%;
-    }
-    
-    :host thead > tr {
-        border-bottom: 2px solid #575757;
-        height: 48px;
-    }
-    
-    :host tbody > tr {
-        border-bottom: 1px solid #424242;
-        height: 48px;
-        color: #bebebe;
-    }
-
-    :host tbody > tr > td {
-        cursor: pointer;
-    }
-
-    :host tbody > tr:hover, :host tbody > tr.selected {
+    :host > div:hover,
+    :host > div.selected {
         background-color: #222;
     }
-
-    :host tr > td:nth-child(1), :host tr > th:nth-child(1) {
-        padding-left: 10px;
-    }
-
-    :host tr > td:nth-child(4), :host tr > th:nth-child(4) {
-        padding-right: 10px;
-    }    
-
     
-    :host tbody > tr > td > input {
-        margin-top: 7px;
+    :host > div {
+        padding: 10px;
+    }
+    
+    :host p.name {
+        font-size: 16px;
+        margin-bottom: 2px;
+    }
+    
+    :host span.planet {
+        display: inline-block;
+        margin-left: 10px;
+        font-size: 13px;
+        color: #888;
+    }
+    
+    :host span.status {
+        font-size: 13px;
+        color: #888;
     }
     </style>
     <template>
-        <table>
-            <thead>
-                <tr>
-                    <th width="220">Container</th>
-                    <th width="220">Planet</th>
-                    <th width="220">Status</th>
-                    <th>Command</th>                    
-                </tr>
-            </thead>
-            <tbody>
-                <template is="x-repeat" items="{{data}}">
-                    <tr on-click="onCellClicked">
-<!--                         <td class="check">
-                            <input type="checkbox" value="{{item.Key}}" on-change="onCheckChanged" />
-                        </td>
-
- -->                    
-                        <td>{{item.Names0[3]}}</td>
-                        <td>{{item.Planet}}</td>
-                        <td>{{item.Status[3]}}</td>
-                        <td>{{item.Command[3]}}</td>                        
-                    </tr>
-                </template>
-            </tbody>
-        </table>
+        <div class="item">
+            <p class="name">{{data.Container}}<span class="planet">{{data.Planet}}</span></p>
+            <span class="status">{{data.Status[3]}}</span>
+        </div>
     </template>
 </dom-module>
 <script>
 Polymer({
-    is: 'container-table',
+    is: 'container-item',
     properties: {
         data: {
-            type: Array,
-            value: [],
-            observer: 'dataChanged'
+            type: Object
+        }
+    }
+});
+</script>
+<dom-module id="page-container">
+    <style>
+    :host .card.list {
+        padding: 0;
+    }
+    
+    :host > div {
+        width: 992px;
+        margin: 0 auto;
+    }
+    
+    :host container-item {
+        cursor: pointer;
+    }
+    
+    :host .col-md-4,
+    :host .col-md-8 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    :host input.search {
+        width: 100%;
+        margin-bottom: 5px;
+        background-color: #292929;
+        border: 1px solid #323232;
+        padding: 3px 5px;
+    }
+    
+    :host input.search:focus {
+        background-color: #222;
+    }
+    
+    :host .graph h5 {
+        text-align: center;
+    }
+    
+    :host .graph > div {
+        min-height: 265px;
+    }
+    </style>
+    <template>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-4 col-xs-12">
+                    <div>
+                        <input type="text" class="search" placeholder="search" style="" />
+                    </div>
+                    <div id="containerList" class="card list">
+                        <template is="x-repeat" items="{{data}}">
+                            <container-item data="{{item}}" on-click="onItemClicked"></container-item>
+                        </template>
+                    </div>
+                </div>
+                <div class="col-md-8 col-xs-12">
+                    <div class="card graph">
+                        <h5>CPU Utilization (%)</h5>
+                        <div id="cpu"></div>
+                        <h5>Memory Usage (MB)</h5>
+                        <div id="mem"></div>
+                        <h5>Network In (KB)</h5>
+                        <div id="networkRx"></div>
+                        <h5>Network Out (KB)</h5>
+                        <div id="networkTx"></div>
+                        <!--                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>CPU Utilization (%)</h5>
+                                    <div id="cpu"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Memory Usage (MB)</h5>
+                                    <div id="mem"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Network In (KB)</h5>
+                                    <div id="networkRx"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Network Out (KB)</h5>
+                                    <div id="networkTx"></div>
+                                </div>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</dom-module>
+<script>
+Polymer({
+    is: 'page-container',
+
+    properties: {
+        data: {
+            type: Array
         },
-        key: String,
-        isChecked: {
-            type: Boolean,
-            computed: 'isChecked(key)'
+        charts: {
+            type: Array,
+            value: []
         }
     },
-    _first: true,
-    isChecked: function(k) {
-        return false;
+    _refresh: undefined,
+    ready: function() {
+        this.reload();
     },
-    onCellClicked: function(e) {
-        var target = $(e.target || e.srcElement);
-        var allTr = target.closest('tbody').find('tr');
-        allTr.removeClass('selected');
-
-        var selectedTr = target.parent();
-        selectedTr.addClass('selected');
-
-        var index = allTr.index(selectedTr.get(0));
-        this.showGraph(this.data[index].Key);
+    attached: function() {
+        this.showEmptyGraph();
     },
-    dataChanged: function(newValue, oldValue) {
-        if (newValue.length > 0 && history.state && history.state.key) {
-            var jqElem = $(this);
-            var self = this;
-
-            var fn = function() {
-                var checkboxes = jqElem.find('input[type=checkbox]');
-                if (checkboxes.size() > 0) {
-                    checkboxes.each(function(i, elem) {
-                        var input = $(elem);
-                        if (input.val() == history.state.key) {
-                            if (input.prop('checked') != true) {
-                                input.prop('checked', true);
-                                self.onCheckChanged({
-                                    target: elem
-                                });
-                            }
-                            return false;
+    detached: function() {
+        if (this._refresh) {
+            clearTimeout(this._refresh);
+        }
+    },
+    reload: function() {
+        var self = this;
+        Cosmos.getContainers(undefined, function(json) {
+            self.data = json;
+            self.selectItem();
+        }, function(jqXHR) {
+            console.log('request failed - ' + jqXHR.responseText);
+        });
+    },
+    selectItem: function() {
+        var self = this;
+        var $this = $(this);
+        var fn = function() {
+            var items = $this.find('container-item');
+            if (items.size() > 0) {
+                var e = {};
+                if (history.state.key) {
+                    items.each(function(i, elem) {
+                        if (elem.data.Key == history.state.key) {
+                            e.target = elem;
                         }
                     });
                 } else {
-                    setTimeout(fn, 50);
+                    e.target = $(items.get(0)).find('> div').get(0);
                 }
-            };
 
-            setTimeout(fn, 50);
+                if (e.target) {
+                    self.onItemClicked(e);
+                }
+            } else {
+                setTimeout(fn, 100);
+            }
+        };
+
+        setTimeout(fn, 100);
+    },
+    onItemClicked: function(e) {
+        var selectedItem = $(e.target || e.srcElement);
+        if (selectedItem.prop('tagName') != 'container-item') {
+            selectedItem = selectedItem.closest('container-item');
         }
 
-        if (this._first && newValue.length > 0) {
-            this._first = false;
+        var allItems = selectedItem.closest('#containerList').find('.item');
+        var index = selectedItem.get(0).data.Index;
+        if (index < 0) return;
 
+        allItems.removeClass('selected');
+        $(selectedItem.find('> div')).addClass('selected');
 
+        if (this._refresh) {
+            clearTimeout(this._refresh);
         }
+        this.showGraph(this.data[index].Key);
     },
     drawGraph: function(selector, width, height, labels, data) {
         var dataset = {
@@ -149,7 +235,6 @@ Polymer({
         if (data) {
             dataset.datasets[0].data = data;
         }
-
         var container = $('<div/>').css({
             'text-align': 'center'
         });
@@ -165,17 +250,51 @@ Polymer({
         };
 
         if (isNaN(width)) {
-            opt['responsive'] = true;
-            opt['maintainAspectRatio'] = false;
+            opt.responsive = true;
+            opt.maintainAspectRatio = false;
         } else {
             chart.attr('width', width);
         }
 
         container.append(chart);
-        $(selector).append(container);
+        Polymer.dom(document.querySelector(selector)).appendChild(container.get(0));
 
         var ctx = chart[0].getContext("2d");
-        new Chart(ctx).Line(dataset, opt);
+        return new Chart(ctx).Line(dataset, opt);
+    },
+    showEmptyGraph: function() {
+        var self = this;
+        var cpuUsageData = [],
+            memUsageData = [],
+            networkRxData = [],
+            networkTxData = [],
+            timeLabel = [];
+
+        for (var i = 0; i < 10; i++) {
+            cpuUsageData.push(0);
+            memUsageData.push(0);
+            networkRxData.push(0);
+            networkTxData.push(0);
+            timeLabel.push('');
+        }
+
+        var cpu = $('#cpu');
+        var mem = $('#mem');
+        var nRx = $('#networkRx');
+        var nTx = $('#networkTx');
+
+        setTimeout(function() {
+            self.drawGraph('#cpu', 629, 250, timeLabel, cpuUsageData);
+        }, 10);
+        setTimeout(function() {
+            self.drawGraph('#mem', 629, 250, timeLabel, memUsageData);
+        }, 10);
+        setTimeout(function() {
+            self.drawGraph('#networkRx', 629, 250, timeLabel, networkRxData);
+        }, 10);
+        setTimeout(function() {
+            self.drawGraph('#networkRx', 629, 250, timeLabel, networkTxData);
+        }, 10);
     },
     showGraph: function(key) {
         var self = this;
@@ -186,7 +305,6 @@ Polymer({
 
         Cosmos.getContainerInfo(planetName, containerName, function(json) {
             // succeed
-
             var cpuUsageData = [],
                 memUsageData = [],
                 networkRxData = [],
@@ -199,6 +317,16 @@ Polymer({
                 KB = 1024 * 1024;
 
 
+            var cpuCount = 0;
+
+            while (true) {
+                if (json['StatsCpuPerCpuUtilization' + cpuCount] == undefined) {
+                    cpuCount += 1;
+                    break;
+                }
+                cpuCount++;
+            }
+
             if (!totalCpuUsageSet || !memoryUsageSet || !networkRxUsageSet || !networkTxUsageSet) {
                 return;
             }
@@ -206,104 +334,45 @@ Polymer({
             for (var i = totalCpuUsageSet.length - 1; i >= 0; i--) {
                 cpuUsageData.push(parseInt(totalCpuUsageSet[i][2] * 1000) / 1000);
                 memUsageData.push(parseInt(memoryUsageSet[i][2] / KB));
-                networkRxData.push(networkRxUsageSet[i][2]);
-                networkTxData.push(networkTxUsageSet[i][2]);
+                networkRxData.push(parseInt(networkRxUsageSet[i][2] / 1024));
+                networkTxData.push(parseInt(networkTxUsageSet[i][2] / 1024));
 
-                var d = new Date(totalCpuUsageSet[i][0] * 1000);
-                timeLabel.push(d.getMonth() + '/' + d.getDate() + ' ' + d.getHours() + ':' + (d.getMinutes() >= 10 ? d.getMinutes() : '0' + d.getMinutes()));
+                if (i != totalCpuUsageSet.length - 1) {
+                    var d = new Date(totalCpuUsageSet[i][0] * 1000);
+                    timeLabel.push(d.getHours() + ':' + (d.getMinutes() >= 10 ? d.getMinutes() : '0' + d.getMinutes()));
+                } else {
+                    timeLabel.push("");
+                }
             }
-
-            $('#graphContainer').show();
             var cpu = $('#cpu');
             cpu.empty();
-
             var mem = $('#mem');
             mem.empty();
-
             var nRx = $('#networkRx');
             nRx.empty();
-
             var nTx = $('#networkTx');
             nTx.empty();
 
-            self.drawGraph(cpu, undefined, 250, timeLabel, cpuUsageData);
-            self.drawGraph(mem, undefined, 250, timeLabel, memUsageData);
-            self.drawGraph(nRx, undefined, 250, timeLabel, networkRxData);
-            self.drawGraph(nTx, undefined, 250, timeLabel, networkTxData);
+            setTimeout(function() {
+                self.drawGraph('#cpu', undefined, 250, timeLabel, cpuUsageData);
+            }, 10);
+            setTimeout(function() {
+                self.drawGraph('#mem', undefined, 250, timeLabel, memUsageData);
+            }, 10);
+            setTimeout(function() {
+                self.drawGraph('#networkRx', undefined, 250, timeLabel, networkRxData);
+            }, 10);
+            setTimeout(function() {
+                self.drawGraph('#networkTx', undefined, 250, timeLabel, networkTxData);
+            }, 10);
+
+            self._refresh = setTimeout(function() {
+                self.showGraph(key);
+            }, 1000 * 60);
 
         }, function(jqXHR) {
             // failed
             alert('request failed - ' + jqXHR.responseText);
-        });
-    }
-});
-</script>
-<dom-module id="page-container">
-    <style>
-    :host .card {
-        padding: 0;
-    }
-    :host .card.graph {
-        display: none;
-        margin-bottom: 10px;
-        padding-top: 10px;
-    }
-    
-    :host > div {
-        width: 992px;
-        margin: 0 auto;
-    }
-    </style>
-    <template>
-        <script src="/vendor/chartjs-1.0.2/chart.min.js"></script>
-        <div>
-            <div class="card graph" id="graphContainer">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-6 col-xs-12" style="padding:10px">
-                            <h5>CPU Usage (%)</h5>
-                            <div id="cpu"></div>
-                        </div>
-                        <div class="col-md-6 col-xs-12" style="padding:10px">
-                            <h5>Memory Usage (MiB)</h5>
-                            <div id="mem"></div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 col-xs-12" style="padding:10px">
-                            <h5>Network Rx (Bytes)</h5>
-                            <div id="networkRx"></div>
-                        </div>
-                        <div class="col-md-6 col-xs-12" style="padding:10px">
-                            <h5>Network Tx (Bytes)</h5>
-                            <div id="networkTx"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card" id="container">
-                <container-table></container-table>
-            </div>
-        </div>
-    </template>
-</dom-module>
-<script>
-Polymer({
-    is: 'page-container',
-
-    properties: {
-
-    },
-    ready: function() {
-        this.reload();
-    },
-    reload: function() {
-        var self = this;
-        Cosmos.getContainers(undefined, function(json) {
-            var elem = document.querySelector('container-table');
-            elem.data = json;
-        }, function(jqXHR) {
-            console.log('request failed - ' + jqXHR.responseText);
         });
     }
 });

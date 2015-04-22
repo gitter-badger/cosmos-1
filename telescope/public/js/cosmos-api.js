@@ -109,7 +109,6 @@
                 }
                 data.push(j);
             }
-            console.log(data);
             return data;
         },
         _convertPlanetResponse: function(json) {
@@ -145,6 +144,7 @@
                     delete(json[k][inK]);
                     json[k][newK] = val
                 }
+                json[k]['Index'] = i;
                 json[k]['Key'] = k;
                 var comps = k.split('.');
                 json[k]['Planet'] = comps[0];

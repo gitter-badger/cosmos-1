@@ -34,11 +34,12 @@ Polymer({
                 elem = document.createElement('page-container');
                 break;
         }
-        if (elem) {
-            var self = this;
-            $(self).empty();
-            Polymer.dom(self.root).appendChild(elem);
+        if (elem) {            
+            for (var i = 0, len = Polymer.dom(this).childNodes.length; i < len; i++) {
+                Polymer.dom(this).removeChild(Polymer.dom(this).childNodes[i]);
+            }
 
+            Polymer.dom(this).appendChild(elem);
         }
     }
 
