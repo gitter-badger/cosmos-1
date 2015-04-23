@@ -61,12 +61,15 @@ func GetContainersOfPlanet(r render.Render, params martini.Params, req *http.Req
 	r.JSON(http.StatusOK, result)
 }
 
-func GetContainerInfo(r render.Render, params martini.Params, req *http.Request, cosmos *service.CosmosService) {
+func GetContainerMetrics(r render.Render, params martini.Params, req *http.Request, cosmos *service.CosmosService) {
+	req.ParseForm()
+
+	metric := util.GetMetric(req)
 	token := util.GetToken(req)
 	planetName := params["planetName"]
 	containerName := strings.Replace(params["containerName"], ".", "_", -1)
 
-	result, err := cosmos.GetContainerInfo(token, planetName, containerName)
+	result, err := cosmos.GetContainerMetrics(token, planetName, containerName, metric)
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)

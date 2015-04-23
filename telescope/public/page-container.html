@@ -30,7 +30,7 @@
     <template>
         <div class="item">
             <p class="name">{{data.Container}}<span class="planet">{{data.Planet}}</span></p>
-            <span class="status">{{data.Status[3]}}</span>
+            <span class="status">{{data.Status.3}}</span>
         </div>
     </template>
 </dom-module>
@@ -48,19 +48,20 @@ Polymer({
     <style>
     :host .card.list {
         padding: 0;
-    }    
+    }
     
     @media (min-width: 768px) {
         :host > div {
             width: 100%;
         }
     }
+    
     @media (min-width: 1024px) {
         :host > div {
             width: 992px;
             margin: 0 auto;
         }
-    }    
+    }
     
     :host container-item {
         cursor: pointer;
@@ -88,8 +89,13 @@ Polymer({
         text-align: center;
     }
     
+    :host .card.graph {
+        padding: 10px;
+    }
+    
     :host .graph > div {
         min-height: 265px;
+        cursor: pointer;
     }
     </style>
     <template>
@@ -107,14 +113,14 @@ Polymer({
                 </div>
                 <div class="col-md-8 col-xs-12">
                     <div class="card graph">
+                        <div id="cpuUtil" name="Stats.Cpu.TotalUtilization" on-click="onGraphClicked"></div>
                         <h5>CPU Utilization (%)</h5>
-                        <div id="cpu"></div>
+                        <div id="memUsage" name="Stats.Memory.Usage" on-click="onGraphClicked"></div>
                         <h5>Memory Usage (MB)</h5>
-                        <div id="mem"></div>
+                        <div id="netIn" name="Stats.Network.RxBytes" on-click="onGraphClicked"></div>
                         <h5>Network In (KB)</h5>
-                        <div id="networkRx"></div>
+                        <div id="netOut" name="Stats.Network.TxBytes" on-click="onGraphClicked"></div>
                         <h5>Network Out (KB)</h5>
-                        <div id="networkTx"></div>
                     </div>
                 </div>
             </div>
@@ -124,7 +130,6 @@ Polymer({
 <script>
 Polymer({
     is: 'page-container',
-
     properties: {
         data: {
             type: Array
@@ -135,11 +140,16 @@ Polymer({
         }
     },
     _refresh: undefined,
+    graphHeight: 250,
+    dialogGraphHeight: 400,
     ready: function() {
         this.reload();
     },
     attached: function() {
-        this.showEmptyGraph();
+        this.showEmptyGraph('#cpuUtil');
+        this.showEmptyGraph('#memUsage');
+        this.showEmptyGraph('#netIn');
+        this.showEmptyGraph('#netOut');
     },
     detached: function() {
         if (this._refresh) {
@@ -165,30 +175,63 @@ Polymer({
                 if (history.state.key) {
                     items.each(function(i, elem) {
                         if (elem.data.Key == history.state.key) {
-                            e.target = elem;
+                            e.currentTarget = elem;
                         }
                     });
                 } else {
-                    e.target = $(items.get(0)).find('> div').get(0);
+                    e.currentTarget = items.get(0);
                 }
 
-                if (e.target) {
+                if (e.currentTarget) {
                     self.onItemClicked(e);
                 }
             } else {
-                setTimeout(fn, 100);
+                setTimeout(fn, 80);
             }
         };
 
-        setTimeout(fn, 100);
+        setTimeout(fn, 80);
+    },
+    onGraphClicked: function(e) {
+        var self = this;
+        var target = $(e.currentTarget);
+
+        vex.open({
+            contentCSS: {
+                width: '976px'
+            },
+            afterOpen: function($vexContent) {
+                $vexContent.append($('<div id="graph"/>'));
+                var h = $('<h3 style="text-align:center;"/>');
+                var title;
+                switch (target.attr('name')) {
+                    case 'Stats.Cpu.TotalUtilization':
+                        title = 'CPU Utilization (%)'
+                        break;
+                    case 'Stats.Memory.Usage':
+                        title = 'Memory Usage (MB)'
+                        break;
+                    case 'Stats.Network.TxBytes':
+                        title = 'Network Out (KB)'
+                        break;
+                    case 'Stats.Network.RxBytes':
+                        title = 'Network In (KB)'
+                        break;
+                }
+
+                h.text(title);
+                $vexContent.append(h);
+
+                self.showDetailGraph(target.attr('key'), target.attr('name'));
+                return $vexContent;
+            },
+            afterClose: function() {}
+        });
     },
     onItemClicked: function(e) {
-        var selectedItem = $(e.target || e.srcElement);
-        if (selectedItem.prop('tagName') != 'container-item') {
-            selectedItem = selectedItem.closest('container-item');
-        }
+        var selectedItem = $(e.currentTarget);
 
-        var allItems = selectedItem.closest('#containerList').find('.item');
+        var allItems = selectedItem.parent().find('.item');
         var index = selectedItem.get(0).data.Index;
         if (index < 0) return;
 
@@ -200,7 +243,7 @@ Polymer({
         }
         this.showGraph(this.data[index].Key);
     },
-    drawGraph: function(selector, width, height, labels, data) {
+    drawGraph: function(selector, width, height, times, data, unit) {
         var dataset = {
             labels: [],
             datasets: [{
@@ -214,8 +257,14 @@ Polymer({
                 data: []
             }]
         };
-        if (labels) {
-            dataset.labels = labels;
+        if (times) {
+            dataset.labels = function() {
+                var labels = [];
+                for (var i = 0; i < times.length; i++) {
+                    labels.push(moment(times[i]).format("HH:mm"));
+                }
+                return labels;
+            }();
         }
         if (data) {
             dataset.datasets[0].data = data;
@@ -229,9 +278,11 @@ Polymer({
         var opt = {
             bezierCurve: false,
             pointHitDetectionRadius: 4,
-            scaleLabel: "<%= ' ' + value%>",
+            scaleLabel: "<%=' ' + value%>",
             scaleFontSize: 12,
-            scaleFontColor: '#888'
+            scaleFontColor: '#888',
+            tooltipTemplate: "[<%=time%>] <%=value%>" + unit,
+            showTooltips: true
         };
 
         if (isNaN(width)) {
@@ -242,43 +293,136 @@ Polymer({
         }
 
         container.append(chart);
-        Polymer.dom(document.querySelector(selector)).appendChild(container.get(0));
+        $(selector).append(container);
 
         var ctx = chart[0].getContext("2d");
-        return new Chart(ctx).Line(dataset, opt);
-    },
-    showEmptyGraph: function() {
-        var self = this;
-        var cpuUsageData = [],
-            memUsageData = [],
-            networkRxData = [],
-            networkTxData = [],
-            timeLabel = [];
+        var chart = new Chart(ctx).Line(dataset, opt);
 
-        for (var i = 0; i < 10; i++) {
-            cpuUsageData.push(0);
-            memUsageData.push(0);
-            networkRxData.push(0);
-            networkTxData.push(0);
-            timeLabel.push('');
+        var points = chart.datasets[0].points;
+        for (var i = 0; i < points.length; i++) {
+            points[i].time = moment(times[i]).format("YYYY-MM-DD HH:mm");
+        }
+        return chart;
+    },
+    showEmptyGraph: function(selector, unit) {
+        var self = this;
+        var data = [],
+            times = [];
+
+        var now = (new Date()).getTime();
+        for (var i = 10; i > 0; i--) {
+            data.push(0);
+            times.push(now - (i * 60 * 1000));
         }
 
-        var cpu = $('#cpu');
-        var mem = $('#mem');
-        var nRx = $('#networkRx');
-        var nTx = $('#networkTx');
+        setTimeout(function() {
+            self.drawGraph(selector, undefined, self.graphHeight, times, data, unit);
+        }, 10);
+    },
+    showDetailGraph: function(key, metric) {
+        var self = this;
+        var container = this.data[key];
+        var planetName = key.split('.')[0];
+        var containerName = key.split('.')[1];
+        var selector = '#graph';
+
+        Cosmos.getContainerMetrics(planetName, containerName, metric, function(json) {
+            switch (metric) {
+                case 'Stats.Cpu.TotalUtilization':
+                    self._showCpuUsageGraph(selector, json, self.dialogGraphHeight);
+                    break;
+                case 'Stats.Memory.Usage':
+                    self._showMemoryUsageGraph(selector, json, self.dialogGraphHeight);
+                    break;
+                case 'Stats.Network.RxBytes':
+                    self._showNetworkInGraph(selector, json, self.dialogGraphHeight);
+                    break;
+                case 'Stats.Network.TxBytes':
+                    self._showNetworkOutGraph(selector, json, self.dialogGraphHeight);
+                    break;
+            }
+
+        }, function(jqXHR) {
+
+        });
+    },
+    _showCpuUsageGraph: function(selector, json, height) {
+        var self = this;
+        var dataset = json['StatsCpuTotalUtilization'];
+        if (dataset == undefined) {
+            return;
+        }
+
+        var data = [],
+            times = [];
+        for (var i = dataset.length - 1; i >= 0; i--) {
+            data.push(parseInt(dataset[i][2] * 1000) / 1000);
+            times.push(dataset[i][0] * 1000);
+        }
+        $(selector).empty();
 
         setTimeout(function() {
-            self.drawGraph('#cpu', 629, 250, timeLabel, cpuUsageData);
+            self.drawGraph(selector, undefined, height, times, data, '%');
         }, 10);
+    },
+    _showMemoryUsageGraph: function(selector, json, height) {
+        var self = this;
+        var dataset = json['StatsMemoryUsage'];
+        if (dataset == undefined) {
+            return;
+        }
+
+        var MB = 1024 * 1024;
+        var data = [],
+            times = [];
+        for (var i = dataset.length - 1; i >= 0; i--) {
+            data.push(parseInt(dataset[i][2] / MB));
+            times.push(dataset[i][0] * 1000);
+        }
+        $(selector).empty();
+
         setTimeout(function() {
-            self.drawGraph('#mem', 629, 250, timeLabel, memUsageData);
+            self.drawGraph(selector, undefined, height, times, data, 'MB');
         }, 10);
+    },
+    _showNetworkInGraph: function(selector, json, height) {
+        var self = this;
+        var dataset = json['StatsNetworkRxBytes'];
+        if (dataset == undefined) {
+            return;
+        }
+
+        var KB = 1024;
+        var data = [],
+            times = [];
+        for (var i = dataset.length - 1; i >= 0; i--) {
+            data.push(parseInt(dataset[i][2] / KB));
+            times.push(dataset[i][0] * 1000);
+        }
+        $(selector).empty();
+
         setTimeout(function() {
-            self.drawGraph('#networkRx', 629, 250, timeLabel, networkRxData);
+            self.drawGraph(selector, undefined, height, times, data, 'KB');
         }, 10);
+    },
+    _showNetworkOutGraph: function(selector, json, height) {
+        var self = this;
+        var dataset = json['StatsNetworkTxBytes'];
+        if (dataset == undefined) {
+            return;
+        }
+
+        var KB = 1024;
+        var data = [],
+            times = [];
+        for (var i = dataset.length - 1; i >= 0; i--) {
+            data.push(parseInt(dataset[i][2] / KB));
+            times.push(dataset[i][0] * 1000);
+        }
+        $(selector).empty();
+
         setTimeout(function() {
-            self.drawGraph('#networkRx', 629, 250, timeLabel, networkTxData);
+            self.drawGraph(selector, undefined, height, times, data, 'KB');
         }, 10);
     },
     showGraph: function(key) {
@@ -288,69 +432,16 @@ Polymer({
         var planetName = key.split('.')[0];
         var containerName = key.split('.')[1];
 
-        Cosmos.getContainerInfo(planetName, containerName, function(json) {
-            // succeed
-            var cpuUsageData = [],
-                memUsageData = [],
-                networkRxData = [],
-                networkTxData = [],
-                timeLabel = [],
-                totalCpuUsageSet = json['StatsCpuTotalUtilization'],
-                memoryUsageSet = json['StatsMemoryUsage'],
-                networkRxUsageSet = json['StatsNetworkRxBytes'],
-                networkTxUsageSet = json['StatsNetworkTxBytes'],
-                KB = 1024 * 1024;
+        Cosmos.getContainerMetrics(planetName, containerName, 'all', function(json) {
+            $('#cpuUtil').attr('key', key);
+            $('#memUsage').attr('key', key);
+            $('#netIn').attr('key', key);
+            $('#netOut').attr('key', key);
 
-
-            var cpuCount = 0;
-
-            while (true) {
-                if (json['StatsCpuPerCpuUtilization' + cpuCount] == undefined) {
-                    cpuCount += 1;
-                    break;
-                }
-                cpuCount++;
-            }
-
-            if (!totalCpuUsageSet || !memoryUsageSet || !networkRxUsageSet || !networkTxUsageSet) {
-                return;
-            }
-
-            for (var i = totalCpuUsageSet.length - 1; i >= 0; i--) {
-                cpuUsageData.push(parseInt(totalCpuUsageSet[i][2] * 1000) / 1000);
-                memUsageData.push(parseInt(memoryUsageSet[i][2] / KB));
-                networkRxData.push(parseInt(networkRxUsageSet[i][2] / 1024));
-                networkTxData.push(parseInt(networkTxUsageSet[i][2] / 1024));
-
-                if (i != totalCpuUsageSet.length - 1) {
-                    var d = new Date(totalCpuUsageSet[i][0] * 1000);
-                    timeLabel.push(d.getHours() + ':' + (d.getMinutes() >= 10 ? d.getMinutes() : '0' + d.getMinutes()));
-                } else {
-                    timeLabel.push("");
-                }
-            }
-            var cpu = $('#cpu');
-            cpu.empty();
-            var mem = $('#mem');
-            mem.empty();
-            var nRx = $('#networkRx');
-            nRx.empty();
-            var nTx = $('#networkTx');
-            nTx.empty();
-
-            setTimeout(function() {
-                self.drawGraph('#cpu', undefined, 250, timeLabel, cpuUsageData);
-            }, 10);
-            setTimeout(function() {
-                self.drawGraph('#mem', undefined, 250, timeLabel, memUsageData);
-            }, 10);
-            setTimeout(function() {
-                self.drawGraph('#networkRx', undefined, 250, timeLabel, networkRxData);
-            }, 10);
-            setTimeout(function() {
-                self.drawGraph('#networkTx', undefined, 250, timeLabel, networkTxData);
-            }, 10);
-
+            self._showCpuUsageGraph('#cpuUtil', json, self.graphHeight);
+            self._showMemoryUsageGraph('#memUsage', json, self.graphHeight);
+            self._showNetworkInGraph('#netIn', json, self.graphHeight);
+            self._showNetworkOutGraph('#netOut', json, self.graphHeight);
             self._refresh = setTimeout(function() {
                 self.showGraph(key);
             }, 1000 * 60);

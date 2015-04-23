@@ -15,6 +15,7 @@ import (
 	"github.com/cosmos-io/cosmos/worker"
 	"github.com/cosmos-io/influxdbc"
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/gzip"
 	"github.com/martini-contrib/render"
 )
 
@@ -128,6 +129,7 @@ func startServer() {
 	m := martini.Classic()
 
 	m.Handlers(
+		gzip.All(),
 		martini.Logger(),
 		martini.Static("telescope/public"),
 		strict.Strict,
@@ -166,7 +168,7 @@ func startServer() {
 		// get metrics of container
 		r.Get("/planets/:planetName/containers/:containerName",
 			strict.Accept("application/json"),
-			router.GetContainerInfo)
+			router.GetContainerMetrics)
 	})
 
 	m.RunOnAddr(":" + cosmosPort)

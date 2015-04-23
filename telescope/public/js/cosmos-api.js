@@ -51,10 +51,12 @@
                 xhr.complete(complete)
             }
         },
-        getContainerInfo: function(planet, containerName, done, fail, complete) {
+        getContainerMetrics: function(planet, containerName, metric, done, fail, complete) {
             var self = this;
+            var url = '/' + Cosmos.API_VER + '/planets/' + planet + '/containers/' + containerName;
             var xhr = $.ajax({
-                url: '/' + Cosmos.API_VER + '/planets/' + planet + '/containers/' + containerName,
+                url: url,
+                data: { metric: metric ? metric : 'all' },
                 method: 'GET',
                 accept: 'application/json',
                 dataType: 'json'

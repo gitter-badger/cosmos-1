@@ -72,8 +72,8 @@ func (this *CosmosService) GetContainersOfPlanet(token, planet string, useRollup
 	return converter.ConvertFromContainerSeries(token, planet, series), nil
 }
 
-func (this *CosmosService) GetContainerInfo(token, planetName, containerName string) (map[string]interface{}, error) {
-	series, err := dao.Container.GetContainerInfo(token, planetName, containerName)
+func (this *CosmosService) GetContainerMetrics(token, planetName, containerName, metric string) (map[string]interface{}, error) {
+	series, err := dao.Container.GetContainerMetrics(token, planetName, containerName, metric)
 	if err != nil {
 		return nil, err
 	}

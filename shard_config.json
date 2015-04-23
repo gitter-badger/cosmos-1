@@ -8,28 +8,28 @@
         "split": 1
     }, {
         "name": "planet",
-        "retentionPolicy": "24h",
+        "retentionPolicy": "1h",
         "shardDuration": "1h",
         "regex": "/^PLANET\\..*/",
         "replicationFactor": 1,
         "split": 1
     }, {
         "name": "container",
-        "retentionPolicy": "24h",
+        "retentionPolicy": "1h",
         "shardDuration": "1h",
         "regex": "/^CONTAINER\\..*/",
         "replicationFactor": 1,
         "split": 1
     }, {
         "name": "min_rollup",
-        "retentionPolicy": "30d",
+        "retentionPolicy": "7d",
         "shardDuration": "1h",
         "regex": "/^MIN\\..*/",
         "replicationFactor": 1,
         "split": 1
     }, {
         "name": "hour_rollup",
-        "retentionPolicy": "30d",
+        "retentionPolicy": "7d",
         "shardDuration": "1h",
         "regex": "/^HOUR\\..*/",
         "replicationFactor": 1,

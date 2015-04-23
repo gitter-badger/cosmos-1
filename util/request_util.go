@@ -13,6 +13,14 @@ func GetToken(req *http.Request) string {
 	return token
 }
 
+func GetMetric(req *http.Request) string {
+	metric := req.URL.Query().Get("metric")
+	if metric == "" {
+		metric = "all"
+	}
+	return metric
+}
+
 func GetBodyFromRequest(req *http.Request) ([]byte, error) {
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {

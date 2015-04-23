@@ -70,8 +70,8 @@ func MakeFieldPathAndValue(obj interface{}, pathDelimeter string) []*FieldPathAn
 	return findFieldPathAndValue(obj, "", ".", make([]*FieldPathAndValue, 0))
 }
 
-func MakeContainerSeriesName(token, planet, containerId string) string {
-	return fmt.Sprintf("%s.%s.%s", token, planet, containerId)
+func MakeContainerSeriesName(token, planet, containerName string) string {
+	return fmt.Sprintf("%s.%s.%s", token, planet, containerName)
 }
 
 func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.Series, error) {
