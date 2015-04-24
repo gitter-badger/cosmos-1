@@ -1,94 +1,125 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <dom-module id="page-cosmos">
-    <style>
-    .row {
-        margin-bottom: 15px;
-    }
-    .header h4 {
-        margin: 0;
-    }
-    .header span {
-        display: inline-block;
-    }
-    .header span.ago {
-        color: #999;
-    }
-    .header span.date {
-        color: #666;
-        font-size: 11px;
-        margin-left: 10px;
-    }
-    .stream {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 10px;
-      background-color: #292929;
-      border: 1px solid #323232;
-      border-radius: 2px;
-      -moz-border-radius: 2px;
-      -webkit-border-radius: 2px;
-    }
-    .stream > p {
-        margin-top: 20px;
-    }
-    </style>
-    <template>
-        <div class="container-fluid">
-            <template is="x-repeat" items="{{newsfeeds}}">
-                <div class="row">
-                    <div class="col-md-12 col-xs-12">
-                        <div class="stream">
-                            <div class="header">
-                                <a href="#" class="btn btn-primary pull-right">View Metrics</a>
-                                <h4><a href="{{item.Planet}}" on-click="onPlanetClicked">{{item.Planet}}</a><span hidden$="{{item.Hidden}}">.</span><a href="{{item.Key}}" on-click="onContainerClicked" hidden$="{{item.Hidden}}">{{item.Container}}</a></h4>
-                                <p><span class="ago">{{item.AgoLabel}}</span><span class="date">{{item.TimeLabel}}</span></p>
-                            </div>
-                            <p>{{item.Content}}</p>
-                        </div>
-                    </div>
-                </div>
-            </template>
+<style>
+.container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 1080px) {
+  .container {
+    width: 1080px;
+    margin: 0 auto;
+  }
+}
+
+.stream {
+  margin: 20px auto;
+  padding: 10px;
+  background-color: #222;
+  border-bottom: 1px solid #333;
+}
+
+.stream:hover {
+  border-bottom: 1px solid #489dff;
+}
+
+.stream:hover a:hover {
+  color: #489dff;
+  text-decoration: underline;
+}
+
+.stream p {
+  font-size: 15px;
+  color: #bbb;
+}
+
+.title {
+    margin: 0;
+    padding: 0;
+}
+
+.title a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.title span {
+  display: inline-block;
+}
+
+.header span.ago {
+    color: #999;
+}
+
+.header span.date {
+    color: #666;
+    font-size: 11px;
+    margin-left: 10px;
+}
+</style>
+<template>
+  <div class="container">
+    <template is="x-repeat" items="{{newsfeeds}}">
+      <div class="row">
+        <div class="col-md-12 col-xs-12">
+          <div class="stream">
+            <div class="header">
+              <h4 class="title">
+                <a href="/planets">{{item.Planet}}</a>
+                <span hidden$="{{item.Hidden}}">.</span>
+                <a href="/containers">{{item.Container}}</a>
+              </h4>
+              <p>
+                <span class="ago">{{item.AgoLabel}}</span>
+                <span class="date">{{item.TimeLabel}}</span>
+              </p>
+            </div>
+            <p>{{item.Content}}</p>
+          </div>
         </div>
+      </div>
     </template>
+  </div>
+</template>
 </dom-module>
 <script>
 Polymer({
-    is: 'page-cosmos',
-    properties: {
-        newsfeeds: Array
-    },
-    ready: function() {
-        this.reload();
-    },
-    onPlanetClicked: function(e) {
-        e.preventDefault();
-        var target = e.target || e.srcElement;
-        history.pushState({
-            page: "planet",
-            key: $(target).attr('href')
-        }, 'planet', '/planets');
-
-    },
-    onContainerClicked: function(e) {
-        e.preventDefault();
-        var target = e.target || e.srcElement;
-        history.pushState({
-            page: "container",
-            key: $(target).attr('href')
-        }, 'container', '/containers');
-    },
-    reload: function() {
-        var self = this;
-        Cosmos.getNewsFeeds(function(json) {
-            for (var i = 0; i < json.length; i++) {
-                json[i].TimeLabel = moment(json[i].Time * 1000).format("YYYY-MM-DD HH:mm");
-                json[i].AgoLabel = moment(json[i].Time * 1000).fromNow();
-            }
-
-            self.newsfeeds = json;
-        }, function(jqXHR) {
-            console.log('request failed - ' + jqXHR.responseText);
-        });
-    }
+  is: 'page-cosmos',
+  properties: {
+    newsfeeds: Array
+  },
+  ready: function() {
+    this.reload();
+  },
+  onPlanetClicked: function(e) {
+    e.preventDefault();
+    var target = e.target || e.srcElement;
+    history.pushState({
+      page: 'planet',
+      key: $(target).attr('href')
+    }, 'planet', '/planets');
+  },
+  onContainerClicked: function(e) {
+    e.preventDefault();
+    var target = e.target || e.srcElement;
+    history.pushState({
+      page: 'container',
+      key: $(target).attr('href')
+    }, 'container', '/containers');
+  },
+  reload: function() {
+    var self = this;
+    Cosmos.getNewsFeeds(function(json) {
+      for (var i = 0; i < json.length; i++) {
+        json[i].TimeLabel = moment(json[i].Time * 1000).format('YYYY-MM-DD HH:mm');
+        json[i].AgoLabel = moment(json[i].Time * 1000).fromNow();
+      }
+      self.newsfeeds = json;
+    }, function(jqXHR) {
+      console.log(jqXHR.responseText);
+    });
+  }
 });
 </script>

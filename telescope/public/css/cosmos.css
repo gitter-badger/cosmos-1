@@ -35,24 +35,17 @@ a:hover {
  */
 
 html {
+  margin: 0;
+  padding: 0;
   background-color: #222;
 }
 
 body {
+  margin: 0;
+  padding: 0;
   background-color: #222;
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   color: #fff;
-}
-
-.card {
-    min-height: 50px;
-    background-color: #292929;
-    border: 1px solid #323232;
-    padding: 0 10px 10px 10px;
-    margin-bottom: 10px;
-    border-radius: 2px;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
 }
 
 .vex.vex-theme-plain .vex-content {

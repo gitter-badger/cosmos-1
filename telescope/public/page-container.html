@@ -1,562 +1,600 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
+
+<!-- Dialog -->
 <dom-module id="dialog-metric">
-    <style>
-    :host > p.title {
-        display: inline-block;
-        font-weight: bold;
-        margin-right: 20px;
-    }
-    
-    :host > div.controls {
-        display: inline-block;
-    }
-    </style>
-    <template>
-        <p class="title"></p>
-        <div class="controls">
-            <label>Last</label>
-            <select name="period">
-                <option selected="selected" value="30m">30 minutes</option>
-                <option value="3h">3 hours</option>
-                <option value="8h">8 hours</option>
-                <option value="24h">24 hours</option>
-            </select>
-        </div>
-        <div id="graph"></div>
-    </template>
+<style>
+:host > p.title {
+  display: inline-block;
+  font-weight: bold;
+  margin-right: 20px;
+}
+
+:host > div.controls {
+  display: inline-block;
+}
+</style>
+<template>
+  <p class="title"></p>
+  <div class="controls">
+    <label>Last</label>
+    <select name="period">
+      <option selected="selected" value="30m">30 minutes</option>
+      <option value="3h">3 hours</option>
+      <option value="8h">8 hours</option>
+      <option value="24h">24 hours</option>
+    </select>
+  </div>
+  <div id="graph"></div>
+</template>
 </dom-module>
 <script>
 Polymer({
-    is: 'dialog-metric'
+  is: 'dialog-metric'
 });
 </script>
+
+
+<!-- Container Item -->
 <dom-module id="container-item">
-    <style>
-    :host > div:hover,
-    :host > div.selected {
-        background-color: #222;
-    }
-    
-    :host > div {
-        padding: 10px;
-    }
-    
-    :host p.name {
-        font-size: 16px;
-        margin-bottom: 2px;
-    }
-    
-    :host span.planet {
-        display: inline-block;
-        margin-left: 10px;
-        font-size: 13px;
-        color: #888;
-    }
-    
-    :host span.status {
-        font-size: 13px;
-        color: #888;
-    }
-    </style>
-    <template>
-        <div class="item">
-            <p class="name">{{data.Container}}<span class="planet">{{data.Planet}}</span></p>
-            <span class="status">{{data.Status.3}}</span>
-        </div>
-    </template>
+<style>
+.item {
+  padding: 10px;
+  border-bottom: 1px solid #333;
+  color: #bbb;
+}
+
+.item:hover,
+.selected {
+  background-color: #489dff;
+}
+
+.item:hover p,
+.item:hover span,
+.selected p,
+.selected span {
+  color: #fff;
+}
+
+.name {
+  color: #fff;
+}
+
+.planet {
+  padding-left: 10px;
+  color: #bbb;
+}
+</style>
+<template>
+  <div class="item">
+    <p class="name">{{data.Container}}<span class="planet">{{data.Planet}}</span></p>
+    <span class="status">{{data.Status.3}}</span>
+  </div>
+</template>
 </dom-module>
 <script>
 Polymer({
-    is: 'container-item',
-    properties: {
-        data: {
-            type: Object
-        }
+  is: 'container-item',
+  properties: {
+    data: {
+      type: Object
     }
+  }
 });
 </script>
+
+<!-- Container Page -->
 <dom-module id="page-container">
-    <style>
-    :host .card.list {
-        padding: 0;
-    }
-    
-    @media (min-width: 768px) {
-        :host > div {
-            width: 100%;
-        }
-    }
-    
-    @media (min-width: 1024px) {
-        :host > div {
-            width: 992px;
-            margin: 0 auto;
-        }
-    }
-    
-    :host container-item {
-        cursor: pointer;
-    }
-    
-    :host .col-md-4,
-    :host .col-md-8 {
-        padding-left: 5px;
-        padding-right: 5px;
-    }
-    
-    :host input.search {
-        width: 100%;
-        margin-bottom: 5px;
-        background-color: #292929;
-        border: 1px solid #323232;
-        padding: 3px 5px;
-    }
-    
-    :host input.search:focus {
-        background-color: #222;
-    }
-    
-    :host .graph h5 {
-        text-align: center;
-    }
-    
-    :host .card.graph {
-        padding: 10px;
-    }
-    
-    :host .graph > div {
-        min-height: 265px;
-        cursor: pointer;
-    }
-    </style>
-    <template>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-4 col-xs-12">
-                    <div>
-                        <input type="text" class="search" placeholder="search" style="" />
-                    </div>
-                    <div id="containerList" class="card list">
-                        <template is="x-repeat" items="{{data}}">
-                            <container-item data="{{item}}" on-click="onItemClicked"></container-item>
-                        </template>
-                    </div>
-                </div>
-                <div class="col-md-8 col-xs-12">
-                    <div class="card graph">
-                        <div id="cpuUtil" on-click="onGraphClicked"></div>
-                        <h5>CPU Utilization (%)</h5>
-                        <div id="memUsage" on-click="onGraphClicked"></div>
-                        <h5>Memory Usage (MB)</h5>
-                        <div id="netIn" on-click="onGraphClicked"></div>
-                        <h5>Network In (KB)</h5>
-                        <div id="netOut" on-click="onGraphClicked"></div>
-                        <h5>Network Out (KB)</h5>
-                    </div>
-                </div>
-            </div>
+<style>
+.container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 1400px) {
+  .container {
+    width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+.row {
+  margin: 0;
+}
+
+.card {
+    min-height: 50px;
+    background-color: #222;
+}
+
+.container-list {
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 1400px) {
+  .container-list {
+    width: 320px;
+  }
+}
+
+.container-metrics {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 1400px) {
+  .container-metrics {
+    width: 1080px;
+  }
+}
+
+:host .card.list {
+  padding: 20px 0;
+}
+
+:host div {
+  width: 100%;
+}
+
+@media (min-width: 1400px) {
+  :host > div {
+    width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+:host container-item {
+  cursor: pointer;
+}
+
+.search {
+  padding: 10px 20px;
+  background-color: #333;
+}
+
+.search input {
+  width: 100%;
+  background-color: #333;
+  outline: none;
+  border: none;
+  color: #fff;
+}
+
+:host .graph h5 {
+  text-align: center;
+}
+
+:host .card.graph {
+  padding: 10px;
+}
+
+:host .graph > div {
+  min-height: 265px;
+  cursor: pointer;
+}
+</style>
+<template>
+  <div class="container">
+    <div class="row">
+      <div class="container-list col-md-4 col-xs-12">
+        <div class="search">
+          <input id="search-input" type="text" placeholder="search" style="" />
         </div>
-    </template>
+        <div class="card list">
+          <template is="x-repeat" items="{{data}}">
+            <container-item data="{{item}}" on-click="onItemClicked"></container-item>
+          </template>
+        </div>
+      </div>
+      <div class="container-metrics col-md-8 col-xs-12">
+        <div class="card graph">
+          <div id="cpuUtil" on-click="onGraphClicked"></div>
+          <h5>CPU Utilization (%)</h5>
+          <div id="memUsage" on-click="onGraphClicked"></div>
+          <h5>Memory Usage (MB)</h5>
+          <div id="netIn" on-click="onGraphClicked"></div>
+          <h5>Network In (KB)</h5>
+          <div id="netOut" on-click="onGraphClicked"></div>
+          <h5>Network Out (KB)</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 </dom-module>
 <script>
 Polymer({
-    is: 'page-container',
-    properties: {
-        data: {
-            type: Array
-        },
-        charts: {
-            type: Array,
-            value: []
-        }
+  is: 'page-container',
+  properties: {
+    data: {
+      type: Array
     },
-    _refresh: undefined,
-    graphHeight: 250,
-    dialogGraphHeight: 480,
-    ready: function() {
-        this.reload();
-    },
-    attached: function() {
-        this.showEmptyGraph('#cpuUtil', '%', '10m');
-        this.showEmptyGraph('#memUsage', 'MB', '10m');
-        this.showEmptyGraph('#netIn', 'KB', '10m');
-        this.showEmptyGraph('#netOut', 'KB', '10m');
-    },
-    detached: function() {
-        if (this._refresh) {
-            clearTimeout(this._refresh);
-        }
-    },
-    reload: function() {
-        var self = this;
-        Cosmos.getContainers(undefined, function(json) {
-            self.data = json;
-            self.selectItem();
-        }, function(jqXHR) {
-            console.log('request failed - ' + jqXHR.responseText);
-        });
-    },
-    selectItem: function() {
-        var self = this;
-        var $this = $(this);
-        var fn = function() {
-            var items = $this.find('container-item');
-            if (items.size() > 0) {
-                var e = {};
-                if (history.state.key) {
-                    items.each(function(i, elem) {
-                        if (elem.data.Key == history.state.key) {
-                            e.currentTarget = elem;
-                        }
-                    });
-                } else {
-                    e.currentTarget = items.get(0);
-                }
-
-                if (e.currentTarget) {
-                    self.onItemClicked(e);
-                }
-            } else {
-                setTimeout(fn, 80);
-            }
-        };
-
-        setTimeout(fn, 80);
-    },
-    onGraphClicked: function(e) {
-        var self = this;
-        var info = $(e.currentTarget).data('info');
-
-        vex.open({
-            contentCSS: {
-                width: '976px'
-            },
-            afterOpen: function($vexContent) {
-                var content = document.createElement('dialog-metric');
-                $vexContent.append(content);
-                var $select = $(content).find('select[name=period]');
-                $select.change(function(e) {
-                    info.period = $(this).val();
-                    self.showDetailGraph(info);
-                });
-                info.period = $select.val();
-
-                var title;
-                switch (info.metric) {
-                    case 'Stats.Cpu.TotalUtilization':
-                        title = 'CPU Utilization (%)';
-                        break;
-                    case 'Stats.Memory.Usage':
-                        title = 'Memory Usage (MB)';
-                        break;
-                    case 'Stats.Network.TxBytesDelta':
-                        title = 'Network Out (KB)';
-                        break;
-                    case 'Stats.Network.RxBytesDelta':
-                        title = 'Network In (KB)';
-                        break;
-                }
-                content.querySelector('.title').innerText = title;
-
-                self.showDetailGraph(info);
-                return $vexContent;
-            },
-            afterClose: function() {}
-        });
-    },
-    onItemClicked: function(e) {
-        var selectedItem = $(e.currentTarget);
-
-        var allItems = selectedItem.parent().find('.item');
-        var index = selectedItem.get(0).data.Index;
-        if (index < 0) return;
-
-        allItems.removeClass('selected');
-        $(selectedItem.find('> div')).addClass('selected');
-
-        if (this._refresh) {
-            clearTimeout(this._refresh);
-        }
-        this.showGraph(this.data[index].Key);
-    },
-    drawGraph: function(selector, width, height, times, data, unit, scaleOpt) {
-        var dataset = {
-            labels: [],
-            datasets: [{
-                label: "Metrics",
-                fillColor: "rgba(72,157,255,0.2)",
-                strokeColor: "rgba(72,157,255,1)",
-                pointColor: "rgba(72,157,255,1)",
-                pointStrokeColor: "#fff",
-                pointHighlightFill: "#fff",
-                pointHighlightStroke: "rgba(72,157,255,1)",
-                data: []
-            }]
-        };
-        if (times) {
-            dataset.labels = function() {
-                var labels = [];
-                for (var i = 0; i < times.length; i++) {
-                    labels.push(moment(times[i]).format("HH:mm"));
-                }
-                return labels;
-            }();
-        }
-        if (data) {
-            dataset.datasets[0].data = data;
-        }
-        var container = $('<div/>').css({
-            'text-align': 'center'
-        });
-        var chart = $('<canvas/>').css({
-            'display': 'inline-block'
-        }).attr('height', height);
-        var opt = {
-            bezierCurve: false,
-            pointHitDetectionRadius: 4,
-            scaleLabel: "<%=' ' + value%>",
-            scaleFontSize: 12,
-            scaleFontColor: '#888',
-            tooltipTemplate: "[<%=time%>] <%=value%>" + unit,
-            showTooltips: true,
-            scaleIntegersOnly: false
-        };
-        if (scaleOpt) {
-            var keys = Object.keys(scaleOpt);
-            for (var i in keys) {
-                opt[keys[i]] = scaleOpt[keys[i]];
-            }
-        }
-
-        if (isNaN(width)) {
-            opt.responsive = true;
-            opt.maintainAspectRatio = false;
-        } else {
-            chart.attr('width', width);
-        }
-
-        container.append(chart);
-        $(selector).empty().append(container);
-
-        var ctx = chart[0].getContext("2d");
-        var chart = new Chart(ctx).Line(dataset, opt);
-
-        var points = chart.datasets[0].points;
-        for (var i = 0; i < points.length; i++) {
-            points[i].time = moment(times[i]).format("YYYY-MM-DD HH:mm");
-        }
-        return chart;
-    },
-    showEmptyGraph: function(selector, unit, period) {
-        var self = this;
-        var data = [],
-            times = [],
-            points = 10,
-            timeWidth = 60 * 1000;
-
-        if (period == "10m") {
-            points = 10;
-        } else if (period == "30m") {
-            points = 30;
-        } else if (period == "3h") {
-            points = 36;
-            timeWidth *= 5;
-        } else if (period == "8h") {
-            points = 32;
-            timeWidth *= 15;
-        } else if (period == "24h") {
-            points = 24;
-            timeWidth *= 60;
-        }
-
-        var now = (new Date()).getTime();
-        for (var i = points; i > 0; i--) {
-            data.push(0);
-            times.push(now - (i * timeWidth));
-        }
-
-        setTimeout(function() {
-            self.drawGraph(selector, undefined, self.graphHeight, times, data, unit);
-        }, 10);
-    },
-    showDetailGraph: function(info) {
-        var self = this;
-        var container = this.data[info.key];
-        var planetName = info.key.split('.')[0];
-        var containerName = info.key.split('.')[1];
-        var selector = '#graph';
-
-        switch (info.metric) {
-            case 'Stats.Cpu.TotalUtilization':
-                self.showEmptyGraph(selector, '%', '30m');
-                break;
-            case 'Stats.Memory.Usage':
-                self.showEmptyGraph(selector, 'MB', '30m');
-                break;
-            case 'Stats.Network.TxBytesDelta':
-                self.showEmptyGraph(selector, 'KB', '30m');
-                break;
-            case 'Stats.Network.RxBytesDelta':
-                self.showEmptyGraph(selector, 'KB', '30m');
-                break;
-        }
-
-        Cosmos.getContainerMetrics(planetName, containerName, info.metric, info.period, function(json) {
-            if (json.length == 0) {
-                vex.dialog.alert('No metrics to display yet.');
-            } else {
-                switch (info.metric) {
-                    case 'Stats.Cpu.TotalUtilization':
-                        self._showCpuUsageGraph(selector, json, self.dialogGraphHeight, info.cpuCount);
-                        break;
-                    case 'Stats.Memory.Usage':
-                        self._showMemoryUsageGraph(selector, json, self.dialogGraphHeight);
-                        break;
-                    case 'Stats.Network.RxBytesDelta':
-                        self._showNetworkInGraph(selector, json, self.dialogGraphHeight);
-                        break;
-                    case 'Stats.Network.TxBytesDelta':
-                        self._showNetworkOutGraph(selector, json, self.dialogGraphHeight);
-                        break;
-                }
-            }
-
-        }, function(jqXHR) {
-            console.log('request failed - ' + jqXHR.responseText);
-        });
-    },
-    _showCpuUsageGraph: function(selector, json, height, cpuCount) {
-        var self = this;
-        var dataset = json['StatsCpuTotalUtilization'];
-        if (dataset == undefined) {
-            return;
-        }
-
-        var data = [],
-            times = [];
-        for (var i = dataset.length - 1; i >= 0; i--) {
-            data.push(parseInt(dataset[i][2] * 1000) / 1000);
-            times.push(dataset[i][0] * 1000);
-        }
-
-        var total = cpuCount * 100;
-        var steps = 10;
-        var stepWidth = total / steps;
-
-        var scaleOpt = {
-            scaleOverride: true,
-            scaleSteps: steps,
-            scaleStepWidth: stepWidth,
-            scaleStartValue: 0
-        }
-        setTimeout(function() {
-            self.drawGraph(selector, undefined, height, times, data, '%', scaleOpt);
-        }, 10);
-    },
-    _showMemoryUsageGraph: function(selector, json, height) {
-        var self = this;
-        var dataset = json['StatsMemoryUsage'];
-        if (dataset == undefined) {
-            return;
-        }
-
-        var MB = 1024 * 1024;
-        var data = [],
-            times = [];
-        for (var i = dataset.length - 1; i >= 0; i--) {
-            data.push(parseInt(dataset[i][2] / MB));
-            times.push(dataset[i][0] * 1000);
-        }
-
-        setTimeout(function() {
-            self.drawGraph(selector, undefined, height, times, data, 'MB');
-        }, 10);
-    },
-    _showNetworkInGraph: function(selector, json, height) {
-        var self = this;
-        var dataset = json['StatsNetworkRxBytesDelta'];
-        if (dataset == undefined) {
-            return;
-        }
-
-        var KB = 1024;
-        var data = [],
-            times = [];
-        for (var i = dataset.length - 1; i >= 0; i--) {
-            data.push(parseInt(dataset[i][2] / KB));
-            times.push(dataset[i][0] * 1000);
-        }
-
-        setTimeout(function() {
-            self.drawGraph(selector, undefined, height, times, data, 'KB');
-        }, 10);
-    },
-    _showNetworkOutGraph: function(selector, json, height) {
-        var self = this;
-        var dataset = json['StatsNetworkTxBytesDelta'];
-        if (dataset == undefined) {
-            return;
-        }
-
-        var KB = 1024;
-        var data = [],
-            times = [];
-        for (var i = dataset.length - 1; i >= 0; i--) {
-            data.push(parseInt(dataset[i][2] / KB));
-            times.push(dataset[i][0] * 1000);
-        }
-
-        setTimeout(function() {
-            self.drawGraph(selector, undefined, height, times, data, 'KB');
-        }, 10);
-    },
-    showGraph: function(key) {
-        var self = this;
-
-        var container = this.data[key];
-        var planetName = key.split('.')[0];
-        var containerName = key.split('.')[1];
-
-        Cosmos.getContainerMetrics(planetName, containerName, 'all', '10m', function(json) {
-            var cpuCount = 0;
-            for (var i = 0; i < 100; i++) {
-                if (json['StatsCpuPerCpuUtilization' + i] != undefined) {
-                    cpuCount++;
-                } else {
-                    break;
-                }
-            }
-
-            $('#cpuUtil').data('info', {
-                key: key,
-                metric: 'Stats.Cpu.TotalUtilization',
-                cpuCount: cpuCount
-            });
-            $('#memUsage').data('info', {
-                key: key,
-                metric: 'Stats.Memory.Usage'
-            });
-            $('#netIn').data('info', {
-                key: key,
-                metric: 'Stats.Network.RxBytesDelta'
-            });
-            $('#netOut').data('info', {
-                key: key,
-                metric: 'Stats.Network.TxBytesDelta'
-            });
-
-            self._showCpuUsageGraph('#cpuUtil', json, self.graphHeight, cpuCount);
-            self._showMemoryUsageGraph('#memUsage', json, self.graphHeight);
-            self._showNetworkInGraph('#netIn', json, self.graphHeight);
-            self._showNetworkOutGraph('#netOut', json, self.graphHeight);
-            self._refresh = setTimeout(function() {
-                self.showGraph(key);
-            }, 1000 * 60);
-
-        }, function(jqXHR) {
-            // failed
-            console.log('request failed - ' + jqXHR.responseText);
-        });
+    charts: {
+      type: Array,
+      value: []
     }
+  },
+  _refresh: undefined,
+  graphHeight: 250,
+  dialogGraphHeight: 480,
+  ready: function() {
+    this.reload();
+  },
+  attached: function() {
+    this.showEmptyGraph('#cpuUtil', '%', '10m');
+    this.showEmptyGraph('#memUsage', 'MB', '10m');
+    this.showEmptyGraph('#netIn', 'KB', '10m');
+    this.showEmptyGraph('#netOut', 'KB', '10m');
+  },
+  detached: function() {
+    if (this._refresh) {
+      clearTimeout(this._refresh);
+    }
+  },
+  reload: function() {
+    var self = this;
+    Cosmos.getContainers(undefined, function(json) {
+      self.data = json;
+      self.selectItem();
+    }, function(jqXHR) {
+      console.log('request failed - ' + jqXHR.responseText);
+    });
+  },
+  selectItem: function() {
+    var self = this;
+    var $this = $(this);
+    var fn = function() {
+      var items = $this.find('container-item');
+      if (items.size() > 0) {
+        var e = {};
+        if (history.state.key) {
+          items.each(function(i, elem) {
+            if (elem.data.Key == history.state.key) {
+              e.currentTarget = elem;
+            }
+          });
+        } else {
+          e.currentTarget = items.get(0);
+        }
+
+        if (e.currentTarget) {
+          self.onItemClicked(e);
+        }
+      } else {
+        setTimeout(fn, 80);
+      }
+    };
+
+    setTimeout(fn, 80);
+  },
+  onGraphClicked: function(e) {
+    var self = this;
+    var info = $(e.currentTarget).data('info');
+
+    vex.open({
+      contentCSS: {
+        width: '976px'
+      },
+      afterOpen: function($vexContent) {
+        var content = document.createElement('dialog-metric');
+        $vexContent.append(content);
+        var $select = $(content).find('select[name=period]');
+        $select.change(function(e) {
+            info.period = $(this).val();
+            self.showDetailGraph(info);
+        });
+        info.period = $select.val();
+
+        var title;
+        switch (info.metric) {
+          case 'Stats.Cpu.TotalUtilization':
+            title = 'CPU Utilization (%)';
+            break;
+          case 'Stats.Memory.Usage':
+            title = 'Memory Usage (MB)';
+            break;
+          case 'Stats.Network.TxBytesDelta':
+            title = 'Network Out (KB)';
+            break;
+          case 'Stats.Network.RxBytesDelta':
+            title = 'Network In (KB)';
+            break;
+        }
+        content.querySelector('.title').innerText = title;
+
+        self.showDetailGraph(info);
+        return $vexContent;
+      },
+      afterClose: function() {}
+    });
+  },
+  onItemClicked: function(e) {
+    var selectedItem = $(e.currentTarget);
+
+    var allItems = selectedItem.parent().find('.item');
+    var index = selectedItem.get(0).data.Index;
+    if (index < 0) return;
+
+    allItems.removeClass('selected');
+    $(selectedItem.find('> div')).addClass('selected');
+
+    if (this._refresh) {
+      clearTimeout(this._refresh);
+    }
+    this.showGraph(this.data[index].Key);
+  },
+  drawGraph: function(selector, width, height, times, data, unit, scaleOpt) {
+    var dataset = {
+      labels: [],
+      datasets: [{
+        label: "Metrics",
+        fillColor: "rgba(72,157,255,0.2)",
+        strokeColor: "rgba(72,157,255,1)",
+        pointColor: "rgba(72,157,255,1)",
+        pointStrokeColor: "#fff",
+        pointHighlightFill: "#fff",
+        pointHighlightStroke: "rgba(72,157,255,1)",
+        data: []
+      }]
+    };
+    if (times) {
+      dataset.labels = function() {
+        var labels = [];
+        for (var i = 0; i < times.length; i++) {
+          labels.push(moment(times[i]).format("HH:mm"));
+        }
+        return labels;
+      }();
+    }
+    if (data) {
+      dataset.datasets[0].data = data;
+    }
+    var container = $('<div/>').css({
+      'text-align': 'center'
+    });
+    var chart = $('<canvas/>').css({
+      'display': 'inline-block'
+    }).attr('height', height);
+    var opt = {
+      bezierCurve: false,
+      pointHitDetectionRadius: 4,
+      scaleLabel: "<%=' ' + value%>",
+      scaleFontSize: 12,
+      scaleFontColor: '#888',
+      tooltipTemplate: "[<%=time%>] <%=value%>" + unit,
+      showTooltips: true,
+      scaleIntegersOnly: false
+    };
+    if (scaleOpt) {
+      var keys = Object.keys(scaleOpt);
+      for (var i in keys) {
+        opt[keys[i]] = scaleOpt[keys[i]];
+      }
+    }
+
+    if (isNaN(width)) {
+      opt.responsive = true;
+      opt.maintainAspectRatio = false;
+    } else {
+      chart.attr('width', width);
+    }
+
+    container.append(chart);
+    $(selector).empty().append(container);
+
+    var ctx = chart[0].getContext("2d");
+    var chart = new Chart(ctx).Line(dataset, opt);
+
+    var points = chart.datasets[0].points;
+    for (var i = 0; i < points.length; i++) {
+      points[i].time = moment(times[i]).format("YYYY-MM-DD HH:mm");
+    }
+    return chart;
+  },
+  showEmptyGraph: function(selector, unit, period) {
+    var self = this;
+    var data = [],
+        times = [],
+        points = 10,
+        timeWidth = 60 * 1000;
+
+    if (period == "10m") {
+        points = 10;
+    } else if (period == "30m") {
+        points = 30;
+    } else if (period == "3h") {
+        points = 36;
+        timeWidth *= 5;
+    } else if (period == "8h") {
+        points = 32;
+        timeWidth *= 15;
+    } else if (period == "24h") {
+        points = 24;
+        timeWidth *= 60;
+    }
+
+    var now = (new Date()).getTime();
+    for (var i = points; i > 0; i--) {
+      data.push(0);
+      times.push(now - (i * timeWidth));
+    }
+
+    setTimeout(function() {
+      self.drawGraph(selector, undefined, self.graphHeight, times, data, unit);
+    }, 10);
+  },
+  showDetailGraph: function(info) {
+    var self = this;
+    var container = this.data[info.key];
+    var planetName = info.key.split('.')[0];
+    var containerName = info.key.split('.')[1];
+    var selector = '#graph';
+
+    switch (info.metric) {
+      case 'Stats.Cpu.TotalUtilization':
+        self.showEmptyGraph(selector, '%', '30m');
+        break;
+      case 'Stats.Memory.Usage':
+        self.showEmptyGraph(selector, 'MB', '30m');
+        break;
+      case 'Stats.Network.TxBytesDelta':
+        self.showEmptyGraph(selector, 'KB', '30m');
+        break;
+      case 'Stats.Network.RxBytesDelta':
+        self.showEmptyGraph(selector, 'KB', '30m');
+        break;
+    }
+
+    Cosmos.getContainerMetrics(planetName, containerName, info.metric, info.period, function(json) {
+      if (json.length == 0) {
+        vex.dialog.alert('No metrics to display yet.');
+      } else {
+          switch (info.metric) {
+            case 'Stats.Cpu.TotalUtilization':
+              self._showCpuUsageGraph(selector, json, self.dialogGraphHeight, info.cpuCount);
+              break;
+            case 'Stats.Memory.Usage':
+              self._showMemoryUsageGraph(selector, json, self.dialogGraphHeight);
+              break;
+            case 'Stats.Network.RxBytesDelta':
+              self._showNetworkInGraph(selector, json, self.dialogGraphHeight);
+              break;
+            case 'Stats.Network.TxBytesDelta':
+              self._showNetworkOutGraph(selector, json, self.dialogGraphHeight);
+              break;
+          }
+      }
+    }, function(jqXHR) {
+      console.log('request failed - ' + jqXHR.responseText);
+    });
+  },
+  _showCpuUsageGraph: function(selector, json, height, cpuCount) {
+    var self = this;
+    var dataset = json['StatsCpuTotalUtilization'];
+    if (dataset == undefined) {
+      return;
+    }
+
+    var data = [],
+        times = [];
+    for (var i = dataset.length - 1; i >= 0; i--) {
+      data.push(parseInt(dataset[i][2] * 1000) / 1000);
+      times.push(dataset[i][0] * 1000);
+    }
+
+    var total = cpuCount * 100;
+    var steps = 10;
+    var stepWidth = total / steps;
+
+    var scaleOpt = {
+      scaleOverride: true,
+      scaleSteps: steps,
+      scaleStepWidth: stepWidth,
+      scaleStartValue: 0
+    }
+    setTimeout(function() {
+      self.drawGraph(selector, undefined, height, times, data, '%', scaleOpt);
+    }, 10);
+  },
+  _showMemoryUsageGraph: function(selector, json, height) {
+    var self = this;
+    var dataset = json['StatsMemoryUsage'];
+    if (dataset == undefined) return;
+
+    var MB = 1024 * 1024;
+    var data = [],
+        times = [];
+    for (var i = dataset.length - 1; i >= 0; i--) {
+      data.push(parseInt(dataset[i][2] / MB));
+      times.push(dataset[i][0] * 1000);
+    }
+
+    setTimeout(function() {
+      self.drawGraph(selector, undefined, height, times, data, 'MB');
+    }, 10);
+  },
+  _showNetworkInGraph: function(selector, json, height) {
+    var self = this;
+    var dataset = json['StatsNetworkRxBytesDelta'];
+    if (dataset == undefined) return;
+
+    var KB = 1024;
+    var data = [],
+        times = [];
+    for (var i = dataset.length - 1; i >= 0; i--) {
+      data.push(parseInt(dataset[i][2] / KB));
+      times.push(dataset[i][0] * 1000);
+    }
+
+    setTimeout(function() {
+      self.drawGraph(selector, undefined, height, times, data, 'KB');
+    }, 10);
+  },
+  _showNetworkOutGraph: function(selector, json, height) {
+    var self = this;
+    var dataset = json['StatsNetworkTxBytesDelta'];
+    if (dataset == undefined) return;
+
+    var KB = 1024;
+    var data = [],
+        times = [];
+    for (var i = dataset.length - 1; i >= 0; i--) {
+      data.push(parseInt(dataset[i][2] / KB));
+      times.push(dataset[i][0] * 1000);
+    }
+
+    setTimeout(function() {
+      self.drawGraph(selector, undefined, height, times, data, 'KB');
+    }, 10);
+  },
+  showGraph: function(key) {
+    var self = this;
+
+    var container = this.data[key];
+    var planetName = key.split('.')[0];
+    var containerName = key.split('.')[1];
+
+    Cosmos.getContainerMetrics(planetName, containerName, 'all', '10m', function(json) {
+      var cpuCount = 0;
+      for (var i = 0; i < 100; i++) {
+        if (json['StatsCpuPerCpuUtilization' + i] != undefined) {
+          cpuCount++;
+        } else {
+          break;
+        }
+      }
+
+      $('#cpuUtil').data('info', {
+        key: key,
+        metric: 'Stats.Cpu.TotalUtilization',
+        cpuCount: cpuCount
+      });
+      $('#memUsage').data('info', {
+        key: key,
+        metric: 'Stats.Memory.Usage'
+      });
+      $('#netIn').data('info', {
+        key: key,
+        metric: 'Stats.Network.RxBytesDelta'
+      });
+      $('#netOut').data('info', {
+        key: key,
+        metric: 'Stats.Network.TxBytesDelta'
+      });
+
+      self._showCpuUsageGraph('#cpuUtil', json, self.graphHeight, cpuCount);
+      self._showMemoryUsageGraph('#memUsage', json, self.graphHeight);
+      self._showNetworkInGraph('#netIn', json, self.graphHeight);
+      self._showNetworkOutGraph('#netOut', json, self.graphHeight);
+      self._refresh = setTimeout(function() {
+        self.showGraph(key);
+      }, 1000 * 60);
+    }, function(jqXHR) {
+      // failed
+      console.log('request failed - ' + jqXHR.responseText);
+    });
+  }
 });
 </script>
