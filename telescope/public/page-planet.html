@@ -1,175 +1,155 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<dom-module id="planet-containers">
-    <style></style>
-    <template>
-        <template is="x-repeat" items="{{data}}">
-            <div style="padding-bottom:10px; padding-left:30px;">
-                <a href="{{item.Key}}" on-click="onContainerNameClicked">{{item.Names0[3]}}</a>
-            </div>
-        </template>
-    </template>
-</dom-module>
-<script>
-Polymer({
-    is: 'planet-containers',
-    properties: {
-        data: {
-            type: Array,
-            value: []
-
-        }
-    },
-    onContainerNameClicked: function(e) {
-        event.preventDefault();
-        var target = e.target || e.srcElement;
-        var key = $(target).attr('href');
-
-        history.pushState({
-            page: "container",
-            key: key
-        }, 'container', '/containers');
-    }
-});
-</script>
 <dom-module id="page-planet">
-    <style>
-    :host > div {
-        padding: 0 10px;
-    }
-    
-    :host table {
-        width: 100%;
-    }
-    
-    :host thead > tr {
-        border-bottom: 2px solid #575757;
-        height: 48px;
-    }
-    
-    :host tbody > tr:hover {
-        background-color: #222;
-    }
-    
-    :host tbody > tr > td {
-        cursor: pointer;
-    }
-    
-    :host tbody > tr.outer {
-        height: 48px;
-        color: #bebebe;
-    }
-    
-    :host tbody > tr.inner {
-        border-bottom: 1px solid #424242;
-        color: #bebebe;
-        display: none;
-    }
-    
-    :host th:nth-child(1),
-    :host td:nth-child(1) {
-        padding-left: 10px;
-    }
-    
-    :host .card {
-        padding: 0;
-    }
-    </style>
-    <template>
-        <div>
-            <div class="card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Planet</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template id="planetTemplate" is="x-repeat" items="{{data}}">
-                            <tr class="outer" on-click="onCellClicked">
-                                <td>
-                                    <b>{{item.Planet}}</b>
-                                </td>
-                            </tr>
-                            <tr class="inner">
-                                <td>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
+<style>
+.container {
+  width: 100%;
+  padding: 0;
+}
+
+@media (min-width: 1400px) {
+  .container {
+    width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+.row {
+  margin: 0;
+}
+
+.list {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #222;
+}
+
+@media (min-width: 1400px) {
+  .list {
+    width: 320px;
+  }
+}
+
+.content {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 1400px) {
+  .content {
+    width: 1080px;
+  }
+}
+
+#search {
+  padding: 10px;
+}
+
+#search input {
+  width: 100%;
+  color: #000;
+}
+</style>
+<template>
+
+  <div class="container">
+
+    <div class="row">
+
+      <div class="list col-md-4 col-xs-12">
+        <div id="search">
+          <input type="text" class="search" placeholder="search" style="" />
         </div>
-    </template>
+
+        <div id="planet-list">
+          <ul>
+            <template is="x-repeat" items="{{data}}">
+              <li><a on-click="onPlanetClicked">{{item.Planet}}</a></li>
+            </template>
+          </ul>
+        </div>
+      </div>
+
+      <div class="content col-md-8 col-xs-12">
+      </div>
+
+    </div>
+
+  </div>
+</template>
 </dom-module>
 <script>
 Polymer({
-    is: 'page-planet',
-    properties: {
-        data: {
-            type: Array,
-            value: []
-        }
-    },
-    ready: function() {
-        var self = this;
-        Cosmos.getPlanets(function(json) {
-            self.data = json;
-            self.attached();
-        }, function(jqXHR) {
-            console.log('request faield - ' + jqXHR.responseText);
-        });
-    },
-    onCellClicked: function(e) {
-        var target = $(e.target || e.srcElement);
-        var selectedTr = target.parent();
-        var allTr = target.closest('tbody').find('tr');
-
-        allTr.removeClass('selected');
-        selectedTr.addClass('selected');
-        var key = selectedTr.find('td:first').text()
-
-        this.showContainers(key, e);
-    },
-    attached: function() {
-        if (this.data.length > 0 && history.state && history.state.key) {
-            var jqElem = $(this);
-            var self = this;
-
-            var fn = function() {
-                var checkboxes = jqElem.find('input[type=checkbox]');
-                if (checkboxes.size() > 0) {
-                    checkboxes.each(function(i, elem) {
-                        var input = $(elem);
-                        if (input.val() == history.state.key) {
-                            input.prop('checked', true);
-                            self.onCheckChanged({
-                                target: elem
-                            });
-                        }
-                    });
-                } else {
-                    setTimeout(fn, 50);
-                }
-            };
-            setTimeout(fn, 50);
-        }
-    },
-    showContainers: function(key, e) {
-        var self = this;
-        var sender = e.target || e.srcElement;
-
-        Cosmos.getContainers(key, function(json) {
-            var elem = document.createElement('planet-containers');
-            elem.data = json;
-            var innerTr = $(sender).closest('tr').next();
-            innerTr.show();
-            innerTr.find('td').empty();
-            Polymer.dom(innerTr.find('td')[0]).appendChild(elem);
-
-        }, function(jqXHR) {
-            alert('request failed - ' + jqXHR.responseText);
-        });
-        // }
+  is: 'page-planet',
+  properties: {
+    data: {
+      type: Array,
+      value: []
     }
+  },
+  ready: function() {
+    var self = this;
+    Cosmos.getPlanets(function(json) {
+      self.data = json;
+      self.attached();
+    }, function(jqXHR) {
+      console.log('request faield - ' + jqXHR.responseText);
+    });
+  },
+  onPlanetClicked: function(e) {
+    var self = this;
+    var target = $(e.currentTarget);
+  },
+  onCellClicked: function(e) {
+    var target = $(e.target || e.srcElement);
+    var selectedTr = target.parent();
+    var allTr = target.closest('tbody').find('tr');
+
+    allTr.removeClass('selected');
+    selectedTr.addClass('selected');
+    var key = selectedTr.find('td:first').text()
+
+    this.showContainers(key, e);
+  },
+  attached: function() {
+    if (this.data.length > 0 && history.state && history.state.key) {
+      var jqElem = $(this);
+      var self = this;
+
+      var fn = function() {
+        var checkboxes = jqElem.find('input[type=checkbox]');
+        if (checkboxes.size() > 0) {
+          checkboxes.each(function(i, elem) {
+            var input = $(elem);
+            if (input.val() == history.state.key) {
+              input.prop('checked', true);
+              self.onCheckChanged({
+                  target: elem
+              });
+            }
+          });
+        } else {
+          setTimeout(fn, 50);
+        }
+      };
+      setTimeout(fn, 50);
+    }
+  },
+  showContainers: function(key, e) {
+    var self = this;
+    var sender = e.target || e.srcElement;
+
+    Cosmos.getContainers(key, function(json) {
+      var elem = document.createElement('planet-containers');
+      elem.data = json;
+      var innerTr = $(sender).closest('tr').next();
+      innerTr.show();
+      innerTr.find('td').empty();
+      Polymer.dom(innerTr.find('td')[0]).appendChild(elem);
+    }, function(jqXHR) {
+      alert('request failed - ' + jqXHR.responseText);
+    });
+  }
 });
 </script>

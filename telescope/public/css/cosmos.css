@@ -30,51 +30,19 @@ a:hover {
   border: 1px solid #fff;
 }
 
-h1 {
-
-}
-
-h2 {
-
-}
-
-h3 {
-
-}
-
-h4 {
-
-}
-
-h5 {
-
-}
-
-h6 {
-
-}
-
 /*
  * Base structure
  */
 
-html,
+html {
+  background-color: #222;
+}
+
 body {
-    height: 100%;
-    background-color: #222;
-    font-family: 'RobotoDraft', sans-serif;
-    color: #fff;
+  background-color: #222;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  color: #fff;
 }
-
-header,
-footer {
-    text-align: center;
-}
-
-
-/*
- * Footer
- */
 
 .card {
     min-height: 50px;
@@ -87,5 +55,15 @@ footer {
     -webkit-border-radius: 2px;
 }
 
-.page {
-    padding: 20px 10px;
+.vex.vex-theme-plain .vex-content {
+    font-family: inherit;
+    background-color: #292929;
+    color: #fff;
+}
+.vex-overlay {
+    background: rgba(0, 0, 0, 0.6);
+}
+.vex.vex-theme-plain .vex-close:hover::before, .vex.vex-theme-plain .vex-close:active::before {
+    background: rgba(72,157,255,0.2);
+    color: #fff;
+}
