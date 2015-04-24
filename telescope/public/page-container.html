@@ -3,13 +3,13 @@
 <!-- Dialog -->
 <dom-module id="dialog-metric">
 <style>
-:host > p.title {
+p.title {
   display: inline-block;
   font-weight: bold;
   margin-right: 20px;
 }
 
-:host > div.controls {
+div.controls {
   display: inline-block;
 }
 </style>
@@ -100,53 +100,34 @@ Polymer({
 
 .row {
   margin: 0;
+  padding: 0;
 }
 
-.card {
-    min-height: 50px;
-    background-color: #222;
-}
-
-.container-list {
+.left-container {
   margin: 0;
   padding: 0;
 }
 
 @media (min-width: 1400px) {
-  .container-list {
+  .left-container {
     width: 320px;
   }
 }
 
-.container-metrics {
+.container-list {
+  padding: 20px 0;
+}
+
+.main-container {
   width: 100%;
   margin: 0;
   padding: 0;
 }
 
 @media (min-width: 1400px) {
-  .container-metrics {
+  .main-container {
     width: 1080px;
   }
-}
-
-:host .card.list {
-  padding: 20px 0;
-}
-
-:host div {
-  width: 100%;
-}
-
-@media (min-width: 1400px) {
-  :host > div {
-    width: 1400px;
-    margin: 0 auto;
-  }
-}
-
-:host container-item {
-  cursor: pointer;
 }
 
 .search {
@@ -162,42 +143,58 @@ Polymer({
   color: #fff;
 }
 
-:host .graph h5 {
+.graph-list {
+  padding: 0 0 0 10px;
+}
+
+.graph-list h3 {
+  margin: 0;
+  padding: 0;
+  font-size: 17px;
   text-align: center;
 }
 
-:host .card.graph {
-  padding: 10px;
+.graph-list h3 {
+  padding-top: 60px;
+  padding-bottom: 10px;
 }
 
-:host .graph > div {
+.graph-list h3:first-child {
+  padding-top: 0;
+}
+
+.graph {
   min-height: 265px;
+  cursor: pointer;
+}
+
+container-item {
   cursor: pointer;
 }
 </style>
 <template>
   <div class="container">
     <div class="row">
-      <div class="container-list col-md-4 col-xs-12">
+      <div class="left-container col-md-4 col-xs-12">
         <div class="search">
           <input id="search-input" type="text" placeholder="search" style="" />
         </div>
-        <div class="card list">
+        <div class="container-list">
           <template is="x-repeat" items="{{data}}">
             <container-item data="{{item}}" on-click="onItemClicked"></container-item>
           </template>
         </div>
       </div>
-      <div class="container-metrics col-md-8 col-xs-12">
-        <div class="card graph">
-          <div id="cpuUtil" on-click="onGraphClicked"></div>
-          <h5>CPU Utilization (%)</h5>
-          <div id="memUsage" on-click="onGraphClicked"></div>
-          <h5>Memory Usage (MB)</h5>
-          <div id="netIn" on-click="onGraphClicked"></div>
-          <h5>Network In (KB)</h5>
-          <div id="netOut" on-click="onGraphClicked"></div>
-          <h5>Network Out (KB)</h5>
+      <div class="main-container col-md-8 col-xs-12">
+        <div class="graph-list">
+          <h3>CPU Utilization (%)</h3>
+          <div id="cpuUtil" class="graph" on-click="onGraphClicked"></div>
+          <h3>Memory Usage (MB)</h3>
+          <div id="memUsage" class="graph" on-click="onGraphClicked"></div>
+          <h3>Network In (KB)</h3>
+          <div id="netIn" class="graph" on-click="onGraphClicked"></div>
+          <h3>Network Out (KB)</h3>
+          <div id="netOut" class="graph" on-click="onGraphClicked"></div>
         </div>
       </div>
     </div>
