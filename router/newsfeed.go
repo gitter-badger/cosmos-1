@@ -9,7 +9,7 @@ import (
 )
 
 func GetNewsFeeds(r render.Render, req *http.Request, cosmos *service.CosmosService) {
-	token := util.GetToken(req)
+	token := util.GetQueryParam(req, "token", DEFAULT_USER)
 	result, err := cosmos.GetNewsFeeds(token, "")
 	if err != nil {
 		r.JSON(http.StatusInternalServerError, JSON{"error": err.Error()})

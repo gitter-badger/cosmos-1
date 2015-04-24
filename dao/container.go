@@ -36,7 +36,7 @@ func (this *ContainerDao) GetContainersOfPlanet(token, planet string, useRollup 
 	return series, nil
 }
 
-func (this *ContainerDao) GetContainerMetrics(token, planetName, containerName, metric string) ([]*influxdbc.Series, error) {
+func (this *ContainerDao) GetContainerMetrics(token, planetName, containerName, metric, period string) ([]*influxdbc.Series, error) {
 	seriesName := converter.MakeContainerSeriesName(token, planetName, containerName)
 	if metric != "all" {
 		seriesName = seriesName + "\\." + metric
@@ -44,7 +44,33 @@ func (this *ContainerDao) GetContainerMetrics(token, planetName, containerName, 
 		seriesName = seriesName + "\\."
 	}
 
-	dbQuery := fmt.Sprintf("SELECT num_value, txt_value FROM /^MIN\\.CONTAINER\\.%s/ LIMIT 10", seriesName)
+	var (
+		cond   = ""
+		prefix = "MIN"
+		limit  = 10
+	)
+
+	switch period {
+	case "10m":
+		cond = "WHERE time > now() - 10m"
+	case "30m":
+		cond = "WHERE time > now() - 30m"
+		limit = 30
+	case "3h":
+		prefix = "5MIN\\.MIN"
+		cond = "WHERE time > now() - 3h"
+		limit = 36
+	case "8h":
+		prefix = "15MIN\\.5MIN\\.MIN"
+		cond = "WHERE time > now() - 8h"
+		limit = 32
+	case "24h":
+		prefix = "HOUR\\.15MIN\\.5MIN\\.MIN"
+		cond = "WHERE time > now() - 24h"
+		limit = 24
+	}
+
+	dbQuery := fmt.Sprintf("SELECT num_value, txt_value FROM /^%s\\.CONTAINER\\.%s/ %s LIMIT %d", prefix, seriesName, cond, limit)
 	series, err := this.dbc.Query(dbQuery, "s")
 
 	if err != nil {

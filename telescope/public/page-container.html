@@ -1,4 +1,35 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
+<dom-module id="dialog-metric">
+    <style>
+    :host > p.title {
+        display: inline-block;
+        font-weight: bold;
+        margin-right: 20px;
+    }
+    
+    :host > div.controls {
+        display: inline-block;
+    }
+    </style>
+    <template>
+        <p class="title"></p>
+        <div class="controls">
+            <label>Last</label>
+            <select name="period">
+                <option selected="selected" value="30m">30 minutes</option>
+                <option value="3h">3 hours</option>
+                <option value="8h">8 hours</option>
+                <option value="24h">24 hours</option>
+            </select>
+        </div>
+        <div id="graph"></div>
+    </template>
+</dom-module>
+<script>
+Polymer({
+    is: 'dialog-metric'
+});
+</script>
 <dom-module id="container-item">
     <style>
     :host > div:hover,
@@ -113,13 +144,13 @@ Polymer({
                 </div>
                 <div class="col-md-8 col-xs-12">
                     <div class="card graph">
-                        <div id="cpuUtil" name="Stats.Cpu.TotalUtilization" on-click="onGraphClicked"></div>
+                        <div id="cpuUtil" on-click="onGraphClicked"></div>
                         <h5>CPU Utilization (%)</h5>
-                        <div id="memUsage" name="Stats.Memory.Usage" on-click="onGraphClicked"></div>
+                        <div id="memUsage" on-click="onGraphClicked"></div>
                         <h5>Memory Usage (MB)</h5>
-                        <div id="netIn" name="Stats.Network.RxBytes" on-click="onGraphClicked"></div>
+                        <div id="netIn" on-click="onGraphClicked"></div>
                         <h5>Network In (KB)</h5>
-                        <div id="netOut" name="Stats.Network.TxBytes" on-click="onGraphClicked"></div>
+                        <div id="netOut" on-click="onGraphClicked"></div>
                         <h5>Network Out (KB)</h5>
                     </div>
                 </div>
@@ -141,15 +172,15 @@ Polymer({
     },
     _refresh: undefined,
     graphHeight: 250,
-    dialogGraphHeight: 400,
+    dialogGraphHeight: 480,
     ready: function() {
         this.reload();
     },
     attached: function() {
-        this.showEmptyGraph('#cpuUtil');
-        this.showEmptyGraph('#memUsage');
-        this.showEmptyGraph('#netIn');
-        this.showEmptyGraph('#netOut');
+        this.showEmptyGraph('#cpuUtil', '%', '10m');
+        this.showEmptyGraph('#memUsage', 'MB', '10m');
+        this.showEmptyGraph('#netIn', 'KB', '10m');
+        this.showEmptyGraph('#netOut', 'KB', '10m');
     },
     detached: function() {
         if (this._refresh) {
@@ -194,35 +225,40 @@ Polymer({
     },
     onGraphClicked: function(e) {
         var self = this;
-        var target = $(e.currentTarget);
+        var info = $(e.currentTarget).data('info');
 
         vex.open({
             contentCSS: {
                 width: '976px'
             },
             afterOpen: function($vexContent) {
-                $vexContent.append($('<div id="graph"/>'));
-                var h = $('<h3 style="text-align:center;"/>');
+                var content = document.createElement('dialog-metric');
+                $vexContent.append(content);
+                var $select = $(content).find('select[name=period]');
+                $select.change(function(e) {
+                    info.period = $(this).val();
+                    self.showDetailGraph(info);
+                });
+                info.period = $select.val();
+
                 var title;
-                switch (target.attr('name')) {
+                switch (info.metric) {
                     case 'Stats.Cpu.TotalUtilization':
-                        title = 'CPU Utilization (%)'
+                        title = 'CPU Utilization (%)';
                         break;
                     case 'Stats.Memory.Usage':
-                        title = 'Memory Usage (MB)'
+                        title = 'Memory Usage (MB)';
                         break;
-                    case 'Stats.Network.TxBytes':
-                        title = 'Network Out (KB)'
+                    case 'Stats.Network.TxBytesDelta':
+                        title = 'Network Out (KB)';
                         break;
-                    case 'Stats.Network.RxBytes':
-                        title = 'Network In (KB)'
+                    case 'Stats.Network.RxBytesDelta':
+                        title = 'Network In (KB)';
                         break;
                 }
+                content.querySelector('.title').innerText = title;
 
-                h.text(title);
-                $vexContent.append(h);
-
-                self.showDetailGraph(target.attr('key'), target.attr('name'));
+                self.showDetailGraph(info);
                 return $vexContent;
             },
             afterClose: function() {}
@@ -243,7 +279,7 @@ Polymer({
         }
         this.showGraph(this.data[index].Key);
     },
-    drawGraph: function(selector, width, height, times, data, unit) {
+    drawGraph: function(selector, width, height, times, data, unit, scaleOpt) {
         var dataset = {
             labels: [],
             datasets: [{
@@ -282,8 +318,15 @@ Polymer({
             scaleFontSize: 12,
             scaleFontColor: '#888',
             tooltipTemplate: "[<%=time%>] <%=value%>" + unit,
-            showTooltips: true
+            showTooltips: true,
+            scaleIntegersOnly: false
         };
+        if (scaleOpt) {
+            var keys = Object.keys(scaleOpt);
+            for (var i in keys) {
+                opt[keys[i]] = scaleOpt[keys[i]];
+            }
+        }
 
         if (isNaN(width)) {
             opt.responsive = true;
@@ -293,7 +336,7 @@ Polymer({
         }
 
         container.append(chart);
-        $(selector).append(container);
+        $(selector).empty().append(container);
 
         var ctx = chart[0].getContext("2d");
         var chart = new Chart(ctx).Line(dataset, opt);
@@ -304,49 +347,85 @@ Polymer({
         }
         return chart;
     },
-    showEmptyGraph: function(selector, unit) {
+    showEmptyGraph: function(selector, unit, period) {
         var self = this;
         var data = [],
-            times = [];
+            times = [],
+            points = 10,
+            timeWidth = 60 * 1000;
+
+        if (period == "10m") {
+            points = 10;
+        } else if (period == "30m") {
+            points = 30;
+        } else if (period == "3h") {
+            points = 36;
+            timeWidth *= 5;
+        } else if (period == "8h") {
+            points = 32;
+            timeWidth *= 15;
+        } else if (period == "24h") {
+            points = 24;
+            timeWidth *= 60;
+        }
 
         var now = (new Date()).getTime();
-        for (var i = 10; i > 0; i--) {
+        for (var i = points; i > 0; i--) {
             data.push(0);
-            times.push(now - (i * 60 * 1000));
+            times.push(now - (i * timeWidth));
         }
 
         setTimeout(function() {
             self.drawGraph(selector, undefined, self.graphHeight, times, data, unit);
         }, 10);
     },
-    showDetailGraph: function(key, metric) {
+    showDetailGraph: function(info) {
         var self = this;
-        var container = this.data[key];
-        var planetName = key.split('.')[0];
-        var containerName = key.split('.')[1];
+        var container = this.data[info.key];
+        var planetName = info.key.split('.')[0];
+        var containerName = info.key.split('.')[1];
         var selector = '#graph';
 
-        Cosmos.getContainerMetrics(planetName, containerName, metric, function(json) {
-            switch (metric) {
-                case 'Stats.Cpu.TotalUtilization':
-                    self._showCpuUsageGraph(selector, json, self.dialogGraphHeight);
-                    break;
-                case 'Stats.Memory.Usage':
-                    self._showMemoryUsageGraph(selector, json, self.dialogGraphHeight);
-                    break;
-                case 'Stats.Network.RxBytes':
-                    self._showNetworkInGraph(selector, json, self.dialogGraphHeight);
-                    break;
-                case 'Stats.Network.TxBytes':
-                    self._showNetworkOutGraph(selector, json, self.dialogGraphHeight);
-                    break;
+        switch (info.metric) {
+            case 'Stats.Cpu.TotalUtilization':
+                self.showEmptyGraph(selector, '%', '30m');
+                break;
+            case 'Stats.Memory.Usage':
+                self.showEmptyGraph(selector, 'MB', '30m');
+                break;
+            case 'Stats.Network.TxBytesDelta':
+                self.showEmptyGraph(selector, 'KB', '30m');
+                break;
+            case 'Stats.Network.RxBytesDelta':
+                self.showEmptyGraph(selector, 'KB', '30m');
+                break;
+        }
+
+        Cosmos.getContainerMetrics(planetName, containerName, info.metric, info.period, function(json) {
+            if (json.length == 0) {
+                vex.dialog.alert('No metrics to display yet.');
+            } else {
+                switch (info.metric) {
+                    case 'Stats.Cpu.TotalUtilization':
+                        self._showCpuUsageGraph(selector, json, self.dialogGraphHeight, info.cpuCount);
+                        break;
+                    case 'Stats.Memory.Usage':
+                        self._showMemoryUsageGraph(selector, json, self.dialogGraphHeight);
+                        break;
+                    case 'Stats.Network.RxBytesDelta':
+                        self._showNetworkInGraph(selector, json, self.dialogGraphHeight);
+                        break;
+                    case 'Stats.Network.TxBytesDelta':
+                        self._showNetworkOutGraph(selector, json, self.dialogGraphHeight);
+                        break;
+                }
             }
 
         }, function(jqXHR) {
-
+            console.log('request failed - ' + jqXHR.responseText);
         });
     },
-    _showCpuUsageGraph: function(selector, json, height) {
+    _showCpuUsageGraph: function(selector, json, height, cpuCount) {
         var self = this;
         var dataset = json['StatsCpuTotalUtilization'];
         if (dataset == undefined) {
@@ -359,10 +438,19 @@ Polymer({
             data.push(parseInt(dataset[i][2] * 1000) / 1000);
             times.push(dataset[i][0] * 1000);
         }
-        $(selector).empty();
 
+        var total = cpuCount * 100;
+        var steps = 10;
+        var stepWidth = total / steps;
+
+        var scaleOpt = {
+            scaleOverride: true,
+            scaleSteps: steps,
+            scaleStepWidth: stepWidth,
+            scaleStartValue: 0
+        }
         setTimeout(function() {
-            self.drawGraph(selector, undefined, height, times, data, '%');
+            self.drawGraph(selector, undefined, height, times, data, '%', scaleOpt);
         }, 10);
     },
     _showMemoryUsageGraph: function(selector, json, height) {
@@ -379,7 +467,6 @@ Polymer({
             data.push(parseInt(dataset[i][2] / MB));
             times.push(dataset[i][0] * 1000);
         }
-        $(selector).empty();
 
         setTimeout(function() {
             self.drawGraph(selector, undefined, height, times, data, 'MB');
@@ -387,7 +474,7 @@ Polymer({
     },
     _showNetworkInGraph: function(selector, json, height) {
         var self = this;
-        var dataset = json['StatsNetworkRxBytes'];
+        var dataset = json['StatsNetworkRxBytesDelta'];
         if (dataset == undefined) {
             return;
         }
@@ -399,7 +486,6 @@ Polymer({
             data.push(parseInt(dataset[i][2] / KB));
             times.push(dataset[i][0] * 1000);
         }
-        $(selector).empty();
 
         setTimeout(function() {
             self.drawGraph(selector, undefined, height, times, data, 'KB');
@@ -407,7 +493,7 @@ Polymer({
     },
     _showNetworkOutGraph: function(selector, json, height) {
         var self = this;
-        var dataset = json['StatsNetworkTxBytes'];
+        var dataset = json['StatsNetworkTxBytesDelta'];
         if (dataset == undefined) {
             return;
         }
@@ -419,7 +505,6 @@ Polymer({
             data.push(parseInt(dataset[i][2] / KB));
             times.push(dataset[i][0] * 1000);
         }
-        $(selector).empty();
 
         setTimeout(function() {
             self.drawGraph(selector, undefined, height, times, data, 'KB');
@@ -432,13 +517,35 @@ Polymer({
         var planetName = key.split('.')[0];
         var containerName = key.split('.')[1];
 
-        Cosmos.getContainerMetrics(planetName, containerName, 'all', function(json) {
-            $('#cpuUtil').attr('key', key);
-            $('#memUsage').attr('key', key);
-            $('#netIn').attr('key', key);
-            $('#netOut').attr('key', key);
+        Cosmos.getContainerMetrics(planetName, containerName, 'all', '10m', function(json) {
+            var cpuCount = 0;
+            for (var i = 0; i < 100; i++) {
+                if (json['StatsCpuPerCpuUtilization' + i] != undefined) {
+                    cpuCount++;
+                } else {
+                    break;
+                }
+            }
 
-            self._showCpuUsageGraph('#cpuUtil', json, self.graphHeight);
+            $('#cpuUtil').data('info', {
+                key: key,
+                metric: 'Stats.Cpu.TotalUtilization',
+                cpuCount: cpuCount
+            });
+            $('#memUsage').data('info', {
+                key: key,
+                metric: 'Stats.Memory.Usage'
+            });
+            $('#netIn').data('info', {
+                key: key,
+                metric: 'Stats.Network.RxBytesDelta'
+            });
+            $('#netOut').data('info', {
+                key: key,
+                metric: 'Stats.Network.TxBytesDelta'
+            });
+
+            self._showCpuUsageGraph('#cpuUtil', json, self.graphHeight, cpuCount);
             self._showMemoryUsageGraph('#memUsage', json, self.graphHeight);
             self._showNetworkInGraph('#netIn', json, self.graphHeight);
             self._showNetworkOutGraph('#netOut', json, self.graphHeight);
@@ -448,7 +555,7 @@ Polymer({
 
         }, function(jqXHR) {
             // failed
-            alert('request failed - ' + jqXHR.responseText);
+            console.log('request failed - ' + jqXHR.responseText);
         });
     }
 });

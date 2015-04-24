@@ -5,20 +5,12 @@ import (
 	"net/http"
 )
 
-func GetToken(req *http.Request) string {
-	token := req.URL.Query().Get("token")
-	if token == "" {
-		token = "default"
+func GetQueryParam(req *http.Request, key, defaultVal string) string {
+	param := req.URL.Query().Get(key)
+	if param == "" {
+		return defaultVal
 	}
-	return token
-}
-
-func GetMetric(req *http.Request) string {
-	metric := req.URL.Query().Get("metric")
-	if metric == "" {
-		metric = "all"
-	}
-	return metric
+	return param
 }
 
 func GetBodyFromRequest(req *http.Request) ([]byte, error) {

@@ -13,8 +13,10 @@ func (p *Port) Description() string {
 }
 
 type Network struct {
-	RxBytes *int64
-	TxBytes *int64
+	RxBytes      *int64
+	TxBytes      *int64
+	RxBytesDelta *int64
+	TxBytesDelta *int64
 }
 
 type Cpu struct {

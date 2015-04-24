@@ -51,12 +51,12 @@
                 xhr.complete(complete)
             }
         },
-        getContainerMetrics: function(planet, containerName, metric, done, fail, complete) {
+        getContainerMetrics: function(planet, containerName, metric, period, done, fail, complete) {
             var self = this;
             var url = '/' + Cosmos.API_VER + '/planets/' + planet + '/containers/' + containerName;
             var xhr = $.ajax({
                 url: url,
-                data: { metric: metric ? metric : 'all' },
+                data: { metric: metric, period: period },
                 method: 'GET',
                 accept: 'application/json',
                 dataType: 'json'

@@ -12,7 +12,7 @@ import (
 )
 
 func GetContainers(r render.Render, req *http.Request, cosmos *service.CosmosService) {
-	token := util.GetToken(req)
+	token := util.GetQueryParam(req, "token", DEFAULT_USER)
 
 	result, err := cosmos.GetContainers(token)
 	if err != nil {
@@ -26,7 +26,7 @@ func GetContainers(r render.Render, req *http.Request, cosmos *service.CosmosSer
 
 func AddContainersOfPlanet(r render.Render, params martini.Params, req *http.Request, cosmos *service.CosmosService) {
 	req.ParseForm()
-	token := util.GetToken(req)
+	token := util.GetQueryParam(req, "token", DEFAULT_USER)
 	planet := params["planetName"]
 
 	body, err := util.GetBodyFromRequest(req)
@@ -48,7 +48,7 @@ func AddContainersOfPlanet(r render.Render, params martini.Params, req *http.Req
 }
 
 func GetContainersOfPlanet(r render.Render, params martini.Params, req *http.Request, cosmos *service.CosmosService) {
-	token := util.GetToken(req)
+	token := util.GetQueryParam(req, "token", DEFAULT_USER)
 	planet := params["planetName"]
 
 	result, err := cosmos.GetContainersOfPlanet(token, planet, true)
@@ -64,12 +64,14 @@ func GetContainersOfPlanet(r render.Render, params martini.Params, req *http.Req
 func GetContainerMetrics(r render.Render, params martini.Params, req *http.Request, cosmos *service.CosmosService) {
 	req.ParseForm()
 
-	metric := util.GetMetric(req)
-	token := util.GetToken(req)
+	metric := util.GetQueryParam(req, "metric", "all")
+	period := util.GetQueryParam(req, "period", "10m")
+	token := util.GetQueryParam(req, "token", DEFAULT_USER)
+
 	planetName := params["planetName"]
 	containerName := strings.Replace(params["containerName"], ".", "_", -1)
 
-	result, err := cosmos.GetContainerMetrics(token, planetName, containerName, metric)
+	result, err := cosmos.GetContainerMetrics(token, planetName, containerName, metric, period)
 	if err != nil {
 		fmt.Println(err)
 		r.JSON(http.StatusInternalServerError, err)

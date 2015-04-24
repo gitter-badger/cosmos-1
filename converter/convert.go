@@ -142,14 +142,21 @@ func ConvertFromContainerSeries(token, planet string, series []*influxdbc.Series
 func ConvertFromContainerInfoSeries(token, planetName, containerName string, series []*influxdbc.Series) map[string]interface{} {
 	result := make(map[string]interface{})
 
-	var regex *regexp.Regexp
-	regex = regexp.MustCompile(fmt.Sprintf("^(MIN|HOUR)?\\.?CONTAINER\\.%s\\.%s\\.%s\\.", token, planetName, containerName))
+	var normalRegex *regexp.Regexp
+	var rolledRegex *regexp.Regexp
+
+	normalRegex = regexp.MustCompile(fmt.Sprintf("^CONTAINER\\.%s\\.%s\\.%s\\.", token, planetName, containerName))
+	rolledRegex = regexp.MustCompile(fmt.Sprintf("^(15MIN|5MIN|MIN|HOUR)(\\.15MIN)?(\\.5MIN)?(\\.MIN)?\\.CONTAINER\\.%s\\.%s\\.%s\\.", token, planetName, containerName))
 
 	for _, s := range series {
-		comps := regex.Split(s.Name, -1)
-		key := comps[1]
+		var comps []string
+		if strings.HasPrefix(s.Name, "CONTAINER") {
+			comps = normalRegex.Split(s.Name, -1)
+		} else {
+			comps = rolledRegex.Split(s.Name, -1)
+		}
 
-		result[key] = s.Points
+		result[comps[1]] = s.Points
 	}
 	return result
 }

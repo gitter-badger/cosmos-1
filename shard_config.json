@@ -24,7 +24,7 @@
         "name": "min_rollup",
         "retentionPolicy": "7d",
         "shardDuration": "1h",
-        "regex": "/^MIN\\..*/",
+        "regex": "/^\\d*MIN\\..*/",
         "replicationFactor": 1,
         "split": 1
     }, {
@@ -37,7 +37,9 @@
     }],
     "continuousQueries": [
         "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^CONTAINER\\..*$/ group by time(1m) into MIN.:series_name",
-        "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^CONTAINER\\..*$/ group by time(1h) into HOUR.:series_name",
+        "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^MIN\\.CONTAINER\\..*$/ group by time(5m) into 5MIN.:series_name",        
+        "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^5MIN\\.MIN\\.CONTAINER\\..*$/ group by time(15m) into 15MIN.:series_name",
+        "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^15MIN\\.5MIN\\.MIN\\.CONTAINER\\..*$/ group by time(1h) into HOUR.:series_name",
         "select MODE(txt_value) as txt_value, MAX(num_value) as num_value from /^PLANET\\..*$/ group by time(1m) into MIN.:series_name"
     ]
 }

@@ -10,7 +10,7 @@ import (
 )
 
 func GetPlanets(r render.Render, req *http.Request, cosmos *service.CosmosService) {
-	token := util.GetToken(req)
+	token := util.GetQueryParam(req, "token", DEFAULT_USER)
 
 	result, err := cosmos.GetPlanets(token)
 	if err != nil {
