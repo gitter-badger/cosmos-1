@@ -1,39 +1,7 @@
-/*
- * Globals
- */
-/* Links */
-
-a,
-a:focus,
-a:hover {
-    color: #489dff;
-}
 /* Custom default button */
-
-.btn-default,
-.btn-default:hover,
-.btn-default:focus {
-    color: #333;
-    background-color: #fff;
-    border: 1px solid #fff;
-}
-
-.btn-primary {
-  background-color: #489dff;
-  color: #fff;
-}
-
-.btn-primary:hover,
-.btn-primary:focus {
-  color: #489dff;
-  background-color: #fff;
-  border: 1px solid #fff;
-}
-
 /*
  * Base structure
  */
-
 html {
   margin: 0;
   padding: 0;
@@ -46,17 +14,4 @@ body {
   background-color: #222;
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   color: #fff;
-}
-
-.vex.vex-theme-plain .vex-content {
-    font-family: inherit;
-    background-color: #292929;
-    color: #fff;
-}
-.vex-overlay {
-    background: rgba(0, 0, 0, 0.6);
-}
-.vex.vex-theme-plain .vex-close:hover::before, .vex.vex-theme-plain .vex-close:active::before {
-    background: rgba(72,157,255,0.2);
-    color: #fff;
 }
