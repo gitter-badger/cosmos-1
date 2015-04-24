@@ -1,5 +1,11 @@
 // Cosmos object initialize
 (function() {
+
+    var FEED_TYPE_ADD_CONTAINER = 0;
+    var FEED_TYPE_REMOVE_CONTAINER = 1;
+    var FEED_TYPE_ADD_PLANET = 2;
+    var FEED_TYPE_REMOVE_PLANET = 3;
+    
     window.Cosmos = {
         API_VER: 'v1',
         getPlanets: function(done, fail, complete) {
@@ -56,7 +62,10 @@
             var url = '/' + Cosmos.API_VER + '/planets/' + planet + '/containers/' + containerName;
             var xhr = $.ajax({
                 url: url,
-                data: { metric: metric, period: period },
+                data: {
+                    metric: metric,
+                    period: period
+                },
                 method: 'GET',
                 accept: 'application/json',
                 dataType: 'json'
@@ -103,12 +112,28 @@
                 j['Key'] = j.Planet;
                 if (j.Container) {
                     j['Key'] += '.' + j.Container;
-                } 
+                }
                 if (j['Type'] == 2 || j['Type'] == 3) {
                     // Planet NewsFeed
                     // set hidden property to TRUE
                     j['Hidden'] = true;
                 }
+
+                switch (j['Type']) {
+                    case FEED_TYPE_ADD_CONTAINER:
+                        j['Content'] = j['Container'] + ' is on the ' + j['Planet'] + '.';
+                        break;
+                    case FEED_TYPE_REMOVE_CONTAINER:
+                        j['Content'] = j['Container'] + ' is lost on the ' + j['Planet'] + '.';
+                        break;
+                    case FEED_TYPE_ADD_PLANET:
+                        j['Content'] = 'Curiosity lands on the ' + j['Planet'] + '.';
+                        break;
+                    case FEED_TYPE_REMOVE_PLANET:
+                        j['Content'] = 'Curiosity is lost on the ' + j['Planet'] + '.';
+                        break;
+                }
+
                 data.push(j);
             }
             return data;

@@ -144,7 +144,6 @@ func (this *NewsFeedService) checkContainersRemoved(token string, savedContainer
 
 func (this *NewsFeedService) MakeNewsFeed(token, key string, feedType int) (*influxdbc.Series, error) {
 	var (
-		msg  string
 		data map[string]interface{}
 	)
 
@@ -153,31 +152,18 @@ func (this *NewsFeedService) MakeNewsFeed(token, key string, feedType int) (*inf
 
 	switch feedType {
 	case FEED_TYPE_REMOVE_CONTAINER:
-
-		msg = "CONTAINER is removed - " + key
 		comps := strings.Split(key, ".")
 		data["Planet"] = comps[0]
 		data["Container"] = comps[1]
-
 	case FEED_TYPE_ADD_CONTAINER:
-
-		msg = "New CONTAINER is added - " + key
 		comps := strings.Split(key, ".")
 		data["Planet"] = comps[0]
 		data["Container"] = comps[1]
-
 	case FEED_TYPE_ADD_PLANET:
-
-		msg = "New PLANET is added - " + key
 		data["Planet"] = key
-
 	case FEED_TYPE_REMOVE_PLANET:
-
-		msg = "PLANET is removed - " + key
 		data["Planet"] = key
 	}
-
-	data["Content"] = msg
 	data["Type"] = feedType
 
 	raw, err := json.Marshal(data)
@@ -187,7 +173,6 @@ func (this *NewsFeedService) MakeNewsFeed(token, key string, feedType int) (*inf
 	}
 
 	jsonData := string(raw)
-
 	feedSeries := influxdbc.NewSeries(fmt.Sprintf("NEWSFEED.%s.%s", token, key), "type", "value")
 	feedSeries.AddPoint(feedType, jsonData)
 
