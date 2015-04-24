@@ -3,6 +3,7 @@
 <style>
 .container {
   width: 100%;
+  margin: 0;
   padding: 0;
 }
 
@@ -21,13 +22,38 @@
   width: 100%;
   margin: 0;
   padding: 0;
-  background-color: #222;
 }
 
 @media (min-width: 1400px) {
   .list {
     width: 320px;
   }
+}
+
+.planet-list {
+  margin: 0;
+  padding: 20px 0;
+  list-style: none;
+}
+
+.planet-list li {
+  border-bottom: 1px solid #333;
+  display: block;
+}
+
+.planet-list li:hover {
+  background-color: #489dff;
+}
+
+.planet-list li a {
+  padding: 10px 10px;
+  color: #bbb;
+  display: block;
+  text-decoration: none;
+}
+
+.planet-list li a:hover {
+  color: #fff;
 }
 
 .content {
@@ -42,13 +68,17 @@
   }
 }
 
-#search {
-  padding: 10px;
+.search {
+  padding: 10px 20px;
+  background-color: #333;
 }
 
-#search input {
+.search input {
   width: 100%;
-  color: #000;
+  background-color: #333;
+  outline: none;
+  border: none;
+  color: #fff;
 }
 </style>
 <template>
@@ -58,17 +88,15 @@
     <div class="row">
 
       <div class="list col-md-4 col-xs-12">
-        <div id="search">
-          <input type="text" class="search" placeholder="search" style="" />
+        <div class="search">
+          <input id="search-input" type="text" placeholder="search" style="" />
         </div>
 
-        <div id="planet-list">
-          <ul>
-            <template is="x-repeat" items="{{data}}">
-              <li><a on-click="onPlanetClicked">{{item.Planet}}</a></li>
-            </template>
-          </ul>
-        </div>
+        <ul class="planet-list">
+          <template is="x-repeat" items="{{data}}">
+            <li><a href="/containers">{{item.Planet}}</a></li>
+          </template>
+        </ul>
       </div>
 
       <div class="content col-md-8 col-xs-12">
@@ -94,47 +122,37 @@ Polymer({
       self.data = json;
       self.attached();
     }, function(jqXHR) {
-      console.log('request faield - ' + jqXHR.responseText);
+      console.log(jqXHR.responseText);
     });
   },
   onPlanetClicked: function(e) {
+    e.preventDefault();
     var self = this;
     var target = $(e.currentTarget);
-  },
-  onCellClicked: function(e) {
-    var target = $(e.target || e.srcElement);
-    var selectedTr = target.parent();
-    var allTr = target.closest('tbody').find('tr');
-
-    allTr.removeClass('selected');
-    selectedTr.addClass('selected');
-    var key = selectedTr.find('td:first').text()
-
-    this.showContainers(key, e);
+    // show planet metrics
   },
   attached: function() {
-    if (this.data.length > 0 && history.state && history.state.key) {
-      var jqElem = $(this);
-      var self = this;
+    if (this.data.length <= 0 || !history.state || !history.state.key) return;
+    var jqElem = $(this);
+    var self = this;
 
-      var fn = function() {
-        var checkboxes = jqElem.find('input[type=checkbox]');
-        if (checkboxes.size() > 0) {
-          checkboxes.each(function(i, elem) {
-            var input = $(elem);
-            if (input.val() == history.state.key) {
-              input.prop('checked', true);
-              self.onCheckChanged({
-                  target: elem
-              });
-            }
-          });
-        } else {
-          setTimeout(fn, 50);
-        }
-      };
-      setTimeout(fn, 50);
-    }
+    var callback = function() {
+      var checkboxes = jqElem.find('input[type=checkbox]');
+      if (checkboxes.size() > 0) {
+        checkboxes.each(function(i, elem) {
+          var input = $(elem);
+          if (input.val() == history.state.key) {
+            input.prop('checked', true);
+            self.onCheckChanged({
+                target: elem
+            });
+          }
+        });
+      } else {
+        setTimeout(callbak, 50);
+      }
+    };
+    setTimeout(callbak, 50);
   },
   showContainers: function(key, e) {
     var self = this;
