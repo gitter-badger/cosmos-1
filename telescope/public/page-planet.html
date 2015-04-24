@@ -1,53 +1,81 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-
-<dom-module id="planet-containers">
-<style></style>
-<template>
-  <template is="x-repeat" items="{{data}}">
-    <div style="padding-bottom:10px; padding-left:30px;">
-      <a href="{{item.Key}}" on-click="onContainerNameClicked">{{item.Names0[3]}}</a>
-    </div>
-  </template>
-</template>
-</dom-module>
-<script>
-Polymer({
-  is: 'planet-containers',
-  properties: {
-    data: {
-      type: Array,
-      value: []
-    }
-  },
-  onContainerNameClicked: function(e) {
-    event.preventDefault();
-    var target = e.target || e.srcElement;
-    var key = $(target).attr('href');
-
-    history.pushState({
-      page: "container",
-      key: key
-    }, 'container', '/containers');
-  }
-});
-</script>
-
 <dom-module id="page-planet">
 <style>
-:host > div {
-    padding: 0 10px;
+.container {
+  width: 100%;
+  padding: 0;
 }
 
-:host .card {
-    padding: 0;
+@media (min-width: 1400px) {
+  .container {
+    width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+.row {
+  margin: 0;
+}
+
+.list {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #222;
+}
+
+@media (min-width: 1400px) {
+  .list {
+    width: 320px;
+  }
+}
+
+.content {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 1400px) {
+  .content {
+    width: 1080px;
+  }
+}
+
+#search {
+  padding: 10px;
+}
+
+#search input {
+  width: 100%;
+  color: #000;
 }
 </style>
 <template>
-  <div id="planet-list">
-    <template is="x-repeat" items="{{data}}">
-      <p>{{item.Planet}}</p>
-      <!--<container-item data="{{item}}" on-click="onItemClicked"></container-item>-->
-    </template>
+
+  <div class="container">
+
+    <div class="row">
+
+      <div class="list col-md-4 col-xs-12">
+        <div id="search">
+          <input type="text" class="search" placeholder="search" style="" />
+        </div>
+
+        <div id="planet-list">
+          <ul>
+            <template is="x-repeat" items="{{data}}">
+              <li><a on-click="onPlanetClicked">{{item.Planet}}</a></li>
+            </template>
+          </ul>
+        </div>
+      </div>
+
+      <div class="content col-md-8 col-xs-12">
+      </div>
+
+    </div>
+
   </div>
 </template>
 </dom-module>
@@ -68,6 +96,10 @@ Polymer({
     }, function(jqXHR) {
       console.log('request faield - ' + jqXHR.responseText);
     });
+  },
+  onPlanetClicked: function(e) {
+    var self = this;
+    var target = $(e.currentTarget);
   },
   onCellClicked: function(e) {
     var target = $(e.target || e.srcElement);
