@@ -3,8 +3,15 @@
 <style>
 .container {
   width: 100%;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
+}
+
+@media (min-width: 1080px) {
+  .container {
+    width: 1080px;
+    marign: 0 auto;
+  }
 }
 
 @media (min-width: 1400px) {
@@ -19,14 +26,20 @@
   padding: 0;
 }
 
-.list {
+.left-container {
   width: 100%;
   margin: 0;
   padding: 0;
 }
 
+@media (min-width: 1080px) {
+  .left-container {
+    width: 260px;
+  }
+}
+
 @media (min-width: 1400px) {
-  .list {
+  .left-container {
     width: 320px;
   }
 }
@@ -57,14 +70,20 @@
   color: #fff;
 }
 
-.content {
+.main-container {
   width: 100%;
   margin: 0;
   padding: 0;
 }
 
+@media (min-width: 1080px) {
+  .main-container {
+    width: 720px;
+  }
+}
+
 @media (min-width: 1400px) {
-  .content {
+  .main-container {
     width: 1080px;
   }
 }
@@ -88,7 +107,7 @@
 
     <div class="row">
 
-      <div class="list col-md-4 col-xs-12">
+      <div class="left-container col-md-4 col-xs-12">
         <div class="search">
           <input id="search-input" type="text" placeholder="search" style="" />
         </div>
@@ -100,7 +119,7 @@
         </ul>
       </div>
 
-      <div class="content col-md-8 col-xs-12">
+      <div class="main-container col-md-8 col-xs-12">
       </div>
 
     </div>
