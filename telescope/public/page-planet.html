@@ -29,18 +29,20 @@
 .left-container {
   width: 100%;
   margin: 0;
-  padding: 0 10px;
+  padding: 0;
 }
 
 @media (min-width: 1080px) {
   .left-container {
     width: 260px;
+    padding: 0 10px;
   }
 }
 
 @media (min-width: 1400px) {
   .left-container {
     width: 320px;
+    padding: 0 10px;
   }
 }
 
@@ -100,6 +102,31 @@
   border: none;
   color: #fff;
 }
+
+.graph-list {
+  padding: 0;
+}
+
+.graph-list h3 {
+  margin: 0;
+  padding: 0;
+  font-size: 17px;
+  text-align: center;
+}
+
+.graph-list h3 {
+  padding-top: 60px;
+  padding-bottom: 10px;
+}
+
+.graph-list h3:first-child {
+  padding-top: 0;
+}
+
+.graph {
+  min-height: 265px;
+  cursor: pointer;
+}
 </style>
 <template>
 
@@ -114,12 +141,24 @@
 
         <ul class="planet-list">
           <template is="x-repeat" items="{{data}}">
-            <li><a href="/containers">{{item.Planet}}</a></li>
+            <li><a href="/containers" on-click="onPlanetClicked">{{item.Planet}}</a></li>
           </template>
         </ul>
       </div>
 
       <div class="main-container col-md-8 col-xs-12">
+        <div class="main-container col-md-8 col-xs-12">
+          <div class="graph-list">
+            <h3>CPU Utilization (%)</h3>
+            <div id="cpu" class="graph"></div>
+            <h3>Memory Usage (MB)</h3>
+            <div id="memory" class="graph"></div>
+            <h3>Network In (KB)</h3>
+            <div id="network-in" class="graph"></div>
+            <h3>Network Out (KB)</h3>
+            <div id="network-out" class="graph"></div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -140,54 +179,119 @@ Polymer({
     var self = this;
     Cosmos.getPlanets(function(json) {
       self.data = json;
-      self.attached();
     }, function(jqXHR) {
       console.log(jqXHR.responseText);
     });
+
+    this.showEmptyGraph('#cpu', '%', '10m');
+    this.showEmptyGraph('#memory', 'MB', '10m');
+    this.showEmptyGraph('#network-in', 'KB', '10m');
+    this.showEmptyGraph('#network-out', 'KB', '10m');
   },
   onPlanetClicked: function(e) {
     e.preventDefault();
     var self = this;
     var target = $(e.currentTarget);
-    // show planet metrics
   },
-  attached: function() {
-    if (this.data.length <= 0 || !history.state || !history.state.key) return;
-    var jqElem = $(this);
-    var self = this;
-
-    var callback = function() {
-      var checkboxes = jqElem.find('input[type=checkbox]');
-      if (checkboxes.size() > 0) {
-        checkboxes.each(function(i, elem) {
-          var input = $(elem);
-          if (input.val() == history.state.key) {
-            input.prop('checked', true);
-            self.onCheckChanged({
-                target: elem
-            });
-          }
-        });
-      } else {
-        setTimeout(callbak, 50);
-      }
+  drawGraph: function(selector, width, height, times, data, unit, scaleOpt) {
+    var dataset = {
+      labels: [],
+      datasets: [{
+        label: 'Metrics',
+        fillColor: 'rgba(72,157,255,0.2)',
+        strokeColor: 'rgba(72,157,255,1)',
+        pointColor: 'rgba(72,157,255,1)',
+        pointStrokeColor: '#fff',
+        pointHighlightFill: '#fff',
+        pointHighlightStroke: 'rgba(72,157,255,1)',
+        data: []
+      }]
     };
-    setTimeout(callbak, 50);
-  },
-  showContainers: function(key, e) {
-    var self = this;
-    var sender = e.target || e.srcElement;
-
-    Cosmos.getContainers(key, function(json) {
-      var elem = document.createElement('planet-containers');
-      elem.data = json;
-      var innerTr = $(sender).closest('tr').next();
-      innerTr.show();
-      innerTr.find('td').empty();
-      Polymer.dom(innerTr.find('td')[0]).appendChild(elem);
-    }, function(jqXHR) {
-      alert('request failed - ' + jqXHR.responseText);
+    if (times) {
+      dataset.labels = function() {
+        var labels = [];
+        for (var i = 0; i < times.length; i++) {
+          labels.push(moment(times[i]).format('HH:mm'));
+        }
+        return labels;
+      }();
+    }
+    if (data) {
+      dataset.datasets[0].data = data;
+    }
+    var container = $('<div/>').css({
+      'text-align': 'center'
     });
+    var chart = $('<canvas/>').css({
+      'display': 'inline-block'
+    }).attr('height', height);
+    var opt = {
+      bezierCurve: false,
+      pointHitDetectionRadius: 4,
+      scaleLabel: "<%=' ' + value%>",
+      scaleFontSize: 12,
+      scaleFontColor: '#888',
+      tooltipTemplate: "[<%=time%>] <%=value%>" + unit,
+      showTooltips: true,
+      scaleIntegersOnly: false
+    };
+    if (scaleOpt) {
+      var keys = Object.keys(scaleOpt);
+      for (var i in keys) {
+        opt[keys[i]] = scaleOpt[keys[i]];
+      }
+    }
+
+    if (isNaN(width)) {
+      opt.responsive = true;
+      opt.maintainAspectRatio = false;
+    } else {
+      chart.attr('width', width);
+    }
+
+    container.append(chart);
+    $(selector).empty().append(container);
+
+    var ctx = chart[0].getContext('2d');
+    var chart = new Chart(ctx).Line(dataset, opt);
+
+    var points = chart.datasets[0].points;
+    for (var i = 0; i < points.length; i++) {
+      points[i].time = moment(times[i]).format('YYYY-MM-DD HH:mm');
+    }
+    return chart;
+  },
+  showEmptyGraph: function(selector, unit, period) {
+    var self = this;
+    var data = [],
+        times = [],
+        points = 10,
+        timeWidth = 60 * 1000;
+
+    if (period == '10m') {
+        points = 10;
+    } else if (period == '30m') {
+        points = 30;
+    } else if (period == '3h') {
+        points = 36;
+        timeWidth *= 5;
+    } else if (period == '8h') {
+        points = 32;
+        timeWidth *= 15;
+    } else if (period == '24h') {
+        points = 24;
+        timeWidth *= 60;
+    }
+
+    var now = (new Date()).getTime();
+    for (var i = points; i > 0; i--) {
+      data.push(0);
+      times.push(now - (i * timeWidth));
+    }
+
+    setTimeout(function() {
+      self.drawGraph(selector, undefined, 265, times, data, unit);
+    }, 10);
   }
 });
 </script>
