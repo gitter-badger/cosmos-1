@@ -35,13 +35,13 @@ elements to the template itself as the binding scope.
 <body>
 
   <template is="x-autobind">
-
+    
     <core-ajax url="http://..." lastresponse="{{data}}"></core-ajax>
-
+    
     <template is="x-repeat" items="{{data}}">
         <div><span>{{item.first}}</span> <span>{{item.last}}</span></div>
     </template>
-
+    
   </template>
 
 </body>
@@ -58,7 +58,7 @@ elements to the template itself as the binding scope.
 
     extends: 'template',
 
-    _registerFeatures: function() {
+    registerFeatures: function() {
       this._prepExtends();
       this._prepConstructor();
     },
@@ -68,13 +68,11 @@ elements to the template itself as the binding scope.
       parentDom.insertBefore(this.root, this);
     },
 
-    _initFeatures: function() {
+    initFeatures: function() {
       this._template = this;
       this._prepAnnotations();
       this._prepEffects();
-      this._prepBehaviors();
-      this._prepBindings();
-      Polymer.Base._initFeatures.call(this);
+      Polymer.Base.initFeatures.call(this);
     }
 
   });
