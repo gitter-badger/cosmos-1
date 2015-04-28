@@ -259,7 +259,11 @@ Polymer({
       self.data = json;
       self.selectItem();
     }, function(jqXHR) {
-      console.log('request failed - ' + jqXHR.responseText);
+      var notification = {
+        type: 'error',
+        message: "Cosmos server didn't respond any response."
+      };
+      $('cosmos-layout-header').trigger('cosmos-notification', notification);
     });
   },
   selectItem: function() {
@@ -493,7 +497,11 @@ Polymer({
           }
       }
     }, function(jqXHR) {
-      console.log('request failed - ' + jqXHR.responseText);
+      var notification = {
+        type: 'error',
+        message: "Cosmos server didn't respond any response."
+      };
+      $('cosmos-layout-header').trigger('cosmos-notification', notification);
     });
   },
   _showCpuUsageGraph: function(selector, json, height, cpuCount, opt) {
@@ -618,8 +626,11 @@ Polymer({
         self.showGraph(key);
       }, 1000 * 60);
     }, function(jqXHR) {
-      // failed
-      console.log('request failed - ' + jqXHR.responseText);
+      var notification = {
+        type: 'error',
+        message: "Cosmos server didn't respond any response."
+      };
+      $('cosmos-layout-header').trigger('cosmos-notification', notification);
     });
   }
 });
