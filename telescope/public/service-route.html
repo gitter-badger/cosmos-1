@@ -1,10 +1,10 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<dom-module id="cosmos-route">
+<dom-module id="cosmos-service-route">
     <template></template>
 </dom-module>
 <script>
 Polymer({
-    is: 'cosmos-route',
+    is: 'cosmos-service-route',
     routes: [],
     defaultRoute: function() {},
     regist: function() {
@@ -62,16 +62,16 @@ Polymer({
         setTimeout(function() {
             switch (page) {
                 case 'cosmos':
-                    document.querySelector('cosmos-content').page = 'cosmos';
-                    document.querySelector('cosmos-header').page = 'cosmos';
+                    document.querySelector('cosmos-layout-content').page = 'cosmos';
+                    document.querySelector('cosmos-layout-header').page = 'cosmos';
                     break;
                 case 'planet':
-                    document.querySelector('cosmos-content').page = 'planet';
-                    document.querySelector('cosmos-header').page = 'planet';
+                    document.querySelector('cosmos-layout-content').page = 'planet';
+                    document.querySelector('cosmos-layout-header').page = 'planet';
                     break;
                 case 'container':
-                    document.querySelector('cosmos-content').page = 'container';
-                    document.querySelector('cosmos-header').page = 'container';
+                    document.querySelector('cosmos-layout-content').page = 'container';
+                    document.querySelector('cosmos-layout-header').page = 'container';
                     break;
             }
         }, 50);

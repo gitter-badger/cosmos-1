@@ -2,7 +2,7 @@
 <link rel="import" href="/page-cosmos.html">
 <link rel="import" href="/page-planet.html">
 <link rel="import" href="/page-container.html">
-<dom-module id="cosmos-content">
+<dom-module id="cosmos-layout-content">
 <style>
 /* CSS rules for your element */
 /* Extra markup and styles for table-esque vertical and horizontal centering */
@@ -14,7 +14,7 @@
 <script>
 // element registration
 Polymer({
-  is: 'cosmos-content',
+  is: 'cosmos-layout-content',
   properties: {
     page: {
       type: String,
@@ -25,13 +25,13 @@ Polymer({
     var elem;
     switch (newVal) {
       case 'cosmos':
-        elem = document.createElement('page-cosmos');
+        elem = document.createElement('cosmos-page-cosmos');
         break;
       case 'planet':
-        elem = document.createElement('page-planet');
+        elem = document.createElement('cosmos-page-planet');
         break;
       case 'container':
-        elem = document.createElement('page-container');
+        elem = document.createElement('cosmos-page-container');
         break;
     }
     if (elem) {
