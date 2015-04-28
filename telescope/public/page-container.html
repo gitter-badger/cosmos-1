@@ -7,7 +7,7 @@
         font-weight: bold;
         margin-right: 20px;
     }
-    
+
     div.controls {
         display: inline-block;
     }
@@ -39,23 +39,23 @@ Polymer({
         border-bottom: 1px solid #333;
         color: #bbb;
     }
-    
+
     .item:hover,
     .selected {
         background-color: #489dff;
     }
-    
+
     .item:hover p,
     .item:hover span,
     .selected p,
     .selected span {
         color: #fff;
     }
-    
+
     .name {
         color: #fff;
     }
-    
+
     .planet {
         padding-left: 10px;
         color: #bbb;
@@ -86,73 +86,73 @@ Polymer({
         margin: 0 auto;
         padding: 0;
     }
-    
+
     @media (min-width: 1080px) {
         .container {
             width: 1080px;
             marign: 0 auto;
         }
     }
-    
+
     @media (min-width: 1400px) {
         .container {
             width: 1400px;
             margin: 0 auto;
         }
     }
-    
+
     .row {
         margin: 0;
         padding: 0;
     }
-    
+
     .left-container {
         width: 100%;
         margin: 0;
         padding: 0;
     }
-    
+
     @media (min-width: 1080px) {
         .left-container {
             width: 260px;
             padding: 0 10px;
         }
     }
-    
+
     @media (min-width: 1400px) {
         .left-container {
             width: 320px;
             padding: 0 10px;
         }
     }
-    
+
     .container-list {
         padding: 20px 0;
     }
-    
+
     .main-container {
         width: 100%;
         margin: 0;
         padding: 0;
     }
-    
+
     @media (min-width: 1080px) {
         .main-container {
             width: 720px;
         }
     }
-    
+
     @media (min-width: 1400px) {
         .main-container {
             width: 1080px;
         }
     }
-    
+
     .search {
         padding: 10px 20px;
         background-color: #333;
     }
-    
+
     .search input {
         width: 100%;
         background-color: #333;
@@ -160,32 +160,32 @@ Polymer({
         border: none;
         color: #fff;
     }
-    
+
     .graph-list {
         padding: 0;
     }
-    
+
     .graph-list h3 {
         margin: 0;
         padding: 0;
         font-size: 17px;
         text-align: center;
     }
-    
+
     .graph-list h3 {
         padding-top: 60px;
         padding-bottom: 10px;
     }
-    
+
     .graph-list h3:first-child {
         padding-top: 0;
     }
-    
+
     .graph {
         min-height: 265px;
         cursor: pointer;
     }
-    
+
     container-item {
         cursor: pointer;
     }
@@ -254,6 +254,14 @@ Polymer({
         Cosmos.getContainers(undefined, function(json) {
             self.data = json;
             self.selectItem();
+
+            if (self.data.length == 0) {
+              var notification = {
+                type: 'information',
+                message: "There is no running container yet."
+              };
+              $('cosmos-layout-header').trigger('cosmos-notification', notification);
+            }
         }, function(jqXHR) {
             var notification = {
                 type: 'error',

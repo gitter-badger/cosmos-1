@@ -8,7 +8,8 @@
   display: block;
 }
 
-.planet-list-item:hover {
+.planet-list-item:hover,
+.planet-list-item.selected {
   background-color: #489dff;
 }
 
@@ -19,7 +20,8 @@
   text-decoration: none;
 }
 
-.planet-list-item a:hover {
+.planet-list-item a:hover,
+.planet-list-item.selected a {
   color: #fff;
 }
 </style>
@@ -44,11 +46,17 @@ Polymer({
   },
   planetChanged: function() {
     if (this.data.index != 0) return;
-    this.data.eventListener.onPlanetClicked(this.data.Planet);
+    this.data.eventListener.onPlanetClicked(this.data.Planet, this);
   },
   onPlanetClicked: function(e) {
     e.preventDefault();
-    this.data.eventListener.onPlanetClicked(this.data.Planet);
+    this.data.eventListener.onPlanetClicked(this.data.Planet, this);
+  },
+  onSelected: function() {
+    this.querySelector('.planet-list-item').classList.add('selected');
+  },
+  onDeselected: function() {
+    this.querySelector('.planet-list-item').classList.remove('selected');
   }
 });
 </script>
@@ -181,6 +189,10 @@ Polymer({
     planets: {
       type: Array,
       value: []
+    },
+    selectedPlanetElement: {
+      type: Object,
+      value: null
     }
   },
   ready: function() {
@@ -191,6 +203,14 @@ Polymer({
           json[i]['eventListener'] = self;
       }
       self.planets = json;
+
+      if (self.planets.length == 0) {
+        var notification = {
+          type: 'information',
+          message: "There is no running planet yet."
+        };
+        $('cosmos-layout-header').trigger('cosmos-notification', notification);
+      }
     }, function(jqXHR) {
       var notification = {
         type: 'error',
@@ -205,16 +225,17 @@ Polymer({
   detached: function() {
 
   },
-  onPlanetClicked: function(planet) {
-    var graphs = $(this).find('cosmos-layout-graph');
+  onPlanetClicked: function(planet, planetElement) {
+    if (this.selectedPlanetElement) {
+      this.selectedPlanetElement.onDeselected();
+    }
+    this.selectedPlanetElement = planetElement;
+    this.selectedPlanetElement.onSelected();
+
+    var graphs = this.querySelectorAll('cosmos-layout-graph');
     for (var i = 0, length = graphs.length; i < length; i++) {
       graphs[i].setPlanet(planet);
     }
-
-    Cosmos.getContainersOfPlanet(planet, function(res){
-        console.log(res);
-    });
-
   }
 });
 </script>

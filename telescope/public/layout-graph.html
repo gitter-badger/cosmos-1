@@ -146,8 +146,8 @@ Polymer({
   },
   drawEmptyGraph: function(selector, unit, period) {
     var self = this;
-    var data = [],
-        times = [],
+    var dataset = [],
+        timeset = [],
         points = 10,
         timeWidth = 60 * 1000;
 
@@ -168,14 +168,14 @@ Polymer({
 
     var now = (new Date()).getTime();
     for (var i = points; i > 0; i--) {
-      data.push(0);
-      times.push(now - (i * timeWidth));
+      dataset.push(0);
+      timeset.push(now - (i * timeWidth));
     }
 
     var height = 265;
 
     setTimeout(function() {
-      self.drawGraph(selector, undefined, height, times, data, unit);
+      self.drawGraph(selector, undefined, height, timeset, dataset, unit);
     }, 10);
   },
   drawGraph: function(selector, width, height, times, data, unit, scaleOpt) {

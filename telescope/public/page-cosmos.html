@@ -129,6 +129,14 @@ Polymer({
         json[i].AgoLabel = moment(json[i].Time * 1000).fromNow();
       }
       self.newsfeeds = json;
+
+      if (self.newsfeeds.length == 0) {
+        var notification = {
+          type: 'information',
+          message: "There is not news feed yet."
+        };
+        $('cosmos-layout-header').trigger('cosmos-notification', notification);
+      }
     }, function(jqXHR) {
       var notification = {
         type: 'error',
