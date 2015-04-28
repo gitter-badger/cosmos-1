@@ -57,6 +57,20 @@ Polymer({
     $(this).find('.graph').attr('id', 'graph-' + this.graphId);
     this.showEmptyGraph(selector, unit, period);
   },
+  attached: function() {
+    // turn on graph runloop
+  },
+  detached: function() {
+    // turn off graph runloop
+  },
+  setPlanet: function(planet) {
+    // remove planet, container graph runloop
+    // set planet graph runloop
+  },
+  setContainer: function(container) {
+    // remove planet, container graph runloop
+    // set container graph runloop
+  },
   showEmptyGraph: function(selector, unit, period) {
     var self = this;
     var data = [],
