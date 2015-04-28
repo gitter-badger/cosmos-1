@@ -1,6 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<link rel="import" href="/cosmos-graph.html">
-<dom-module id="page-planet">
+<link rel="import" href="/layout-graph.html">
+<dom-module id="cosmos-page-planet">
 <style>
 .container {
   width: 100%;
@@ -150,10 +150,10 @@
       <div class="main-container col-md-8 col-xs-12">
         <div class="main-container col-md-8 col-xs-12">
           <div class="graph-list">
-            <cosmos-graph graph-id="cpu" graph-title="CPU Utilization (%)" graph-unit="%" graph-margin-top="0"></cosmos-graph>
-            <cosmos-graph graph-id="memory" graph-title="Memory Usage (MB)" graph-unit="MB"></cosmos-graph>
-            <cosmos-graph graph-id="network-in" graph-title="Network In (KB)" graph-unit="KB"></cosmos-graph>
-            <cosmos-graph graph-id="network-out" graph-title="Network Out (KB)" graph-unit="KB"></cosmos-graph>
+            <cosmos-layout-graph graph-id="cpu" graph-title="CPU Utilization (%)" graph-unit="%" graph-margin-top="0"></cosmos-layout-graph>
+            <cosmos-layout-graph graph-id="memory" graph-title="Memory Usage (MB)" graph-unit="MB"></cosmos-layout-graph>
+            <cosmos-layout-graph graph-id="network-in" graph-title="Network In (KB)" graph-unit="KB"></cosmos-layout-graph>
+            <cosmos-layout-graph graph-id="network-out" graph-title="Network Out (KB)" graph-unit="KB"></cosmos-layout-graph>
           </div>
         </div>
       </div>
@@ -165,7 +165,7 @@
 </dom-module>
 <script>
 Polymer({
-  is: 'page-planet',
+  is: 'cosmos-page-planet',
   properties: {
     data: {
       type: Array,
