@@ -58,6 +58,10 @@ nav {
   background-color: #c42c00;
 }
 
+.information {
+  background-color: #489dff;
+}
+
 </style>
 <template>
   <!-- local DOM for your element -->
@@ -91,7 +95,10 @@ Polymer({
     }
   },
   ready: function() {
-    $(this).on('cosmos-notification', this.notificationReceived);
+
+  },
+  detached: function() {
+
   },
   pageChanged: function(newValue) {
     var self = this;
@@ -127,12 +134,12 @@ Polymer({
     }, 'container', '/containers');
   },
   notificationReceived: function(e, data) {
-    var notificationNode = $(this).find('.notification');
-    notificationNode.removeClass();
-    notificationNode.addClass('notification');
-    notificationNode.addClass(data.type);
-    notificationNode.empty();
-    notificationNode.append('<p>' + data.message + '</p>');
+    var element = this.querySelector('.notification');
+    element.removeClass();
+    element.addClass('notification');
+    element.addClass(data.type);
+    element.empty();
+    element.append('<p>' + data.message + '</p>');
   },
   notificationClicked: function() {
     $(this).find('.notification').addClass('hidden');
