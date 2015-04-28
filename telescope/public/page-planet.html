@@ -156,7 +156,11 @@ Polymer({
     Cosmos.getPlanets(function(json) {
       self.planets = json;
     }, function(jqXHR) {
-      console.log(jqXHR.responseText);
+      var notification = {
+        type: 'error',
+        message: "Cosmos server didn't respond any response."
+      };
+      $('cosmos-layout-header').trigger('cosmos-notification', notification);
     });
   },
   onPlanetClicked: function(e) {

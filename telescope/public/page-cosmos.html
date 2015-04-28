@@ -130,7 +130,11 @@ Polymer({
       }
       self.newsfeeds = json;
     }, function(jqXHR) {
-      console.log(jqXHR.responseText);
+      var notification = {
+        type: 'error',
+        message: "Cosmos server didn't respond any response."
+      };
+      $('cosmos-layout-header').trigger('cosmos-notification', notification);
     });
   }
 });
