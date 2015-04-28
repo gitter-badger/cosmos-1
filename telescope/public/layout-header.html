@@ -44,6 +44,20 @@ nav {
   background-color: #222;
   border-bottom: 1px solid #489dff;
 }
+
+.notification {
+  padding: 15px 0 10px 0;
+  background-color: #222;
+  text-align: center;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.error {
+  background-color: #c42c00;
+}
+
 </style>
 <template>
   <!-- local DOM for your element -->
@@ -56,6 +70,9 @@ nav {
           <li><a href="/containers" class="menu-link" on-click="onContainersClicked">Containers</a></li>
         </ul>
       </nav>
+      <div class="notification" on-click="notificationClicked">
+        <!--<p>Cosmos server didn't respond any response.</p>-->
+      </div>
     </header>
 </div>
   <!-- data bindings in local DOM -->
@@ -73,7 +90,9 @@ Polymer({
       observer: 'pageChanged'
     }
   },
-  ready: function() {},
+  ready: function() {
+    $(this).on('cosmos-notification', this.notificationReceived);
+  },
   pageChanged: function(newValue) {
     var self = this;
     $(self.$.nav).find('a').removeClass('selected');
@@ -106,6 +125,17 @@ Polymer({
     history.pushState({
       page: 'container'
     }, 'container', '/containers');
+  },
+  notificationReceived: function(e, data) {
+    var notificationNode = $(this).find('.notification');
+    notificationNode.removeClass();
+    notificationNode.addClass('notification');
+    notificationNode.addClass(data.type);
+    notificationNode.empty();
+    notificationNode.append('<p>' + data.message + '</p>');
+  },
+  notificationClicked: function() {
+    $(this).find('.notification').addClass('hidden');
   }
 });
 </script>
