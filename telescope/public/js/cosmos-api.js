@@ -188,7 +188,7 @@
                     var newK = inK.replace(/\./g, "");
                     var val = json[k][inK];
                     delete(json[k][inK]);
-                    json[k][newK] = val[0];
+                    json[k][newK] = val;
                 }
                 json[k]['Index'] = i;
                 json[k]['Key'] = k;

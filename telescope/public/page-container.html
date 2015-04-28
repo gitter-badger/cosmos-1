@@ -67,7 +67,7 @@ Polymer({
 <template>
   <div class="item">
     <p class="name">{{data.Container}}<span class="planet">{{data.Planet}}</span></p>
-    <span class="status">{{data.Status[3]}}</span>
+    <span class="status">{{data.Status[0][3]}}</span>
   </div>
 </template>
 </dom-module>
@@ -345,7 +345,7 @@ Polymer({
     }
     this.showGraph(this.data[index].Key);
   },
-  drawGraph: function(selector, width, height, times, data, unit, scaleOpt) {
+  drawGraph: function(selector, width, height, times, data, unit, options) {
     var dataset = {
       labels: [],
       datasets: [{
@@ -382,15 +382,17 @@ Polymer({
       pointHitDetectionRadius: 4,
       scaleLabel: "<%=' ' + value%>",
       scaleFontSize: 12,
-      scaleFontColor: '#888',
+      scaleFontColor: '#aaa',
+      pointLableFontColor: '#aaa',
       tooltipTemplate: "[<%=time%>] <%=value%>" + unit,
       showTooltips: true,
-      scaleIntegersOnly: false
+      scaleIntegersOnly: false,
+      scaleGridLineColor : "rgba(255,255,255,.04)"
     };
-    if (scaleOpt) {
-      var keys = Object.keys(scaleOpt);
+    if (options) {
+      var keys = Object.keys(options);
       for (var i in keys) {
-        opt[keys[i]] = scaleOpt[keys[i]];
+        opt[keys[i]] = options[keys[i]];
       }
     }
 
@@ -471,18 +473,22 @@ Polymer({
       if (json.length == 0) {
         vex.dialog.alert('No metrics to display yet.');
       } else {
+          var opt = {
+              scaleGridLineColor : "rgba(0,0,0,.04)"
+          };
+
           switch (info.metric) {
             case 'Stats.Cpu.TotalUtilization':
-              self._showCpuUsageGraph(selector, json, self.dialogGraphHeight, info.cpuCount);
+              self._showCpuUsageGraph(selector, json, self.dialogGraphHeight, info.cpuCount, opt);
               break;
             case 'Stats.Memory.Usage':
-              self._showMemoryUsageGraph(selector, json, self.dialogGraphHeight);
+              self._showMemoryUsageGraph(selector, json, self.dialogGraphHeight, opt);
               break;
             case 'Stats.Network.RxBytes':
-              self._showNetworkInGraph(selector, json, self.dialogGraphHeight);
+              self._showNetworkInGraph(selector, json, self.dialogGraphHeight, opt);
               break;
             case 'Stats.Network.TxBytes':
-              self._showNetworkOutGraph(selector, json, self.dialogGraphHeight);
+              self._showNetworkOutGraph(selector, json, self.dialogGraphHeight, opt);
               break;
           }
       }
@@ -490,7 +496,7 @@ Polymer({
       console.log('request failed - ' + jqXHR.responseText);
     });
   },
-  _showCpuUsageGraph: function(selector, json, height, cpuCount) {
+  _showCpuUsageGraph: function(selector, json, height, cpuCount, opt) {
     var self = this;
     var dataset = json['StatsCpuTotalUtilization'];
     if (dataset == undefined) {
@@ -508,17 +514,17 @@ Polymer({
     var steps = 10;
     var stepWidth = total / steps;
 
-    var scaleOpt = {
-      scaleOverride: true,
-      scaleSteps: steps,
-      scaleStepWidth: stepWidth,
-      scaleStartValue: 0
-    }
+    opt = opt || {};
+    opt.scaleOverride = true;
+    opt.scaleSteps = steps;
+    opt.scaleStepWidth = stepWidth;
+    opt.scaleStartValue = 0;
+
     setTimeout(function() {
-      self.drawGraph(selector, undefined, height, times, data, '%', scaleOpt);
+      self.drawGraph(selector, undefined, height, times, data, '%', opt);
     }, 10);
   },
-  _showMemoryUsageGraph: function(selector, json, height) {
+  _showMemoryUsageGraph: function(selector, json, height, opt) {
     var self = this;
     var dataset = json['StatsMemoryUsage'];
     if (dataset == undefined) return;
@@ -532,10 +538,10 @@ Polymer({
     }
 
     setTimeout(function() {
-      self.drawGraph(selector, undefined, height, times, data, 'MB');
+      self.drawGraph(selector, undefined, height, times, data, 'MB', opt);
     }, 10);
   },
-  _showNetworkInGraph: function(selector, json, height) {
+  _showNetworkInGraph: function(selector, json, height, opt) {
     var self = this;
     var dataset = json['StatsNetworkRxBytes'];
     if (dataset == undefined) return;
@@ -549,10 +555,10 @@ Polymer({
     }
 
     setTimeout(function() {
-      self.drawGraph(selector, undefined, height, times, data, 'KB');
+      self.drawGraph(selector, undefined, height, times, data, 'KB', opt);
     }, 10);
   },
-  _showNetworkOutGraph: function(selector, json, height) {
+  _showNetworkOutGraph: function(selector, json, height, opt) {
     var self = this;
     var dataset = json['StatsNetworkTxBytes'];
     if (dataset == undefined) return;
@@ -566,7 +572,7 @@ Polymer({
     }
 
     setTimeout(function() {
-      self.drawGraph(selector, undefined, height, times, data, 'KB');
+      self.drawGraph(selector, undefined, height, times, data, 'KB', opt);
     }, 10);
   },
   showGraph: function(key) {
