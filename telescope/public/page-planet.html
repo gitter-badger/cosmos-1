@@ -141,7 +141,7 @@
         </div>
 
         <ul class="planet-list">
-          <template is="x-repeat" items="{{data}}">
+          <template is="x-repeat" items="{{planets}}">
             <li><a href="/containers" on-click="onPlanetClicked">{{item.Planet}}</a></li>
           </template>
         </ul>
@@ -167,7 +167,7 @@
 Polymer({
   is: 'cosmos-page-planet',
   properties: {
-    data: {
+    planets: {
       type: Array,
       value: []
     }
@@ -175,7 +175,7 @@ Polymer({
   ready: function() {
     var self = this;
     Cosmos.getPlanets(function(json) {
-      self.data = json;
+      self.planets = json;
     }, function(jqXHR) {
       console.log(jqXHR.responseText);
     });
@@ -184,6 +184,11 @@ Polymer({
     e.preventDefault();
     var self = this;
     var target = $(e.currentTarget);
+    var graphs = $(this).find('cosmos-layout-graph');
+    var planet = target.context.innerText;
+    for (var i = 0, length = graphs.length; i < length; i++) {
+      graphs[i].setPlanet(planet);
+    }
   }
 });
 </script>
