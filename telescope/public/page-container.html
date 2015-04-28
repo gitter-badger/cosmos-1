@@ -67,7 +67,7 @@ Polymer({
 <template>
   <div class="item">
     <p class="name">{{data.Container}}<span class="planet">{{data.Planet}}</span></p>
-    <span class="status">{{data.Status.3}}</span>
+    <span class="status">{{data.Status[3]}}</span>
   </div>
 </template>
 </dom-module>
@@ -228,7 +228,8 @@ Polymer({
   is: 'cosmos-page-container',
   properties: {
     data: {
-      type: Array
+      type: Array,
+      value: []
     },
     charts: {
       type: Array,
