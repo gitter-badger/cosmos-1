@@ -1,0 +1,111 @@
+<link rel="import" href="/vendor/polymer/polymer.html">
+<dom-module id="cosmos-layout-header">
+<style>
+/* CSS rules for your element */
+/* Extra markup and styles for table-esque vertical and horizontal centering */
+.container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  padding-bottom: 40px;
+}
+
+nav {
+  width: 100%;
+  margin: 0 auto;
+  display: block;
+}
+
+.nav {
+  text-align: center;
+  display: block;
+}
+
+.nav li {
+  display: inline-block;
+}
+
+.menu-link {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 200;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+}
+
+.menu-link:hover,
+.menu-link:focus,
+.menu-link.selected {
+  color: #489dff;
+  background-color: #222;
+  border-bottom: 1px solid #489dff;
+}
+</style>
+<template>
+  <!-- local DOM for your element -->
+  <div class="container">
+    <header class="clearfix">
+      <nav>
+        <ul id="nav" class="nav header-nav">
+          <li><a href="/" class="menu-link" on-click="onCosmosClicked">Cosmos</a></li>
+          <li><a href="/planets" class="menu-link" on-click="onPlanetsClicked">Planets</a></li>
+          <li><a href="/containers" class="menu-link" on-click="onContainersClicked">Containers</a></li>
+        </ul>
+      </nav>
+    </header>
+</div>
+  <!-- data bindings in local DOM -->
+</template>
+</dom-module>
+<script>
+// element registration
+Polymer({
+  is: 'cosmos-layout-header',
+  // add properties and methods on the element's prototype
+  properties: {
+    // declare properties for the element's public API
+    page: {
+      type: String,
+      observer: 'pageChanged'
+    }
+  },
+  ready: function() {},
+  pageChanged: function(newValue) {
+    var self = this;
+    $(self.$.nav).find('a').removeClass('selected');
+    switch (newValue) {
+      case 'cosmos':
+        $(self.$.nav).find('a:eq(0)').addClass('selected');
+        break;
+      case 'planet':
+        $(self.$.nav).find('a:eq(1)').addClass('selected');
+        break;
+      case 'container':
+        $(self.$.nav).find('a:eq(2)').addClass('selected');
+        break;
+    }
+  },
+  onCosmosClicked: function(e) {
+    e.preventDefault();
+    history.pushState({
+      page: 'cosmos'
+    }, 'cosmos', '/');
+  },
+  onPlanetsClicked: function(e) {
+    e.preventDefault();
+    history.pushState({
+      page: 'planet'
+    }, 'planet', '/planets');
+  },
+  onContainersClicked: function(e) {
+    e.preventDefault();
+    history.pushState({
+      page: 'container'
+    }, 'container', '/containers');
+  }
+});
+</script>

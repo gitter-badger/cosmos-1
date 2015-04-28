@@ -7,42 +7,26 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
-<link rel="import" href="src/polymer-lib.html">
-<link rel="import" href="src/micro/tag.html">
-<link rel="import" href="src/micro/behaviors.html">
-<link rel="import" href="src/micro/extends.html">
-<link rel="import" href="src/micro/constructor.html">
-<link rel="import" href="src/micro/properties.html">
-<link rel="import" href="src/micro/attributes.html">
-<link rel="import" href="src/micro/debouncer.html">
+<link rel="import" href="src/polymer.html">
+
+<link rel="import" href="src/features/micro/mixins.html">
+<link rel="import" href="src/features/micro/extends.html">
+<link rel="import" href="src/features/micro/constructor.html">
+<link rel="import" href="src/features/micro/properties.html">
+<link rel="import" href="src/features/micro/attributes.html">
 
 <script>
 
-  Polymer.Base._addFeature({
+  Polymer.Base.addFeature({
 
-    _registerFeatures: function() {
-      // identity
-      this._prepIs();
-      // shared behaviors
-      this._prepBehaviors();
-      // inheritance
+    registerFeatures: function() {
+      this._prepMixins();
       this._prepExtends();
-      // factory
       this._prepConstructor();
     },
 
-    _prepBehavior: function() {},
-
-    _initFeatures: function() {
-      // setup debouncers
-      this._setupDebouncers();
-      // acquire behaviors
-      this._marshalBehaviors();
-    },
-
-    _marshalBehavior: function(b) {
-      // publish attributes to instance
-      this._installHostAttributes(b.hostAttributes);
+    initFeatures: function() {
+      this._marshalAttributes();
     }
 
   });

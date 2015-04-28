@@ -1,0 +1,45 @@
+<link rel="import" href="/vendor/polymer/polymer.html">
+<link rel="import" href="/page-cosmos.html">
+<link rel="import" href="/page-planet.html">
+<link rel="import" href="/page-container.html">
+<dom-module id="cosmos-layout-content">
+<style>
+/* CSS rules for your element */
+/* Extra markup and styles for table-esque vertical and horizontal centering */
+</style>
+<template>
+<!-- local DOM for your element -->
+</template>
+</dom-module>
+<script>
+// element registration
+Polymer({
+  is: 'cosmos-layout-content',
+  properties: {
+    page: {
+      type: String,
+      observer: 'pageChanged'
+    }
+  },
+  pageChanged: function(newVal, oldVal) {
+    var elem;
+    switch (newVal) {
+      case 'cosmos':
+        elem = document.createElement('cosmos-page-cosmos');
+        break;
+      case 'planet':
+        elem = document.createElement('cosmos-page-planet');
+        break;
+      case 'container':
+        elem = document.createElement('cosmos-page-container');
+        break;
+    }
+    if (elem) {
+      for (var i = 0, len = Polymer.dom(this).childNodes.length; i < len; i++) {
+        Polymer.dom(this).removeChild(Polymer.dom(this).childNodes[i]);
+      }
+      Polymer.dom(this).appendChild(elem);
+    }
+  }
+});
+</script>

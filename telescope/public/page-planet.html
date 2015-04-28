@@ -1,6 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<link rel="import" href="/cosmos-graph.html">
-<dom-module id="page-planet">
+<link rel="import" href="/layout-graph.html">
+<dom-module id="cosmos-page-planet">
 <style>
 .container {
   width: 100%;
@@ -107,27 +107,6 @@
 .graph-list {
   padding: 0;
 }
-
-.graph-list h3 {
-  margin: 0;
-  padding: 0;
-  font-size: 17px;
-  text-align: center;
-}
-
-.graph-list h3 {
-  padding-top: 60px;
-  padding-bottom: 10px;
-}
-
-.graph-list h3:first-child {
-  padding-top: 0;
-}
-
-.graph {
-  min-height: 265px;
-  cursor: pointer;
-}
 </style>
 <template>
 
@@ -141,7 +120,7 @@
         </div>
 
         <ul class="planet-list">
-          <template is="x-repeat" items="{{data}}">
+          <template is="x-repeat" items="{{planets}}">
             <li><a href="/containers" on-click="onPlanetClicked">{{item.Planet}}</a></li>
           </template>
         </ul>
@@ -150,10 +129,10 @@
       <div class="main-container col-md-8 col-xs-12">
         <div class="main-container col-md-8 col-xs-12">
           <div class="graph-list">
-            <cosmos-graph graph-id="cpu" graph-title="CPU Utilization (%)" graph-unit="%" graph-margin-top="0"></cosmos-graph>
-            <cosmos-graph graph-id="memory" graph-title="Memory Usage (MB)" graph-unit="MB"></cosmos-graph>
-            <cosmos-graph graph-id="network-in" graph-title="Network In (KB)" graph-unit="KB"></cosmos-graph>
-            <cosmos-graph graph-id="network-out" graph-title="Network Out (KB)" graph-unit="KB"></cosmos-graph>
+            <cosmos-layout-graph graph-id="cpu" graph-title="CPU Utilization (%)" graph-unit="%" graph-margin-top="0"></cosmos-layout-graph>
+            <cosmos-layout-graph graph-id="memory" graph-title="Memory Usage (MB)" graph-unit="MB"></cosmos-layout-graph>
+            <cosmos-layout-graph graph-id="network-in" graph-title="Network In (KB)" graph-unit="KB"></cosmos-layout-graph>
+            <cosmos-layout-graph graph-id="network-out" graph-title="Network Out (KB)" graph-unit="KB"></cosmos-layout-graph>
           </div>
         </div>
       </div>
@@ -165,9 +144,9 @@
 </dom-module>
 <script>
 Polymer({
-  is: 'page-planet',
+  is: 'cosmos-page-planet',
   properties: {
-    data: {
+    planets: {
       type: Array,
       value: []
     }
@@ -175,7 +154,7 @@ Polymer({
   ready: function() {
     var self = this;
     Cosmos.getPlanets(function(json) {
-      self.data = json;
+      self.planets = json;
     }, function(jqXHR) {
       console.log(jqXHR.responseText);
     });
@@ -184,6 +163,11 @@ Polymer({
     e.preventDefault();
     var self = this;
     var target = $(e.currentTarget);
+    var graphs = $(this).find('cosmos-layout-graph');
+    var planet = target.context.innerText;
+    for (var i = 0, length = graphs.length; i < length; i++) {
+      graphs[i].setPlanet(planet);
+    }
   }
 });
 </script>

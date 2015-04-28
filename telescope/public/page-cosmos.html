@@ -1,5 +1,5 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<dom-module id="page-cosmos">
+<dom-module id="cosmos-page-cosmos">
 <style>
 .container {
   width: 100%;
@@ -97,9 +97,10 @@
 </dom-module>
 <script>
 Polymer({
-  is: 'page-cosmos',
+  is: 'cosmos-page-cosmos',
   properties: {
-    newsfeeds: Array
+    newsfeeds: Array,
+    value: []
   },
   ready: function() {
     this.reload();
