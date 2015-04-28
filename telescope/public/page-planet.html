@@ -172,6 +172,11 @@ Polymer({
     for (var i = 0, length = graphs.length; i < length; i++) {
       graphs[i].setPlanet(planet);
     }
+
+    Cosmos.getContainersOfPlanet(planet, function(res){
+        console.log(res);
+    });
+
   }
 });
 </script>
