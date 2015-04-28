@@ -71,7 +71,11 @@ func MakeFieldPathAndValue(obj interface{}, pathDelimeter string) []*FieldPathAn
 }
 
 func MakeContainerSeriesName(token, planet, containerName string) string {
-	return fmt.Sprintf("%s.%s.%s", token, planet, containerName)
+	if containerName == "" {
+		return fmt.Sprintf("%s.%s", token, planet)
+	} else {
+		return fmt.Sprintf("%s.%s.%s", token, planet, containerName)
+	}
 }
 
 func ConvertToContainerSeries(token, planet string, body []byte) ([]*influxdbc.Series, error) {
@@ -112,9 +116,9 @@ func ConvertFromContainerSeries(token, planet string, series []*influxdbc.Series
 
 	var regex *regexp.Regexp
 	if planet == "" {
-		regex = regexp.MustCompile(fmt.Sprintf("^(MIN|HOUR)?\\.?CONTAINER\\.%s\\.\\w+\\.", token))
+		regex = regexp.MustCompile(fmt.Sprintf("^(\\d*MIN|HOUR)?\\.?CONTAINER\\.%s\\.\\w+\\.", token))
 	} else {
-		regex = regexp.MustCompile(fmt.Sprintf("^(MIN|HOUR)?\\.?CONTAINER\\.%s\\.%s\\.", token, planet))
+		regex = regexp.MustCompile(fmt.Sprintf("^(\\d*MIN|HOUR)?\\.?CONTAINER\\.%s\\.%s\\.", token, planet))
 	}
 
 	planetName := planet
@@ -133,20 +137,20 @@ func ConvertFromContainerSeries(token, planet string, series []*influxdbc.Series
 			result[key] = make(map[string]interface{})
 		}
 		comps = regexp.MustCompile(fmt.Sprintf(".*%s\\.", containerName)).Split(s.Name, -1)
-		result[key][comps[1]] = s.Points[0]
+		result[key][comps[1]] = s.Points
 	}
 
 	return result
 }
 
-func ConvertFromContainerInfoSeries(token, planetName, containerName string, series []*influxdbc.Series) map[string]interface{} {
+func ConvertFromContainerMetricSeries(token, planetName, containerName string, series []*influxdbc.Series) map[string]interface{} {
 	result := make(map[string]interface{})
 
 	var normalRegex *regexp.Regexp
 	var rolledRegex *regexp.Regexp
 
 	normalRegex = regexp.MustCompile(fmt.Sprintf("^CONTAINER\\.%s\\.%s\\.%s\\.", token, planetName, containerName))
-	rolledRegex = regexp.MustCompile(fmt.Sprintf("^(15MIN|5MIN|MIN|HOUR)(\\.15MIN)?(\\.5MIN)?(\\.MIN)?\\.CONTAINER\\.%s\\.%s\\.%s\\.", token, planetName, containerName))
+	rolledRegex = regexp.MustCompile(fmt.Sprintf("^(\\d*MIN|HOUR)(\\.\\d*MIN)*\\.CONTAINER\\.%s\\.%s\\.%s\\.", token, planetName, containerName))
 
 	for _, s := range series {
 		var comps []string

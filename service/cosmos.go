@@ -72,13 +72,13 @@ func (this *CosmosService) GetContainersOfPlanet(token, planet string, useRollup
 	return converter.ConvertFromContainerSeries(token, planet, series), nil
 }
 
-func (this *CosmosService) GetContainerMetrics(token, planetName, containerName, metric, period string) (map[string]interface{}, error) {
+func (this *CosmosService) GetContainerMetrics(token, planetName, containerName string, metric []string, period string) (map[string]interface{}, error) {
 	series, err := dao.Container.GetContainerMetrics(token, planetName, containerName, metric, period)
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.ConvertFromContainerInfoSeries(token, planetName, containerName, series), nil
+	return converter.ConvertFromContainerMetricSeries(token, planetName, containerName, series), nil
 }
 
 func (this *CosmosService) GetPlanets(token string) (interface{}, error) {
@@ -88,6 +88,15 @@ func (this *CosmosService) GetPlanets(token string) (interface{}, error) {
 	}
 
 	return converter.ConvertFromPlanetSeries(token, series), nil
+}
+
+func (this *CosmosService) GetPlanetMetrics(token, planetName string, metric []string) (interface{}, error) {
+	series, err := dao.Container.GetContainerMetrics(token, planetName, "", metric, "10m")
+	if err != nil {
+		return nil, err
+	}
+
+	return converter.ConvertFromContainerSeries(token, planetName, series), nil
 }
 
 func (this *CosmosService) GetNewsFeeds(token, time string) (interface{}, error) {

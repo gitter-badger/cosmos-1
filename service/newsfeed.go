@@ -52,7 +52,6 @@ func (this *NewsFeedService) checkPlanetAdded(token, planet string, savedPlanets
 	for _, series := range savedPlanets {
 		if strings.HasPrefix(series.Name, fmt.Sprintf("PLANET.%s.%s", token, planet)) {
 			status := series.Points[0][3].(string)
-			fmt.Println("Status = " + status)
 			if strings.Contains(status, "Up") {
 				added = false
 				break
@@ -75,7 +74,8 @@ func (this *NewsFeedService) checkContainersAdded(token string, savedContainers,
 	for key, cont := range newContainers {
 		added := false
 
-		status := cont["Status"].([]interface{})[0].(string)
+		statusRow := cont["Status"].([][]interface{})[0]
+		status := statusRow[0].(string)
 		if strings.Contains(status, "Up") == false {
 			continue
 		}
@@ -83,7 +83,8 @@ func (this *NewsFeedService) checkContainersAdded(token string, savedContainers,
 		savedCont, exist := savedContainers[key]
 
 		if exist {
-			status = savedCont["Status"].([]interface{})[3].(string)
+			savedStatusRow := savedCont["Status"].([][]interface{})[0]
+			status = savedStatusRow[3].(string)
 			if strings.Contains(status, "Up") == false {
 				added = true
 			}
@@ -109,14 +110,16 @@ func (this *NewsFeedService) checkContainersRemoved(token string, savedContainer
 	for key, savedCont := range savedContainers {
 		removed := false
 
-		savedStatus := savedCont["Status"].([]interface{})[3].(string)
+		savedStatusRow := savedCont["Status"].([][]interface{})[0]
+		savedStatus := savedStatusRow[3].(string)
 		if strings.Contains(savedStatus, "Up") == false {
 			continue
 		}
 
 		cont, exist := newContainers[key]
 		if exist {
-			status := cont["Status"].([]interface{})[0].(string)
+			statusRow := cont["Status"].([][]interface{})[0]
+			status := statusRow[0].(string)
 			if strings.Contains(status, "Up") == false {
 				removed = true
 			}

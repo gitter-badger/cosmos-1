@@ -28,7 +28,26 @@
                 xhr.complete(complete)
             }
         },
-
+        getContainersOfPlanet: function(planet, done, fail, complete) {
+            var self = this;
+            var xhr = $.ajax({
+                url: '/' + Cosmos.API_VER + '/planets/' + planet,
+                method: 'GET',
+                accept: 'application/json',
+                dataType: 'json'
+            });
+            if (typeof done == 'function') {
+                xhr.done(function(json) {
+                    done(self._convertContainerResponse(json));
+                });
+            }
+            if (typeof fail == 'function') {
+                xhr.fail(fail);
+            }
+            if (typeof complete == 'function') {
+                xhr.complete(complete)
+            }            
+        },
         getContainers: function(planet, done, fail, complete) {
             var self = this;
             var url = '/' + Cosmos.API_VER;
@@ -73,7 +92,7 @@
 
             if (typeof done == 'function') {
                 xhr.done(function(json) {
-                    done(self._convertContainerInfoResponse(json));
+                    done(self._convertContainerMetricResponse(json));
                 });
             }
             if (typeof fail == 'function') {
@@ -169,7 +188,7 @@
                     var newK = inK.replace(/\./g, "");
                     var val = json[k][inK];
                     delete(json[k][inK]);
-                    json[k][newK] = val
+                    json[k][newK] = val[0];
                 }
                 json[k]['Index'] = i;
                 json[k]['Key'] = k;
@@ -180,7 +199,7 @@
             }
             return data;
         },
-        _convertContainerInfoResponse: function(json) {
+        _convertContainerMetricResponse: function(json) {
             var keys = Object.keys(json);
             for (var i = 0; i < keys.length; i++) {
                 var k = keys[i];

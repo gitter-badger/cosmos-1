@@ -150,6 +150,10 @@ func startServer() {
 			strict.Accept("application/json"),
 			router.GetPlanets)
 
+		r.Get("/planets/:planetName",
+			strict.Accept("application/json"),
+			router.GetPlanetMetrics)
+
 		r.Get("/containers",
 			strict.Accept("application/json"),
 			router.GetContainers)

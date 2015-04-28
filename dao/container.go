@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cosmos-io/cosmos/converter"
 	"github.com/cosmos-io/influxdbc"
@@ -36,12 +37,22 @@ func (this *ContainerDao) GetContainersOfPlanet(token, planet string, useRollup 
 	return series, nil
 }
 
-func (this *ContainerDao) GetContainerMetrics(token, planetName, containerName, metric, period string) ([]*influxdbc.Series, error) {
+func (this *ContainerDao) GetContainerMetrics(token, planetName, containerName string, metric []string, period string) ([]*influxdbc.Series, error) {
 	seriesName := converter.MakeContainerSeriesName(token, planetName, containerName)
-	if metric != "all" {
-		seriesName = seriesName + "\\." + metric
-	} else {
+
+	if metric[0] == "all" {
 		seriesName = seriesName + "\\."
+	} else {
+		seriesName = seriesName + "\\.("
+		for i, m := range metric {
+			m = strings.Replace(m, ".", "\\.", -1)
+			if i == 0 {
+				seriesName += m
+			} else {
+				seriesName += "|" + m
+			}
+		}
+		seriesName += ")"
 	}
 
 	var (

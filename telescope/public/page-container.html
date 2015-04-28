@@ -314,10 +314,10 @@ Polymer({
           case 'Stats.Memory.Usage':
             title = 'Memory Usage (MB)';
             break;
-          case 'Stats.Network.TxBytesDelta':
+          case 'Stats.Network.TxBytes':
             title = 'Network Out (KB)';
             break;
-          case 'Stats.Network.RxBytesDelta':
+          case 'Stats.Network.RxBytes':
             title = 'Network In (KB)';
             break;
         }
@@ -458,10 +458,10 @@ Polymer({
       case 'Stats.Memory.Usage':
         self.showEmptyGraph(selector, 'MB', '30m');
         break;
-      case 'Stats.Network.TxBytesDelta':
+      case 'Stats.Network.TxBytes':
         self.showEmptyGraph(selector, 'KB', '30m');
         break;
-      case 'Stats.Network.RxBytesDelta':
+      case 'Stats.Network.RxBytes':
         self.showEmptyGraph(selector, 'KB', '30m');
         break;
     }
@@ -477,10 +477,10 @@ Polymer({
             case 'Stats.Memory.Usage':
               self._showMemoryUsageGraph(selector, json, self.dialogGraphHeight);
               break;
-            case 'Stats.Network.RxBytesDelta':
+            case 'Stats.Network.RxBytes':
               self._showNetworkInGraph(selector, json, self.dialogGraphHeight);
               break;
-            case 'Stats.Network.TxBytesDelta':
+            case 'Stats.Network.TxBytes':
               self._showNetworkOutGraph(selector, json, self.dialogGraphHeight);
               break;
           }
@@ -536,7 +536,7 @@ Polymer({
   },
   _showNetworkInGraph: function(selector, json, height) {
     var self = this;
-    var dataset = json['StatsNetworkRxBytesDelta'];
+    var dataset = json['StatsNetworkRxBytes'];
     if (dataset == undefined) return;
 
     var KB = 1024;
@@ -553,7 +553,7 @@ Polymer({
   },
   _showNetworkOutGraph: function(selector, json, height) {
     var self = this;
-    var dataset = json['StatsNetworkTxBytesDelta'];
+    var dataset = json['StatsNetworkTxBytes'];
     if (dataset == undefined) return;
 
     var KB = 1024;
@@ -596,11 +596,11 @@ Polymer({
       });
       $('#netIn').data('info', {
         key: key,
-        metric: 'Stats.Network.RxBytesDelta'
+        metric: 'Stats.Network.RxBytes'
       });
       $('#netOut').data('info', {
         key: key,
-        metric: 'Stats.Network.TxBytesDelta'
+        metric: 'Stats.Network.TxBytes'
       });
 
       self._showCpuUsageGraph('#cpuUtil', json, self.graphHeight, cpuCount);

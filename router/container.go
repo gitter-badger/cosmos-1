@@ -64,7 +64,7 @@ func GetContainersOfPlanet(r render.Render, params martini.Params, req *http.Req
 func GetContainerMetrics(r render.Render, params martini.Params, req *http.Request, cosmos *service.CosmosService) {
 	req.ParseForm()
 
-	metric := util.GetQueryParam(req, "metric", "all")
+	metric := strings.Split(util.GetQueryParam(req, "metric", "all"), ",")
 	period := util.GetQueryParam(req, "period", "10m")
 	token := util.GetQueryParam(req, "token", DEFAULT_USER)
 
