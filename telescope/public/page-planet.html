@@ -1,5 +1,58 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/layout-graph.html">
+
+<dom-module id="cosmos-planet-list-item">
+<style>
+.planet-list-item {
+  border-bottom: 1px solid #333;
+  display: block;
+}
+
+.planet-list-item:hover {
+  background-color: #489dff;
+}
+
+.planet-list-item a {
+  padding: 10px 10px;
+  color: #bbb;
+  display: block;
+  text-decoration: none;
+}
+
+.planet-list-item a:hover {
+  color: #fff;
+}
+</style>
+<template>
+  <div class="planet-list-item"><a on-click="onPlanetClicked">{{data.Planet}}</a></div>
+</template>
+</dom-module>
+<script>
+Polymer({
+  is: 'cosmos-planet-list-item',
+  properties: {
+    data: {
+      type: Object,
+      observer: 'planetChanged'
+    }
+  },
+  ready: function() {
+
+  },
+  attached: function() {
+
+  },
+  planetChanged: function() {
+    if (this.data.index != 0) return;
+    this.data.eventListener.onPlanetClicked(this.data.Planet);
+  },
+  onPlanetClicked: function(e) {
+    e.preventDefault();
+    this.data.eventListener.onPlanetClicked(this.data.Planet);
+  }
+});
+</script>
+
 <dom-module id="cosmos-page-planet">
 <style>
 .container {
@@ -50,27 +103,6 @@
 .planet-list {
   margin: 0;
   padding: 20px 0;
-  list-style: none;
-}
-
-.planet-list li {
-  border-bottom: 1px solid #333;
-  display: block;
-}
-
-.planet-list li:hover {
-  background-color: #489dff;
-}
-
-.planet-list li a {
-  padding: 10px 10px;
-  color: #bbb;
-  display: block;
-  text-decoration: none;
-}
-
-.planet-list li a:hover {
-  color: #fff;
 }
 
 .main-container {
@@ -119,11 +151,11 @@
           <input id="search-input" type="text" placeholder="search" style="" />
         </div>
 
-        <ul class="planet-list">
+        <div class="planet-list">
           <template is="x-repeat" items="{{planets}}">
-            <li><a href="/containers" on-click="onPlanetClicked">{{item.Planet}}</a></li>
+            <cosmos-planet-list-item data="{{item}}"></cosmos-planet-list-item>
           </template>
-        </ul>
+        </div>
       </div>
 
       <div class="main-container col-md-8 col-xs-12">
@@ -154,6 +186,10 @@ Polymer({
   ready: function() {
     var self = this;
     Cosmos.getPlanets(function(json) {
+      for (var i = 0; i < json.length; i++) {
+          json[i]['index'] = i;
+          json[i]['eventListener'] = self;
+      }
       self.planets = json;
     }, function(jqXHR) {
       var notification = {
@@ -163,12 +199,14 @@ Polymer({
       $('cosmos-layout-header').trigger('cosmos-notification', notification);
     });
   },
-  onPlanetClicked: function(e) {
-    e.preventDefault();
-    var self = this;
-    var target = $(e.currentTarget);
+  attached: function() {
+
+  },
+  detached: function() {
+
+  },
+  onPlanetClicked: function(planet) {
     var graphs = $(this).find('cosmos-layout-graph');
-    var planet = target.context.innerText;
     for (var i = 0, length = graphs.length; i < length; i++) {
       graphs[i].setPlanet(planet);
     }
