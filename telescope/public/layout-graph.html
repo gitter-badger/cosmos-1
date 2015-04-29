@@ -1,4 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
+<script src="/vendor/moment/moment.js"></script>
+
 <dom-module id="cosmos-layout-graph">
 <style>
 .container {
@@ -47,13 +49,13 @@ Polymer({
       type: String,
       value: '60px'
     },
-    cosmosMetricId: {
-      type: String,
-      value: ''
+    cosmosMetricIds: {
+      type: Array,
+      value: []
     }
   },
   ready: function() {
-    this.cosmosMetricId = this.getCosmosMetricId(this.graphId);
+    this.cosmosMetricIds = this.getCosmosMetricIds(this.graphId);
 
     var selector = '#graph-' + this.graphId;
     var unit = this.graphUnit;
@@ -69,26 +71,71 @@ Polymer({
   detached: function() {
     // turn off graph runloop
   },
-  getCosmosMetricId: function(graphId) {
-    var cosmosMetricId = undefined;
+  getCosmosMetricIds: function(graphId) {
+    var cosmosMetricIds = undefined;
     switch (this.graphId) {
       case 'cpu':
-        cosmosMetricId = 'StatsCpuTotalUtilization';
+        cosmosMetricIds = ['StatsCpuTotalUtilization'];
         break;
       case 'memory':
-        cosmosMetricId = 'StatsMemoryUsage';
+        cosmosMetricIds = ['StatsMemoryUsage', 'StatsMemoryLimit']; // ordered
         break;
       case 'network-in':
-        cosmosMetricId = 'StatsNetworkRxBytes';
+        cosmosMetricIds = ['StatsNetworkRxBytes'];
         break;
       case 'network-out':
-        cosmosMetricId = 'StatsNetworkTxBytes';
+        cosmosMetricIds = ['StatsNetworkTxBytes'];
         break;
       default:
-        cosmosMetricId = '';
+        cosmosMetricIds = [];
         break;
     }
-    return cosmosMetricId;
+    return cosmosMetricIds;
+  },
+  getPlanetCharts: function(res, callback) {
+    // temp variables
+    var container = undefined;
+    var metric = undefined;
+    var time = undefined;
+    var value = undefined;
+    var containerLength = undefined;
+    var metricLength = undefined;
+    var metricId = undefined;
+    //var chart = undefined;
+    var division = 1;
+    if (this.graphUnit == 'KB') { division = 1024; }
+    else if (this.graphUnit == 'MB') { division = 1024 * 1024; }
+
+    // output
+    var charts = [];
+    var times = [];
+
+    // charts loop
+    for (var i = 0; i < this.cosmosMetricIds.length; i++) {
+      var values = [];
+      metricId = this.cosmosMetricIds[i];
+
+      // containers loop
+      for (var j = 0, containerLength = res.length; j < containerLength; j++) {
+        container = res[j];
+        metric = container[metricId];
+
+        // time + metric tuple loop
+        for (var k = metric.length - 1, metricLength = metric.length - 1; k >= 0; k--) {
+          time = metric[k][0] * 1000; // timestamp
+          value = metric[k][2] / division; // value
+          times[metricLength - k] = time;
+          // x3 = x1 + x2
+          values[metricLength - k] = (values[metricLength - k] ? values[metricLength - k] : 0) + value;
+        }
+
+      }
+
+      var chart = {values: values};
+      charts[i] = chart;
+    }
+
+    callback(times, charts);
   },
   setPlanet: function(planet) {
     // remove planet, container graph runloop
@@ -97,45 +144,25 @@ Polymer({
     var selector = '#graph-' + this.graphId;
     var width = undefined;
     var height = 265;
-    var times = null;
-    var data = null;
     var unit = this.graphUnit;
 
     Cosmos.getContainersOfPlanet(planet, function(res){
-      var container = undefined;
-      var metric = undefined;
-      var time = undefined;
-      var value = undefined;
-      var containerLength = undefined;
-      var metricLength = undefined;
-
-      var timeset = [];
-      var dataset = [];
-
-      var division = 1;
-      if (self.graphUnit == 'KB') { division = 1024; }
-      else if (self.graphUnit == 'MB') { division = 1024 * 1024; }
-
-      // containers loop
-      for (var i = 0, containerLength = res.length; i < containerLength; i++) {
-        container = res[i];
-        metric = container[self.cosmosMetricId];
-
-        // time + metric tuple loop
-        for (var j = metric.length - 1, metricLength = metric.length - 1; j >= 0; j--) {
-          time = metric[j][0] * 1000; // timestamp
-          value = metric[j][2] / division; // value
-          timeset[metricLength - j] = time;
-          dataset[metricLength - j] = (dataset[j] ? dataset[j] : 0) + value;
+      self.getPlanetCharts(res, function(times, charts){
+        // for free memory
+        if (self.graphId == 'memory') {
+          for (var i = 0; i < charts[1].values.length; i++) { // ordered, check getCosmosMetricIds()
+            charts[1].values[i] = charts[1].values[i] - charts[0].values[i];
+          }
         }
 
-      }
-
-      self.drawGraph(selector, width, height, timeset, dataset, unit);
+        setTimeout(function() {
+          self.drawGraph(selector, width, height, times, charts, unit);
+        }, 10);
+      });
     }, function(jqXHR){
       var notification = {
         type: 'error',
-        message: "Cosmos server didn't respond any response."
+        message: 'Cosmos server did not respond any response.'
       };
       $('cosmos-layout-header').trigger('cosmos-notification', notification);
     });
@@ -146,52 +173,36 @@ Polymer({
   },
   drawEmptyGraph: function(selector, unit, period) {
     var self = this;
-    var dataset = [],
-        timeset = [],
+    var width = undefined;
+    var height = 265;
+    var times = [],
+        values = [],
         points = 10,
         timeWidth = 60 * 1000;
 
-    if (period == '10m') {
-        points = 10;
-    } else if (period == '30m') {
-        points = 30;
-    } else if (period == '3h') {
-        points = 36;
-        timeWidth *= 5;
-    } else if (period == '8h') {
-        points = 32;
-        timeWidth *= 15;
-    } else if (period == '24h') {
-        points = 24;
-        timeWidth *= 60;
-    }
+    if (period == '10m') points = 10;
+    else if (period == '30m') points = 30;
+    else if (period == '3h') { points = 36; timeWidth *= 5; }
+    else if (period == '8h') { points = 32; timeWidth *= 15; }
+    else if (period == '24h') { points = 24; timeWidth *= 60; }
 
     var now = (new Date()).getTime();
     for (var i = points; i > 0; i--) {
-      dataset.push(0);
-      timeset.push(now - (i * timeWidth));
+      times.push(now - (i * timeWidth));
+      values.push(0);
     }
 
-    var height = 265;
-
     setTimeout(function() {
-      self.drawGraph(selector, undefined, height, timeset, dataset, unit);
+      self.drawGraph(selector, width, height, times, [{ values: values }], unit);
     }, 10);
   },
-  drawGraph: function(selector, width, height, times, data, unit, scaleOpt) {
+  drawGraph: function(selector, width, height, times, charts, unit, option) {
     var dataset = {
       labels: [],
-      datasets: [{
-        label: 'Metrics',
-        fillColor: 'rgba(72,157,255,0.2)',
-        strokeColor: 'rgba(72,157,255,1)',
-        pointColor: 'rgba(72,157,255,1)',
-        pointStrokeColor: '#fff',
-        pointHighlightFill: '#fff',
-        pointHighlightStroke: 'rgba(72,157,255,1)',
-        data: []
-      }]
+      datasets: []
     };
+
+    // labels
     if (times) {
       dataset.labels = function() {
         var labels = [];
@@ -201,49 +212,55 @@ Polymer({
         return labels;
       }();
     }
-    if (data) {
-      dataset.datasets[0].data = data;
-    }
-    var container = $('<div/>').css({
-      'text-align': 'center'
-    });
-    var chart = $('<canvas/>').css({
-      'display': 'inline-block'
-    }).attr('height', height);
-    var opt = {
-      bezierCurve: false,
-      pointHitDetectionRadius: 4,
-      scaleLabel: "<%=' ' + value%>",
-      scaleFontSize: 12,
-      scaleFontColor: '#888',
-      tooltipTemplate: "[<%=time%>] <%=value%>" + unit,
-      showTooltips: true,
-      scaleIntegersOnly: false
-    };
-    if (scaleOpt) {
-      var keys = Object.keys(scaleOpt);
-      for (var i in keys) {
-        opt[keys[i]] = scaleOpt[keys[i]];
-      }
+
+    // charts
+    for (var i = 0; i < charts.length; i++) {
+      var chart = charts[i];
+
+      chart.options = {
+        label: 'Metrics',
+        fillColor: 'rgba(72,157,255,0.2)',
+        strokeColor: 'rgba(72,157,255,1)',
+        pointColor: 'rgba(72,157,255,1)',
+        pointStrokeColor: '#fff',
+        pointHighlightFill: '#fff',
+        pointHighlightStroke: 'rgba(72,157,255,1)',
+        data: chart.values
+      };
+
+      dataset.datasets[i] = chart.options;
     }
 
-    if (isNaN(width)) {
-      opt.responsive = true;
-      opt.maintainAspectRatio = false;
-    } else {
-      chart.attr('width', width);
-    }
+    // dom
+    var container = $('<div>');
+    var chart = $('<canvas>').attr('height', height);
+    if (!isNaN(width)) chart.attr('width', width);
 
+    // option
+    option = option || {};
+    option.bezierCurve = false;
+    option.pointHitDetectionRadius = 4;
+    option.scaleLabel = "<%=' ' + value%>";
+    option.scaleFontSize = 12;
+    option.scaleFontColor = '#888';
+    option.tooltipTemplate = "[<%=time%>] <%=value%>" + unit;
+    option.showTooltips = true;
+    option.scaleIntegersOnly = false;
+    option.responsive = true;
+    option.maintainAspectRatio = false;
+
+    // redraw
     container.append(chart);
     $(selector).empty().append(container);
+    var context = chart[0].getContext('2d');
+    var chart = new Chart(context).Line(dataset, option);
 
-    var ctx = chart[0].getContext('2d');
-    var chart = new Chart(ctx).Line(dataset, opt);
-
+    // points
     var points = chart.datasets[0].points;
     for (var i = 0; i < points.length; i++) {
       points[i].time = moment(times[i]).format('YYYY-MM-DD HH:mm');
     }
+
     return chart;
   }
 });
