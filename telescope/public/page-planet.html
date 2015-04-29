@@ -1,242 +1,392 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<link rel="import" href="/layout-graph.html">
+<!-- <link rel="import" href="/layout-graph.html"> -->
+<link rel="import" href="/graph-cpu.html">
+<link rel="import" href="/graph-mem.html">
+<link rel="import" href="/graph-net-in.html">
+<link rel="import" href="/graph-net-out.html">
 
 <dom-module id="cosmos-planet-list-item">
-<style>
-.planet-list-item {
-  border-bottom: 1px solid #333;
-  display: block;
-  cursor: pointer;
-}
-
-.planet-list-item:hover,
-.planet-list-item.selected {
-  background-color: #489dff;
-}
-
-.planet-list-item a {
-  padding: 10px 10px;
-  color: #bbb;
-  display: block;
-  text-decoration: none;
-}
-
-.planet-list-item a:hover,
-.planet-list-item.selected a {
-  color: #fff;
-}
-</style>
-<template>
-  <div class="planet-list-item"><a on-click="onPlanetClicked">{{data.Planet}}</a></div>
-</template>
+    <style>
+    .planet-list-item {
+        border-bottom: 1px solid #333;
+        display: block;
+        cursor: pointer;
+    }
+    
+    .planet-list-item:hover,
+    .planet-list-item.selected {
+        background-color: #489dff;
+    }
+    
+    .planet-list-item a {
+        padding: 10px 10px;
+        color: #bbb;
+        display: block;
+        text-decoration: none;
+    }
+    
+    .planet-list-item a:hover,
+    .planet-list-item.selected a {
+        color: #fff;
+    }
+    </style>
+    <template>
+        <div class="planet-list-item"><a href="#" on-click="onPlanetClicked">{{data.Planet}}</a></div>
+    </template>
 </dom-module>
 <script>
 Polymer({
-  is: 'cosmos-planet-list-item',
-  properties: {
-    data: {
-      type: Object,
-      observer: 'planetChanged'
+    is: 'cosmos-planet-list-item',
+    properties: {
+        data: {
+            type: Object
+        },
+        select: {
+            type: Boolean,
+            observer: 'selectChanged'
+        }
+    },
+    ready: function() {
+        this.$container = $(this).find('.planet-list-item');
+        this.$pagePlanet = $(document.querySelector('cosmos-page-planet'))
+    },
+    attached: function() {
+        var self = this;
+        setTimeout(function() {
+            self.$pagePlanet.trigger('onItemReady', self);
+        }, 20);
+    },
+    selectChanged: function() {
+        if (this.select) {
+            this.$container.addClass('selected');
+            this.$pagePlanet.trigger('onItemSelected', this);
+        } else {
+            this.$container.removeClass('selected');
+            this.$pagePlanet.trigger('onItemDeselected', this);
+        }
+    },
+    onPlanetClicked: function(e) {
+        e.preventDefault();
+        this.select = !this.select;
     }
-  },
-  ready: function() {
-
-  },
-  attached: function() {
-
-  },
-  planetChanged: function() {
-    if (this.data.index != 0) return;
-    this.data.eventListener.onPlanetClicked(this.data.Planet, this);
-  },
-  onPlanetClicked: function(e) {
-    e.preventDefault();
-    this.data.eventListener.onPlanetClicked(this.data.Planet, this);
-  },
-  onSelected: function() {
-    this.querySelector('.planet-list-item').classList.add('selected');
-  },
-  onDeselected: function() {
-    this.querySelector('.planet-list-item').classList.remove('selected');
-  }
 });
 </script>
-
 <dom-module id="cosmos-page-planet">
-<style>
-.container {
-  width: 100%;
-  margin: 0 auto;
-  padding: 0;
-}
-
-@media (min-width: 1080px) {
-  .container {
-    width: 1080px;
-    marign: 0 auto;
-  }
-}
-
-@media (min-width: 1400px) {
-  .container {
-    width: 1400px;
-    margin: 0 auto;
-  }
-}
-
-.row {
-  margin: 0;
-  padding: 0;
-}
-
-.left-container {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-@media (min-width: 1080px) {
-  .left-container {
-    width: 260px;
-    padding: 0 10px;
-  }
-}
-
-@media (min-width: 1400px) {
-  .left-container {
-    width: 320px;
-    padding: 0 10px;
-  }
-}
-
-.planet-list {
-  margin: 0;
-  padding: 20px 0;
-}
-
-.main-container {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-@media (min-width: 1080px) {
-  .main-container {
-    width: 720px;
-  }
-}
-
-@media (min-width: 1400px) {
-  .main-container {
-    width: 1080px;
-  }
-}
-
-.search {
-  padding: 10px 20px;
-  background-color: #333;
-}
-
-.search input {
-  width: 100%;
-  background-color: #333;
-  outline: none;
-  border: none;
-  color: #fff;
-}
-
-.graph-list {
-  padding: 0;
-}
-</style>
-<template>
-
-  <div class="container">
-
-    <div class="row">
-
-      <div class="left-container col-md-4 col-xs-12">
-        <div class="search">
-          <input id="search-input" type="text" placeholder="search" style="" />
+    <style>
+    .container {
+        width: 100%;
+        margin: 0 auto;
+        padding: 0;
+    }
+    
+    @media (min-width: 1080px) {
+        .container {
+            width: 1080px;
+            marign: 0 auto;
+        }
+    }
+    
+    @media (min-width: 1400px) {
+        .container {
+            width: 1400px;
+            margin: 0 auto;
+        }
+    }
+    
+    .row {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .left-container {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    @media (min-width: 1080px) {
+        .left-container {
+            width: 260px;
+            padding: 0 10px;
+        }
+    }
+    
+    @media (min-width: 1400px) {
+        .left-container {
+            width: 320px;
+            padding: 0 10px;
+        }
+    }
+    
+    .planet-list {
+        margin: 0;
+        padding: 20px 0;
+    }
+    
+    .main-container {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    @media (min-width: 1080px) {
+        .main-container {
+            width: 720px;
+        }
+    }
+    
+    @media (min-width: 1400px) {
+        .main-container {
+            width: 1080px;
+        }
+    }
+    
+    .search {
+        padding: 10px 20px;
+        background-color: #333;
+    }
+    
+    .search input {
+        width: 100%;
+        background-color: #333;
+        outline: none;
+        border: none;
+        color: #fff;
+    }
+    
+    .graph-list {
+        padding: 0;
+    }
+    </style>
+    <template>
+        <div class="container">
+            <div class="row">
+                <div class="left-container col-md-4 col-xs-12">
+                    <div class="search">
+                        <input id="search-input" type="text" placeholder="search" style="" />
+                    </div>
+                    <div class="planet-list">
+                        <template id="template" is="x-repeat" items="{{planets}}">
+                            <cosmos-planet-list-item data="{{item}}"></cosmos-planet-list-item>
+                        </template>
+                    </div>
+                </div>
+                <div class="main-container col-md-8 col-xs-12">
+                    <div class="main-container col-md-8 col-xs-12">
+                        <div class="graph-list">
+                          <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
+                          <cosmos-graph-mem class="graph"></cosmos-graph-mem>
+                          <cosmos-graph-net-in class="graph"></cosmos-graph-net-in>
+                          <cosmos-graph-net-out class="graph"></cosmos-graph-net-out>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="planet-list">
-          <template is="x-repeat" items="{{planets}}">
-            <cosmos-planet-list-item data="{{item}}"></cosmos-planet-list-item>
-          </template>
-        </div>
-      </div>
-
-      <div class="main-container col-md-8 col-xs-12">
-        <div class="main-container col-md-8 col-xs-12">
-          <div class="graph-list">
-            <cosmos-layout-graph graph-id="cpu" graph-title="CPU Utilization (%)" graph-unit="%" graph-margin-top="0"></cosmos-layout-graph>
-            <cosmos-layout-graph graph-id="memory" graph-title="Memory Usage (MB)" graph-unit="MB"></cosmos-layout-graph>
-            <cosmos-layout-graph graph-id="network-in" graph-title="Network In (KB)" graph-unit="KB"></cosmos-layout-graph>
-            <cosmos-layout-graph graph-id="network-out" graph-title="Network Out (KB)" graph-unit="KB"></cosmos-layout-graph>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-</template>
+    </template>
 </dom-module>
 <script>
 Polymer({
-  is: 'cosmos-page-planet',
-  properties: {
-    planets: {
-      type: Array,
-      value: []
+    is: 'cosmos-page-planet',
+    properties: {
+        planets: {
+            type: Array,
+            value: []
+        }
     },
-    selectedPlanetElement: {
-      type: Object,
-      value: null
-    }
-  },
-  ready: function() {
-    var self = this;
-    Cosmos.getPlanets(function(json) {
-      for (var i = 0; i < json.length; i++) {
-          json[i]['index'] = i;
-          json[i]['eventListener'] = self;
+
+    selectedPlanetElement: undefined,
+    selectKey: undefined,
+    loadSelectKeyFromState: function() {
+        if (history.state && history.state.key) {
+            this.selectKey = history.state.key;
+        } else {
+            var keyValues = location.search.split('&');
+            if (keyValues.length > 0) {
+                for (var i = 0; i < keyValues.length; i++) {
+                    var comp = keyValues[i].split('=');
+                    if (comp[0] == 'key') {
+                        this.selectKey = comp[1];
+                    }
+                }
+            }
+        }
+    },
+
+    ready: function() {
+        var self = this;
+        // Listening select event
+        $(this).on('onItemSelected', function(e, elem) {
+            var index = self.$.template.indexForElement(elem);
+            if (self.selectedPlanetElement && self.selectedPlanetElement.select) {
+                self.selectedPlanetElement.select = false;
+            }
+            self.selectedPlanetElement = elem;
+            self.onPlanetClicked(elem);
+        }).on('onItemDeselected', function(e, elem) {
+            //var index = self.$.template.indexForElement(elem);
+        }).on('onItemReady', function(e, elem) {
+            var index = self.$.template.indexForElement(elem);
+            //console.log('item ready - ' + index);
+            if (!self.selectKey && index == 0) {
+                // select first item if there's no selectKey
+                elem.select = true;
+            }
+        });
+
+        // Retrieve planet's list
+        this.getPlanets();
+    },
+    attached: function() {
+
+    },
+    detached: function() {
+
+    },
+    onPlanetClicked: function(elem) {
+        this.getMetricsOfPlanet(elem);
+    },
+    getPlanets: function() {
+        var self = this;
+        Cosmos.getPlanets(function(json) {
+            self.planets = json;
+
+            if (self.planets.length == 0) {
+                var notification = {
+                    type: 'information',
+                    message: "There is no running planet yet."
+                };
+                $('cosmos-layout-header').trigger('cosmos-notification', notification);
+            }
+        }, function(jqXHR) {
+            var notification = {
+                type: 'error',
+                message: "Cosmos server didn't respond any response."
+            };
+            $('cosmos-layout-header').trigger('cosmos-notification', notification);
+        });
+    },
+    getMetricsOfPlanet: function(elem) {
+        // remove planet, container graph runloop
+        // set planet graph runloop
+        var self = this;        
+        var data = elem.data;        
+
+//        var selector = '#graph-' + this.graphId;
+//        var width = undefined;
+//        var height = 265;
+//        var unit = this.graphUnit;
+
+        Cosmos.getMetricsOfPlanet(data.Planet, function(res) {
+            var $graphs = $(self).find('.graph-list > .graph');
+
+            var totalMetrics = self.getTotalMetrics(res);
+            $graphs.each(function(i, elem) {
+              elem.metrics = totalMetrics;
+            });
+            // self.getPlanetCharts(res, function(times, charts) {
+            //     // for free memory
+            //     if (self.graphId == 'memory') {
+            //         for (var i = 0; i < charts[1].values.length; i++) { // ordered, check getCosmosMetricIds()
+            //             charts[1].values[i] = charts[1].values[i] - charts[0].values[i];
+            //         }
+            //     }
+
+            //     setTimeout(function() {
+            //         elem.drawGraph(selector, width, height, times, charts, unit);
+            //     }, 10);
+
+            // });
+        }, function(jqXHR) {
+            var notification = {
+                type: 'error',
+                message: 'Cosmos server did not respond any response.'
+            };
+            $('cosmos-layout-header').trigger('cosmos-notification', notification);
+        });
+    },
+    getTotalMetrics: function(res) {
+      var metrics = {};      
+
+      for (var i = 0; i < res.length; i++) {
+        var container = res[i];
+        var keys = Object.keys(container);
+
+        for (var j = 0; j < keys.length; j++) {
+          var key = keys[j];
+          if (key.match(/^Stats.*/)) {            
+            var values = container[key];            
+            var saved = metrics[key];
+            if (saved) {
+              // sum
+              for (var k = 0; k < saved.length; k++) {
+                var row = saved[k];
+                for (var l = 0; l < values.length; l++) {
+                  if (row[0] == values[l][0]) {
+                    // compare whether two timestamp is same
+                    row[2] += values[l][2];
+                    break;
+                  }
+                }
+              }
+            } else {
+              // new one
+              metrics[key] = values;
+            }
+          }
+        }
       }
-      self.planets = json;
 
-      if (self.planets.length == 0) {
-        var notification = {
-          type: 'information',
-          message: "There is no running planet yet."
-        };
-        $('cosmos-layout-header').trigger('cosmos-notification', notification);
-      }
-    }, function(jqXHR) {
-      var notification = {
-        type: 'error',
-        message: "Cosmos server didn't respond any response."
-      };
-      $('cosmos-layout-header').trigger('cosmos-notification', notification);
-    });
-  },
-  attached: function() {
+      return metrics;
+    },
+    getPlanetCharts: function(res, callback) {
+        // temp variables
+        var container = undefined;
+        var metric = undefined;
+        var time = undefined;
+        var value = undefined;
+        var containerLength = undefined;
+        var metricLength = undefined;
+        var metricId = undefined;
 
-  },
-  detached: function() {
+        var division = 1;
+        if (this.graphUnit == 'KB') {
+            division = 1024;
+        } else if (this.graphUnit == 'MB') {
+            division = 1024 * 1024;
+        }
 
-  },
-  onPlanetClicked: function(planet, planetElement) {
-    if (this.selectedPlanetElement) {
-      this.selectedPlanetElement.onDeselected();
+        // output
+        var charts = [];
+        var times = [];
+
+        // charts loop
+        for (var i = 0; i < this.cosmosMetricIds.length; i++) {
+            var values = [];
+            metricId = this.cosmosMetricIds[i];
+
+            // containers loop
+            for (var j = 0, containerLength = res.length; j < containerLength; j++) {
+                container = res[j];
+                metric = container[metricId];
+
+                // time + metric tuple loop
+                for (var k = metric.length - 1, metricLength = metric.length - 1; k >= 0; k--) {
+                    time = metric[k][0] * 1000; // timestamp
+                    value = metric[k][2] / division; // value
+                    times[metricLength - k] = time;
+                    // x3 = x1 + x2
+                    values[metricLength - k] = (values[metricLength - k] ? values[metricLength - k] : 0) + value;
+                }
+            }
+
+            var chart = {
+                values: values
+            };
+            charts[i] = chart;
+        }
+
+        callback(times, charts);
     }
-    this.selectedPlanetElement = planetElement;
-    this.selectedPlanetElement.onSelected();
-
-    var graphs = this.querySelectorAll('cosmos-layout-graph');
-    for (var i = 0, length = graphs.length; i < length; i++) {
-      graphs[i].setPlanet(planet);
-    }
-  }
 });
 </script>

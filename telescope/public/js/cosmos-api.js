@@ -28,7 +28,7 @@
                 xhr.complete(complete)
             }
         },
-        getContainersOfPlanet: function(planet, done, fail, complete) {
+        getMetricsOfPlanet: function(planet, done, fail, complete) {
             var self = this;
             var xhr = $.ajax({
                 url: '/' + Cosmos.API_VER + '/planets/' + planet,
