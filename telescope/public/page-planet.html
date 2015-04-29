@@ -157,7 +157,28 @@ Polymer({
 
       <div class="left-container col-md-4 col-xs-12">
         <div class="search">
-          <input id="search-input" type="text" placeholder="search" style="" />
+          <input id="search-input" type="text" placeholder="search" autocomplete="off" style="" />
+	  <script>
+	    $('#search-input').keypress(function(e) {
+	      if (e.keyCode == 13) {
+	        var planetItems = $("div.planet-list").find("cosmos-planet-list-item");
+	        var item = undefined;
+
+	        for ( var i in planetItems ) {
+	          if (i == "length") {
+	            break;
+	          }
+	          item = planetItems[i];
+	          var name = $(item).find("a").text();
+	          $(item).show();
+	          if ( name.indexOf(document.getElementById('search-input').value) == -1) {
+	            $(item).hide();
+	          }
+	        }
+	        return false;
+	      }
+	    });
+	  </script>
         </div>
 
         <div class="planet-list">
