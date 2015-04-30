@@ -30,43 +30,45 @@
 }
 </style>
 <template>
-  <div class="planet-list-item"><a href="#" on-click="onPlanetClicked">{{data.Planet}}</a></div>
+  <div class="planet-list-item"><a href="#" on-click="onPlanetClicked">{{planet.Planet}}</a></div>
 </template>
 </dom-module>
 <script>
 Polymer({
     is: 'cosmos-planet-list-item',
+    $container: undefined,
+    $pagePlanet: undefined,
     properties: {
-        data: {
+        planet: {
             type: Object
         },
-        select: {
+        isSelected: {
             type: Boolean,
-            observer: 'selectChanged'
+            observer: 'isSelectedValueChanged'
         }
     },
     ready: function() {
         this.$container = $(this).find('.planet-list-item');
-        this.$pagePlanet = $(document.querySelector('cosmos-page-planet'))
+        this.$pagePlanet = $(document.querySelector('cosmos-page-planet'));
     },
     attached: function() {
         var self = this;
         setTimeout(function() {
-            self.$pagePlanet.trigger('onItemReady', self);
+            self.$pagePlanet.trigger('onPlanetItemReady', self);
         }, 20);
     },
-    selectChanged: function() {
-        if (this.select) {
+    isSelectedValueChanged: function() {
+        if (this.isSelected) {
             this.$container.addClass('selected');
-            this.$pagePlanet.trigger('onItemSelected', this);
+            this.$pagePlanet.trigger('onPlanetItemSelected', this);
         } else {
             this.$container.removeClass('selected');
-            this.$pagePlanet.trigger('onItemDeselected', this);
+            this.$pagePlanet.trigger('onPlanetItemDeselected', this);
         }
     },
     onPlanetClicked: function(e) {
         e.preventDefault();
-        this.select = !this.select;
+        this.isSelected = !this.isSelected;
     }
 });
 </script>
@@ -167,7 +169,7 @@ Polymer({
                     </div>
                     <div class="planet-list">
                         <template id="planetListTemplate" is="x-repeat" items="{{planets}}">
-                            <cosmos-planet-list-item data="{{item}}"></cosmos-planet-list-item>
+                            <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
                         </template>
                     </div>
                 </div>
@@ -195,43 +197,24 @@ Polymer({
         }
     },
     selectedPlanetElement: undefined,
-    selectKey: undefined,
-    loadSelectKeyFromState: function() {
+    selectedPlanetKey: undefined,
+    loadSelectedPlanetKeyFromState: function() {
         if (history.state && history.state.key) {
-            this.selectKey = history.state.key;
+            this.selectedPlanetKey = history.state.key;
         } else {
             var keyValues = location.search.split('&');
             if (keyValues.length > 0) {
                 for (var i = 0; i < keyValues.length; i++) {
                     var comp = keyValues[i].split('=');
                     if (comp[0] == 'key') {
-                        this.selectKey = comp[1];
+                        this.selectedPlanetKey = comp[1];
                     }
                 }
             }
         }
     },
     ready: function() {
-        var self = this;
-        // Listening select event
-        $(this).on('onItemSelected', function(e, target) {
-            var index = self.$.planetListTemplate.indexForElement(target);
-            if (self.selectedPlanetElement && self.selectedPlanetElement.select) {
-                self.selectedPlanetElement.select = false;
-            }
-            self.selectedPlanetElement = target;
-            self.onPlanetClicked(target);
-        }).on('onItemDeselected', function(e, target) {
-            //var index = self.$.planetListTemplate.indexForElement(target);
-        }).on('onItemReady', function(e, target) {
-            var index = self.$.planetListTemplate.indexForElement(target);
-            //console.log('item ready - ' + index);
-            if (!self.selectKey && index == 0) {
-                // select first item if there's no selectKey
-                target.select = true;
-            }
-        });
-
+        this.setPlanetItemEventListener();
         // Retrieve planet's list
         this.getPlanets();
     },
@@ -241,13 +224,33 @@ Polymer({
     detached: function() {
 
     },
-    onPlanetClicked: function(elem) {
-        this.getMetricsOfPlanet(elem);
+    onPlanetClicked: function(target) {
+        this.getMetricsOfPlanet(target);
+    },
+    setPlanetItemEventListener: function() {
+      // Listening select event
+      var self = this;
+      $(this).on('onPlanetItemSelected', function(e, target) {
+          var index = self.$.planetListTemplate.indexForElement(target);
+          if (self.selectedPlanetElement && self.selectedPlanetElement.isSelected) {
+              self.selectedPlanetElement.isSelected = false;
+          }
+          self.selectedPlanetElement = target;
+          self.onPlanetClicked(target);
+      }).on('onPlanetItemDeselected', function(e, target) {
+        // nothing to do
+      }).on('onPlanetItemReady', function(e, target) {
+          var index = self.$.planetListTemplate.indexForElement(target);
+          if (!self.selectedPlanetKey && index == 0) {
+              // select first item if there's no selectedPlanetKey
+              target.isSelected = true;
+          }
+      });
     },
     getPlanets: function() {
         var self = this;
-        Cosmos.getPlanets(function(json) {
-            self.planets = json;
+        Cosmos.getPlanets(function(response) {
+            self.planets = response;
 
             if (self.planets.length == 0) {
                 var notification = {
@@ -264,17 +267,17 @@ Polymer({
             $('cosmos-layout-header').trigger('cosmos-notification', notification);
         });
     },
-    getMetricsOfPlanet: function(elem) {
+    getMetricsOfPlanet: function(target) {
         // remove planet, container graph runloop
         // set planet graph runloop
         var self = this;
-        var data = elem.data;
+        var planet = target.planet.Planet;
 
-        Cosmos.getMetricsOfPlanet(data.Planet, function(res) {
+        Cosmos.getMetricsOfPlanet(planet, function(response) {
             var $graphs = $(self).find('.graph-list > .graph');
-            var totalMetrics = self.getTotalMetrics(res);
-            $graphs.each(function(i, elem) {
-              elem.metrics = totalMetrics;
+            var totalMetrics = self.getTotalMetrics(response);
+            $graphs.each(function(i, target) {
+              target.metrics = totalMetrics;
             });
         }, function(jqXHR) {
             var notification = {
@@ -284,11 +287,11 @@ Polymer({
             $('cosmos-layout-header').trigger('cosmos-notification', notification);
         });
     },
-    getTotalMetrics: function(res) {
+    getTotalMetrics: function(response) {
       var metrics = {};
 
-      for (var i = 0; i < res.length; i++) {
-        var container = res[i];
+      for (var i = 0; i < response.length; i++) {
+        var container = response[i];
         var keys = Object.keys(container);
 
         for (var j = 0; j < keys.length; j++) {
@@ -317,55 +320,6 @@ Polymer({
       }
 
       return metrics;
-    },
-    getPlanetCharts: function(res, callback) {
-        // temp variables
-        var container = undefined;
-        var metric = undefined;
-        var time = undefined;
-        var value = undefined;
-        var containerLength = undefined;
-        var metricLength = undefined;
-        var metricId = undefined;
-
-        var division = 1;
-        if (this.graphUnit == 'KB') {
-            division = 1024;
-        } else if (this.graphUnit == 'MB') {
-            division = 1024 * 1024;
-        }
-
-        // output
-        var charts = [];
-        var times = [];
-
-        // charts loop
-        for (var i = 0; i < this.cosmosMetricIds.length; i++) {
-            var values = [];
-            metricId = this.cosmosMetricIds[i];
-
-            // containers loop
-            for (var j = 0, containerLength = res.length; j < containerLength; j++) {
-                container = res[j];
-                metric = container[metricId];
-
-                // time + metric tuple loop
-                for (var k = metric.length - 1, metricLength = metric.length - 1; k >= 0; k--) {
-                    time = metric[k][0] * 1000; // timestamp
-                    value = metric[k][2] / division; // value
-                    times[metricLength - k] = time;
-                    // x3 = x1 + x2
-                    values[metricLength - k] = (values[metricLength - k] ? values[metricLength - k] : 0) + value;
-                }
-            }
-
-            var chart = {
-                values: values
-            };
-            charts[i] = chart;
-        }
-
-        callback(times, charts);
     }
 });
 </script>
