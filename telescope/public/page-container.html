@@ -1,4 +1,8 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
+<link rel="import" href="/graph-cpu.html">
+<link rel="import" href="/graph-memory.html">
+<link rel="import" href="/graph-network-in.html">
+<link rel="import" href="/graph-network-out.html">
 
 <!-- Dialog -->
 <dom-module id="dialog-metric">
@@ -33,50 +37,90 @@ Polymer({
 });
 </script>
 
-<!-- Container Item -->
-<dom-module id="container-item">
+<!-- Cosmos Container List Item -->
+<dom-module id="cosmos-container-list-item">
     <style>
-    .item {
-        padding: 10px;
-        border-bottom: 1px solid #333;
-        color: #bbb;
+    .container-list-item {
+      padding: 10px;
+      border-bottom: 1px solid #333;
+      color: #bbb;
     }
 
-    .item:hover,
+    .container-list-item:hover,
     .selected {
         background-color: #489dff;
     }
 
-    .item:hover p,
-    .item:hover span,
-    .selected p,
+    .container-list-item:hover span,
     .selected span {
         color: #fff;
     }
 
-    .name {
-        color: #fff;
+    .planet-name {
+      color: #bbb;
     }
 
-    .planet {
-        padding-left: 10px;
-        color: #bbb;
+    .container-name {
+      color: #bbb;
+    }
+
+    .container-status {
+      color: #bbb;
+      display: block;
     }
     </style>
     <template>
-        <div class="item">
-            <p class="name">{{data.Container}}<span class="planet">{{data.Planet}}</span></p>
-            <span class="status">{{data.Status[0][3]}}</span>
+        <div class="container-list-item" on-click="onContainerClicked">
+          <span class="planet-name">{{planetName}}</span>.<span class="container-name">{{containerName}}</span>
+          <span class="container-status">{{containerStatus}}</span>
         </div>
     </template>
 </dom-module>
 <script>
 Polymer({
-    is: 'container-item',
+    is: 'cosmos-container-list-item',
+    planetName: undefined,
+    containerName: undefined,
+    containerStatus: undefined,
+    $container: undefined,
+    $pageContainer: undefined,
     properties: {
-        data: {
-            type: Object
+        container: {
+            type: Object,
+            observer: "containerValueChanged"
+        },
+        isSelected: {
+            type: Boolean,
+            observer: 'isSelectedValueChanged'
         }
+    },
+    ready: function() {
+      this.$container = $(this).find('.container-list-item');
+      this.$pageContainer = $(document.querySelector('cosmos-page-container'));
+    },
+    attached: function() {
+      var self = this;
+      setTimeout(function() {
+          self.$pageContainer.trigger('onContainerItemReady', self);
+      }, 20);
+    },
+    containerValueChanged: function() {
+      this.planetName = this.container.Planet;
+      this.containerName = this.container.Container;
+      this.containerStatus = this.container.Status[0][3];
+    },
+    isSelectedValueChanged: function() {
+        if (this.isSelected) {
+            this.$container.addClass('selected');
+            this.$pageContainer.trigger('onContainerItemSelected', this);
+        } else {
+            this.$container.removeClass('selected');
+            this.$pageContainer.trigger('onContainerItemDeselected', this);
+        }
+    },
+    onContainerClicked: function(e) {
+      e.preventDefault();
+      this.isSelected = !this.isSelected;
     }
 });
 </script>
@@ -167,28 +211,6 @@ Polymer({
     .graph-list {
         padding: 0;
     }
-
-    .graph-list h3 {
-        margin: 0;
-        padding: 0;
-        font-size: 17px;
-        text-align: center;
-    }
-
-    .graph-list h3 {
-        padding-top: 60px;
-        padding-bottom: 10px;
-    }
-
-    .graph-list h3:first-child {
-        padding-top: 0;
-    }
-
-    .graph {
-        min-height: 265px;
-        cursor: pointer;
-    }
-
     container-item {
         cursor: pointer;
     }
@@ -201,21 +223,17 @@ Polymer({
                         <input id="search-input" type="text" placeholder="search" autocomplete="off" style="" />
                     </div>
                     <div class="container-list">
-                        <template is="x-repeat" items="{{data}}">
-                            <container-item data="{{item}}" on-click="onItemClicked"></container-item>
+                        <template id="containerListTemplate" is="x-repeat" items="{{containers}}">
+                            <cosmos-container-list-item container="{{item}}"></cosmos-container-list-item>
                         </template>
                     </div>
                 </div>
                 <div class="main-container col-md-8 col-xs-12">
                     <div class="graph-list">
-                        <h3>CPU Utilization (%)</h3>
-                        <div id="cpuUtil" class="graph" on-click="onGraphClicked"></div>
-                        <h3>Memory Usage (MB)</h3>
-                        <div id="memUsage" class="graph" on-click="onGraphClicked"></div>
-                        <h3>Network In (KB)</h3>
-                        <div id="netIn" class="graph" on-click="onGraphClicked"></div>
-                        <h3>Network Out (KB)</h3>
-                        <div id="netOut" class="graph" on-click="onGraphClicked"></div>
+                      <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
+                      <cosmos-graph-memory class="graph"></cosmos-graph-memory>
+                      <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
+                      <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
                     </div>
                 </div>
             </div>
@@ -225,8 +243,11 @@ Polymer({
 <script>
 Polymer({
     is: 'cosmos-page-container',
+    _refresh: undefined,
+    selectedContainerElement: undefined,
+    selectedContainerKey: undefined,
     properties: {
-        data: {
+        containers: {
             type: Array,
             value: []
         },
@@ -235,500 +256,107 @@ Polymer({
             value: []
         }
     },
-    _refresh: undefined,
-    graphHeight: 250,
-    dialogGraphHeight: 480,
     ready: function() {
-        this.reload();
+      this.setContainerItemEventListener();
+      this.getContainers();
     },
     attached: function() {
-        this.showEmptyGraph('#cpuUtil', '%', '10m');
-        this.showEmptyGraph('#memUsage', 'MB', '10m');
-        this.showEmptyGraph('#netIn', 'KB', '10m');
-        this.showEmptyGraph('#netOut', 'KB', '10m');
+      
     },
     detached: function() {
-        if (this._refresh) {
-            clearTimeout(this._refresh);
-        }
-    },
-    reload: function() {
-        var self = this;
-        Cosmos.getContainers(undefined, function(json) {
-            self.data = json;
-            self.selectItem();
 
-            if (self.data.length == 0) {
+    },
+    setContainerItemEventListener: function() {
+      var self = this;
+      $(this).on('onContainerItemSelected', function(e, target) {
+        var index = self.$.containerListTemplate.indexForElement(target);
+        if (self.selectedContainerElement && self.selectedContainerElement.isSelected) {
+            self.selectedContainerElement.isSelected = false;
+        }
+        self.selectedContainerElement = target;
+        self.onContainerClicked(target);
+      }).on('onContainerItemDeselected', function(e, target) {
+        // nothing to do
+      }).on('onContainerItemReady', function(e, target) {
+        var index = self.$.containerListTemplate.indexForElement(target);
+        if (index != 0 || self.selectedContainerKey) return;
+        target.isSelected = true;
+      });
+    },
+    onContainerClicked: function(target) {
+      this.getContainerMetrics(target);
+    },
+    getContainers: function() {
+        var self = this;
+        var planet = undefined;
+        Cosmos.getContainers(planet, function(response) {
+            self.containers = response;
+            if (self.containers.length == 0) {
               var notification = {
                 type: 'information',
-                message: "There is no running container yet."
+                message: 'There is no running container yet.'
               };
               $('cosmos-layout-header').trigger('cosmos-notification', notification);
             }
         }, function(jqXHR) {
             var notification = {
                 type: 'error',
-                message: "Cosmos server didn't respond any response."
+                message: 'Cosmos server did not respond any response.'
             };
             $('cosmos-layout-header').trigger('cosmos-notification', notification);
         });
     },
-    selectItem: function() {
-        var self = this;
-        var $this = $(this);
-        var fn = function() {
-            var items = $this.find('container-item');
-            if (items.size() > 0) {
-                var e = {};
-                if (history.state.key) {
-                    items.each(function(i, elem) {
-                        if (elem.data.Key == history.state.key) {
-                            e.currentTarget = elem;
-                        }
-                    });
-                } else {
-                    e.currentTarget = items.get(0);
-                }
+    getContainerMetrics: function(target) {
+      var self = this;
+      var planet = target.container.Planet;
+      var container = target.container.Container;
+      var metricType = 'all';
+      var period = '';
+      Cosmos.getContainerMetrics(planet, container, metricType, period, function(response){
+        var $graphs = $(self).find('.graph-list > .graph');
 
-                if (e.currentTarget) {
-                    self.onItemClicked(e);
-                }
-            } else {
-                setTimeout(fn, 80);
-            }
-        };
-
-        setTimeout(fn, 80);
-    },
-    onGraphClicked: function(e) {
-        var self = this;
-        var info = $(e.currentTarget).data('info');
-
-        vex.open({
-            contentCSS: {
-                width: '976px'
-            },
-            afterOpen: function($vexContent) {
-                var content = document.createElement('dialog-metric');
-                $vexContent.append(content);
-                var $select = $(content).find('select[name=period]');
-                $select.change(function(e) {
-                    info.period = $(this).val();
-                    self.showDetailGraph(info);
-                });
-                info.period = $select.val();
-
-                var title;
-                switch (info.tag) {
-                    case 'cpu':
-                        title = 'CPU Utilization (%)';
-                        break;
-                    case 'mem':
-                        title = 'Memory Usage (MB)';
-                        break;
-                    case 'netIn':
-                        title = 'Network In (KB)';
-                        break;
-                    case 'netOut':
-                        title = 'Network Out (KB)';
-                        break;
-                }
-                content.querySelector('.title').innerText = title;
-
-                self.showDetailGraph(info);
-                return $vexContent;
-            },
-            afterClose: function() {}
+        var totalMetrics = self.getTotalMetrics(response);
+        $graphs.each(function(i, target) {
+          target.metrics = totalMetrics;
         });
-    },
-    onItemClicked: function(e) {
-        var selectedItem = $(e.currentTarget);
-
-        var allItems = selectedItem.parent().find('.item');
-        var index = selectedItem.get(0).data.Index;
-        if (index < 0) return;
-
-        allItems.removeClass('selected');
-        $(selectedItem.find('> div')).addClass('selected');
-
-        if (this._refresh) {
-            clearTimeout(this._refresh);
-        }
-        this.showGraph(this.data[index].Key);
-    },
-    _getDefaultDataGraphOptions: function() {
-        return {
-            label: "Metrics",
-            fillColor: "rgba(72,157,255,0.2)",
-            strokeColor: "rgba(72,157,255,1)",
-            pointColor: "rgba(72,157,255,1)",
-            pointStrokeColor: "#fff",
-            pointHighlightFill: "#fff",
-            pointHighlightStroke: "rgba(72,157,255,1)"
+      }, function(jqXHR){
+        var notification = {
+            type: 'error',
+            message: 'Cosmos server did not respond any response.'
         };
+        $('cosmos-layout-header').trigger('cosmos-notification', notification);
+      });
     },
-    drawGraph: function(selector, width, height, times, data, unit, options) {
-        var self = this;
-        var dataset = {
-            labels: [],
-            datasets: []
-        };
+    getTotalMetrics: function(response) {
+      var metrics = {};
 
-        if (times) {
-            dataset.labels = function() {
-                var labels = [];
-                for (var i = 0; i < times.length; i++) {
-                    labels.push(moment(times[i]).format("HH:mm"));
+      var container = response;
+      var keys = Object.keys(container);
+
+      for (var j = 0; j < keys.length; j++) {
+        var key = keys[j];
+        if (key.match(/^Stats.*/)) {
+          var values = container[key];
+          var saved = metrics[key];
+          if (saved) {
+            // sum
+            for (var k = 0; k < saved.length; k++) {
+              var row = saved[k];
+              for (var l = 0; l < values.length; l++) {
+                if (row[0] == values[l][0]) {
+                  // compare whether two timestamp is same
+                  row[2] += values[l][2];
+                  break;
                 }
-                return labels;
-            }();
-        }
-
-        for (var i = 0; i < data.length; i++) {
-            var d = data[i];
-            if (!d.options) {
-                d.options = self._getDefaultDataGraphOptions();
+              }
             }
-
-            d.options.data = d.data;
-            dataset.datasets.push(d.options);
+          } else {
+            // new one
+            metrics[key] = values;
+          }
         }
-
-        var container = $('<div/>').css({
-            'text-align': 'center'
-        });
-        var chart = $('<canvas/>').css({
-            'display': 'inline-block'
-        }).attr('height', height);
-        var opt = {
-            bezierCurve: false,
-            pointHitDetectionRadius: 4,
-            scaleLabel: "<%=' ' + value%>",
-            scaleFontSize: 12,
-            scaleFontColor: '#aaa',
-            pointLableFontColor: '#aaa',
-            tooltipTemplate: "[<%=time%>] <%=value%>" + unit,
-            showTooltips: true,
-            scaleIntegersOnly: true,
-            scaleGridLineColor: "rgba(255,255,255,.04)"
-        };
-        if (options) {
-            var keys = Object.keys(options);
-            for (var i in keys) {
-                opt[keys[i]] = options[keys[i]];
-            }
-        }
-
-        if (isNaN(width)) {
-            opt.responsive = true;
-            opt.maintainAspectRatio = false;
-        } else {
-            chart.attr('width', width);
-        }
-
-        container.append(chart);
-        $(selector).empty().append(container);
-
-        var ctx = chart[0].getContext("2d");
-        var chart = new Chart(ctx).Line(dataset, opt);
-
-        var points = chart.datasets[0].points;
-        for (var i = 0; i < points.length; i++) {
-            points[i].time = moment(times[i]).format("YYYY-MM-DD HH:mm");
-        }
-        return chart;
-    },
-    showEmptyGraph: function(selector, unit, period) {
-        var self = this;
-        var data = [],
-            times = [],
-            points = 10,
-            timeWidth = 60 * 1000;
-
-        if (period == "10m") {
-            points = 10;
-        } else if (period == "30m") {
-            points = 30;
-        } else if (period == "3h") {
-            points = 36;
-            timeWidth *= 5;
-        } else if (period == "8h") {
-            points = 32;
-            timeWidth *= 15;
-        } else if (period == "24h") {
-            points = 24;
-            timeWidth *= 60;
-        }
-
-        var now = (new Date()).getTime();
-        for (var i = points; i > 0; i--) {
-            data.push(0);
-            times.push(now - (i * timeWidth));
-        }
-
-        setTimeout(function() {
-            self.drawGraph(selector, undefined, self.graphHeight, times, [{
-                data: data
-            }], unit);
-        }, 10);
-    },
-    showDetailGraph: function(info) {
-        var self = this;
-        var container = this.data[info.key];
-        var planetName = info.key.split('.')[0];
-        var containerName = info.key.split('.')[1];
-        var selector = '#graph';
-
-        switch (info.tag) {
-            case 'cpu':
-                self.showEmptyGraph(selector, '%', '30m');
-                break;
-            case 'mem':
-                self.showEmptyGraph(selector, 'MB', '30m');
-                break;
-            case 'netOut':
-                self.showEmptyGraph(selector, 'KB', '30m');
-                break;
-            case 'netIn':
-                self.showEmptyGraph(selector, 'KB', '30m');
-                break;
-        }
-
-        Cosmos.getContainerMetrics(planetName, containerName, info.metric, info.period, function(json) {
-            if (json.length == 0) {
-                vex.dialog.alert('No metrics to display yet.');
-            } else {
-                var opt = {
-                    scaleGridLineColor: "rgba(0,0,0,.04)"
-                };
-
-                switch (info.tag) {
-                    case 'cpu':
-                        self._showCpuUsageGraph(selector, json, self.dialogGraphHeight, info.cpuCount, opt);
-                        break;
-                    case 'mem':
-                        self._showMemoryUsageGraph(selector, json, self.dialogGraphHeight, opt);
-                        break;
-                    case 'netIn':
-                        self._showNetworkInGraph(selector, json, self.dialogGraphHeight, opt);
-                        break;
-                    case 'netOut':
-                        self._showNetworkOutGraph(selector, json, self.dialogGraphHeight, opt);
-                        break;
-                }
-            }
-        }, function(jqXHR) {
-            var notification = {
-                type: 'error',
-                message: "Cosmos server didn't respond any response."
-            };
-            $('cosmos-layout-header').trigger('cosmos-notification', notification);
-        });
-    },
-    _showCpuUsageGraph: function(selector, json, height, cpuCount, opt) {
-        var self = this;
-        var dataset = json['StatsCpuTotalUtilization'];
-        if (dataset == undefined) {
-            return;
-        }
-
-        var data = [],
-            times = [];
-        for (var i = dataset.length - 1; i >= 0; i--) {
-            data.push(parseInt(dataset[i][2] * 1000) / 1000);
-            times.push(dataset[i][0] * 1000);
-        }
-
-        var total = cpuCount * 100;
-        var steps = 10;
-        var stepWidth = total / steps;
-
-        opt = opt || {};
-        opt.scaleOverride = true;
-        opt.scaleSteps = steps;
-        opt.scaleStepWidth = stepWidth;
-        opt.scaleStartValue = 0;
-
-        setTimeout(function() {
-            self.drawGraph(selector, undefined, height, times, [{
-                data: data
-            }], '%', opt);
-        }, 10);
-    },
-    _showMemoryUsageGraph: function(selector, json, height, opt) {
-        var self = this;
-        var datasetUsage = json['StatsMemoryUsage'];
-        var datasetLimit = json['StatsMemoryLimit'];
-
-        var MB = 1024 * 1024;
-        var data1 = [],
-            data2 = [],
-            times = [];
-
-        for (var i = datasetUsage.length - 1; i >= 0; i--) {
-            var usage = parseInt(datasetUsage[i][2] / MB);
-            var limit = parseInt(datasetLimit[i][2] / MB);
-            var free = limit - usage;
-            data1.push(usage);
-            data2.push(free);
-            times.push(datasetUsage[i][0] * 1000);
-        }
-
-        setTimeout(function() {
-            if (!opt) {
-                opt = {};
-            }
-
-            opt.customTooltips = function(tooltip) {
-                var tooltipEl = $('#chartjs-tooltip');
-                if (!tooltip) {
-                    tooltipEl.remove();
-                    return;
-                }
-
-                if (tooltipEl.size() == 0) {
-                    tooltipEl = $('<div id="chartjs-tooltip"></div>');
-                    $('body').append(tooltipEl);
-                }
-
-                var innerHtml = '';
-                for (var i = 0; i < tooltip.labels.length; i++) {
-                    var label;
-                    if (i == 0) {
-                        // Usage
-                        label = "Usage: ";
-                    } else if (i == 1) {
-                        // Free
-                        label = "Free: "
-                    }
-
-                    innerHtml += [
-                        '<div class="chartjs-tooltip-section">',
-                        '       <span class="chartjs-tooltip-key" style="background-color:' + tooltip.legendColors[i].fill + '"></span>',
-                        '       <span class="chartjs-tooltip-value">' + label + tooltip.labels[i] + 'MB</span>',
-                        '</div>'
-                    ].join('');
-                }
-
-                tooltipEl.html(innerHtml);
-                var offset = $(tooltip.chart.canvas).offset();
-                tooltipEl.css({
-                    'left': offset.left + tooltip.x + 'px',
-                    'top': offset.top + tooltip.y + 'px',
-                    'fontFamily': tooltip.fontFamily,
-                    'fontSize': tooltip.fontSize,
-                    'fontStyle': tooltip.fontStyle
-                });
-            };
-
-            var data1Opt = self._getDefaultDataGraphOptions();
-            data1Opt.label = "Memory Usage";
-            var data2Opt = self._getDefaultDataGraphOptions();
-            data2Opt.label = "Memory Free";
-            data2Opt.pointColor = "rgba(102,102,255,1)";
-            data2Opt.strokeColor = "rgba(102,102,255,1)";
-            data2Opt.fillColor = "rgba(102,102,255,0.2)";
-
-            self.drawGraph(selector, undefined, height, times, [{
-                options: data1Opt,
-                data: data1
-            }, {
-                options: data2Opt,
-                data: data2
-            }], 'MB', opt);
-        }, 10);
-    },
-    _showNetworkInGraph: function(selector, json, height, opt) {
-        var self = this;
-        var dataset = json['StatsNetworkRxBytes'];
-        if (dataset == undefined) return;
-
-        var KB = 1024;
-        var data = [],
-            times = [];
-        for (var i = dataset.length - 1; i >= 0; i--) {
-            data.push(parseInt(dataset[i][2] / KB));
-            times.push(dataset[i][0] * 1000);
-        }
-
-        setTimeout(function() {
-            self.drawGraph(selector, undefined, height, times, [{
-                data: data
-            }], 'KB', opt);
-        }, 10);
-    },
-    _showNetworkOutGraph: function(selector, json, height, opt) {
-        var self = this;
-        var dataset = json['StatsNetworkTxBytes'];
-        if (dataset == undefined) return;
-
-        var KB = 1024;
-        var data = [],
-            times = [];
-        for (var i = dataset.length - 1; i >= 0; i--) {
-            data.push(parseInt(dataset[i][2] / KB));
-            times.push(dataset[i][0] * 1000);
-        }
-
-        setTimeout(function() {
-            self.drawGraph(selector, undefined, height, times, [{
-                data: data
-            }], 'KB', opt);
-        }, 10);
-    },
-    showGraph: function(key) {
-        var self = this;
-
-        var container = this.data[key];
-        var planetName = key.split('.')[0];
-        var containerName = key.split('.')[1];
-
-        Cosmos.getContainerMetrics(planetName, containerName, 'all', '10m', function(json) {
-            var cpuCount = 0;
-            for (var i = 0; i < 100; i++) {
-                if (json['StatsCpuPerCpuUtilization' + i] != undefined) {
-                    cpuCount++;
-                } else {
-                    break;
-                }
-            }
-
-            $('#cpuUtil').data('info', {
-                key: key,
-                metric: 'Stats.Cpu.TotalUtilization',
-                tag: 'cpu',
-                cpuCount: cpuCount
-            });
-            $('#memUsage').data('info', {
-                key: key,
-                metric: 'Stats.Memory.Usage,Stats.Memory.Limit',
-                tag: 'mem'
-            });
-            $('#netIn').data('info', {
-                key: key,
-                metric: 'Stats.Network.RxBytes',
-                tag: 'netIn'
-            });
-            $('#netOut').data('info', {
-                key: key,
-                metric: 'Stats.Network.TxBytes',
-                tag: 'netOut'
-            });
-
-            self._showCpuUsageGraph('#cpuUtil', json, self.graphHeight, cpuCount);
-            self._showMemoryUsageGraph('#memUsage', json, self.graphHeight);
-            self._showNetworkInGraph('#netIn', json, self.graphHeight);
-            self._showNetworkOutGraph('#netOut', json, self.graphHeight);
-            self._refresh = setTimeout(function() {
-                self.showGraph(key);
-            }, 1000 * 60);
-        }, function(jqXHR) {
-            var notification = {
-                type: 'error',
-                message: "Cosmos server didn't respond any response."
-            };
-            $('cosmos-layout-header').trigger('cosmos-notification', notification);
-        });
+      }
+      return metrics;
     }
 });
 

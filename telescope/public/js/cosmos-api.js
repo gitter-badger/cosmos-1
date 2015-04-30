@@ -5,7 +5,7 @@
     var FEED_TYPE_REMOVE_CONTAINER = 1;
     var FEED_TYPE_ADD_PLANET = 2;
     var FEED_TYPE_REMOVE_PLANET = 3;
-    
+
     window.Cosmos = {
         API_VER: 'v1',
         getPlanets: function(done, fail, complete) {
@@ -46,7 +46,7 @@
             }
             if (typeof complete == 'function') {
                 xhr.complete(complete)
-            }            
+            }
         },
         getContainers: function(planet, done, fail, complete) {
             var self = this;
@@ -76,9 +76,9 @@
                 xhr.complete(complete)
             }
         },
-        getContainerMetrics: function(planet, containerName, metric, period, done, fail, complete) {
+        getContainerMetrics: function(planet, container, metric, period, done, fail, complete) {
             var self = this;
-            var url = '/' + Cosmos.API_VER + '/planets/' + planet + '/containers/' + containerName;
+            var url = '/' + Cosmos.API_VER + '/planets/' + planet + '/containers/' + container;
             var xhr = $.ajax({
                 url: url,
                 data: {
