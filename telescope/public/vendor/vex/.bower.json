@@ -33,6 +33,6 @@
     "commit": "3334f39f89b9cbc0f37f649489a40d4e9f86bcc5"
   },
   "_source": "git://github.com/HubSpot/vex.git",
-  "_target": "~2.3.2",
+  "_target": "2.3.2",
   "_originalSource": "vex"
 }
