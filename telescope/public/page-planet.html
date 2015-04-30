@@ -166,7 +166,7 @@ Polymer({
                         <input id="search-input" type="text" placeholder="search" style="" />
                     </div>
                     <div class="planet-list">
-                        <template id="template" is="x-repeat" items="{{planets}}">
+                        <template id="planetListTemplate" is="x-repeat" items="{{planets}}">
                             <cosmos-planet-list-item data="{{item}}"></cosmos-planet-list-item>
                         </template>
                     </div>
@@ -214,21 +214,21 @@ Polymer({
     ready: function() {
         var self = this;
         // Listening select event
-        $(this).on('onItemSelected', function(e, elem) {
-            var index = self.$.template.indexForElement(elem);
+        $(this).on('onItemSelected', function(e, target) {
+            var index = self.$.planetListTemplate.indexForElement(target);
             if (self.selectedPlanetElement && self.selectedPlanetElement.select) {
                 self.selectedPlanetElement.select = false;
             }
-            self.selectedPlanetElement = elem;
-            self.onPlanetClicked(elem);
-        }).on('onItemDeselected', function(e, elem) {
-            //var index = self.$.template.indexForElement(elem);
-        }).on('onItemReady', function(e, elem) {
-            var index = self.$.template.indexForElement(elem);
+            self.selectedPlanetElement = target;
+            self.onPlanetClicked(target);
+        }).on('onItemDeselected', function(e, target) {
+            //var index = self.$.planetListTemplate.indexForElement(target);
+        }).on('onItemReady', function(e, target) {
+            var index = self.$.planetListTemplate.indexForElement(target);
             //console.log('item ready - ' + index);
             if (!self.selectKey && index == 0) {
                 // select first item if there's no selectKey
-                elem.select = true;
+                target.select = true;
             }
         });
 
