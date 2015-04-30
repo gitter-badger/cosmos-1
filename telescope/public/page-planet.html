@@ -1,38 +1,37 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<!-- <link rel="import" href="/layout-graph.html"> -->
 <link rel="import" href="/graph-cpu.html">
-<link rel="import" href="/graph-mem.html">
-<link rel="import" href="/graph-net-in.html">
-<link rel="import" href="/graph-net-out.html">
+<link rel="import" href="/graph-memory.html">
+<link rel="import" href="/graph-network-in.html">
+<link rel="import" href="/graph-network-out.html">
 
 <dom-module id="cosmos-planet-list-item">
-    <style>
-    .planet-list-item {
-        border-bottom: 1px solid #333;
-        display: block;
-        cursor: pointer;
-    }
-    
-    .planet-list-item:hover,
-    .planet-list-item.selected {
-        background-color: #489dff;
-    }
-    
-    .planet-list-item a {
-        padding: 10px 10px;
-        color: #bbb;
-        display: block;
-        text-decoration: none;
-    }
-    
-    .planet-list-item a:hover,
-    .planet-list-item.selected a {
-        color: #fff;
-    }
-    </style>
-    <template>
-        <div class="planet-list-item"><a href="#" on-click="onPlanetClicked">{{data.Planet}}</a></div>
-    </template>
+<style>
+.planet-list-item {
+    border-bottom: 1px solid #333;
+    display: block;
+    cursor: pointer;
+}
+
+.planet-list-item:hover,
+.planet-list-item.selected {
+    background-color: #489dff;
+}
+
+.planet-list-item a {
+    padding: 10px 10px;
+    color: #bbb;
+    display: block;
+    text-decoration: none;
+}
+
+.planet-list-item a:hover,
+.planet-list-item.selected a {
+    color: #fff;
+}
+</style>
+<template>
+  <div class="planet-list-item"><a href="#" on-click="onPlanetClicked">{{data.Planet}}</a></div>
+</template>
 </dom-module>
 <script>
 Polymer({
@@ -71,9 +70,9 @@ Polymer({
     }
 });
 </script>
-<dom-module id="cosmos-page-planet">
 
-    <style>
+<dom-module id="cosmos-page-planet">
+<style>
 .container {
   width: 100%;
   margin: 0 auto;
@@ -176,16 +175,14 @@ Polymer({
                     <div class="main-container col-md-8 col-xs-12">
                         <div class="graph-list">
                           <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
-                          <cosmos-graph-mem class="graph"></cosmos-graph-mem>
-                          <cosmos-graph-net-in class="graph"></cosmos-graph-net-in>
-                          <cosmos-graph-net-out class="graph"></cosmos-graph-net-out>
+                          <cosmos-graph-memory class="graph"></cosmos-graph-memory>
+                          <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
+                          <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
-
     </template>
 </dom-module>
 <script>
@@ -197,7 +194,6 @@ Polymer({
             value: []
         }
     },
-
     selectedPlanetElement: undefined,
     selectKey: undefined,
     loadSelectKeyFromState: function() {
@@ -215,7 +211,6 @@ Polymer({
             }
         }
     },
-
     ready: function() {
         var self = this;
         // Listening select event
@@ -272,34 +267,15 @@ Polymer({
     getMetricsOfPlanet: function(elem) {
         // remove planet, container graph runloop
         // set planet graph runloop
-        var self = this;        
-        var data = elem.data;        
-
-//        var selector = '#graph-' + this.graphId;
-//        var width = undefined;
-//        var height = 265;
-//        var unit = this.graphUnit;
+        var self = this;
+        var data = elem.data;
 
         Cosmos.getMetricsOfPlanet(data.Planet, function(res) {
             var $graphs = $(self).find('.graph-list > .graph');
-
             var totalMetrics = self.getTotalMetrics(res);
             $graphs.each(function(i, elem) {
               elem.metrics = totalMetrics;
             });
-            // self.getPlanetCharts(res, function(times, charts) {
-            //     // for free memory
-            //     if (self.graphId == 'memory') {
-            //         for (var i = 0; i < charts[1].values.length; i++) { // ordered, check getCosmosMetricIds()
-            //             charts[1].values[i] = charts[1].values[i] - charts[0].values[i];
-            //         }
-            //     }
-
-            //     setTimeout(function() {
-            //         elem.drawGraph(selector, width, height, times, charts, unit);
-            //     }, 10);
-
-            // });
         }, function(jqXHR) {
             var notification = {
                 type: 'error',
@@ -309,7 +285,7 @@ Polymer({
         });
     },
     getTotalMetrics: function(res) {
-      var metrics = {};      
+      var metrics = {};
 
       for (var i = 0; i < res.length; i++) {
         var container = res[i];
@@ -317,8 +293,8 @@ Polymer({
 
         for (var j = 0; j < keys.length; j++) {
           var key = keys[j];
-          if (key.match(/^Stats.*/)) {            
-            var values = container[key];            
+          if (key.match(/^Stats.*/)) {
+            var values = container[key];
             var saved = metrics[key];
             if (saved) {
               // sum

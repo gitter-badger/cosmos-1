@@ -1,5 +1,5 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<dom-module id="cosmos-graph-net-in">
+<dom-module id="cosmos-graph-memory">
     <style>
     .container {
         width: 100%;
@@ -7,14 +7,14 @@
         margin: 0;
         padding: 0;
     }
-    
+
     .graph-title {
         margin: 0;
         padding-bottom: 10px;
         font-size: 17px;
         text-align: center;
     }
-    
+
     .graph {
         min-height: 265px;
         cursor: pointer;
@@ -29,20 +29,18 @@
 </dom-module>
 <script>
 Polymer({
-    is: 'cosmos-graph-net-in',
-
-    graphId: 'graph-net-in',
-    graphTitle: 'Network In',
-    graphUnit: 'KB',
+    is: 'cosmos-graph-memory',
+    graphId: 'graph-memory',
+    graphTitle: 'Memory Usage',
+    graphUnit: 'MB',
     graphPeriod: '10m',
-    graphMetricNames: ['StatsNetworkRxBytes'],
+    graphMetricNames: ['StatsMemoryUsage', 'StatsMemoryLimit'],
     properties: {
         metrics: {
             type: Array,
             observer: 'metricsChanged'
         }
     },
-
     ready: function() {
         $(this).find('.graph-title').text(this.graphTitle + ' (' + this.graphUnit + ')');
         $(this).find('.graph').attr('id', this.graphId);
@@ -64,16 +62,25 @@ Polymer({
             pointHighlightFill: '#fff',
             pointHighlightStroke: 'rgba(72,157,255,1)'
         };
-    },    
+    },
     metricsChanged: function(newValue, oldValue) {
-        var self = this;
-        var defaultDataOptions = this.makeDefaultDataOptions();
+        var dataOptionsForUsageMem = this.makeDefaultDataOptions();
+        var dataOptionsForFreeMem = this.makeDefaultDataOptions();
+
         var times = this.getTimeList();
         var datasets = this.getDataSets();
+        this.convertLimitMemToFreeMem(datasets);
+
+        dataOptionsForFreeMem.pointColor = "rgba(102,102,255,1)";
+        dataOptionsForFreeMem.strokeColor = "rgba(102,102,255,1)";
+        dataOptionsForFreeMem.fillColor = "rgba(102,102,255,0.2)";
 
         var charts = [{
-            dataOptions: defaultDataOptions,
+            dataOptions: dataOptionsForUsageMem,
             datasets: datasets[0]
+        }, {
+            dataOptions: dataOptionsForFreeMem,
+            datasets: datasets[1]
         }];
 
         this.drawGraph('#' + this.graphId, undefined, 260, times, charts, this.graphUnit, {
@@ -88,15 +95,24 @@ Polymer({
                     tooltipEl = $('<div id="chartjs-tooltip"></div>');
                     $('body').append(tooltipEl);
                 }
-
                 var innerHtml = '';
-                innerHtml += [
-                    '<div class="chartjs-tooltip-section">',
-                    '       <span class="chartjs-tooltip-key" style="background-color:' + self.makeDefaultDataOptions().strokeColor + '"></span>',
-                    '       <span class="chartjs-tooltip-value">' + tooltip.text + '</span>',
-                    '</div>'
-                ].join('');
+                for (var i = 0; i < tooltip.labels.length; i++) {
+                    var label;
+                    if (i == 0) {
+                        // Usage
+                        label = "Usage: ";
+                    } else if (i == 1) {
+                        // Free
+                        label = "Free: "
+                    }
 
+                    innerHtml += [
+                        '<div class="chartjs-tooltip-section">',
+                        '       <span class="chartjs-tooltip-key" style="background-color:' + tooltip.legendColors[i].fill + '"></span>',
+                        '       <span class="chartjs-tooltip-value">' + label + tooltip.labels[i] + 'MB</span>',
+                        '</div>'
+                    ].join('');
+                }
 
                 tooltipEl.html(innerHtml);
                 var offset = $(tooltip.chart.canvas).offset();
@@ -110,6 +126,13 @@ Polymer({
             }
         });
     },
+    convertLimitMemToFreeMem: function(datasets) {
+        // 0 -> Usage
+        // 1 -> Limit
+        for (var i = 0; i < datasets[0].length; i++) {
+            datasets[1][i] -= datasets[0][i];
+        }
+    },
     getTimeList: function() {
         var times = [];
         var metric = this.metrics[this.graphMetricNames[0]];
@@ -120,14 +143,14 @@ Polymer({
     },
     getDataSets: function() {
         var datasets = [];
-        var KB = 1024;
+        var MB = 1024 * 1024;
         for (var i = 0; i < this.graphMetricNames.length; i++) {
             datasets.push([]);
             var metric = this.graphMetricNames[i];
             var dataset = this.metrics[metric];
             for (var j = dataset.length - 1; j >= 0; j--) {
                 var data = dataset[j];
-                datasets[i].push(parseInt(data[2] / KB));
+                datasets[i].push(parseInt(data[2] / MB));
             }
         }
         return datasets;
@@ -226,9 +249,11 @@ Polymer({
         var chart = new Chart(context).Line(dataset, option);
 
         // points
-        var points = chart.datasets[0].points;
-        for (var i = 0; i < points.length; i++) {
-            points[i].time = moment(times[i]).format('YYYY-MM-DD HH:mm');
+        for (var j = 0; j < chart.datasets.length - 1; j++) {
+            var points = chart.datasets[j].points;
+            for (var i = 0; i < points.length; i++) {
+                points[i].time = moment(times[i]).format('YYYY-MM-DD HH:mm');
+            }
         }
 
         return chart;
