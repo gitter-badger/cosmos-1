@@ -1,0 +1,99 @@
+<link rel="import" href="/vendor/polymer/polymer.html">
+<dom-module id="cosmos-list-item-container">
+<style>
+.list-item-container {
+  padding: 10px;
+  border-bottom: 1px solid #f1f1f1;
+  color: #bbb;
+  cursor: pointer;
+}
+
+.list-item-container:hover,
+.selected {
+    background-color: #fff;
+}
+
+.planet-name {
+  color: #4183c4;
+  cursor: pointer;
+}
+
+.planet-name:hover {
+  text-decoration: underline;
+}
+
+.container-name {
+  color: #4183c4;
+  cursor: pointer;
+}
+
+.container-name:hover {
+  text-decoration: underline;
+}
+
+.slash {
+  color: #4183c4;
+}
+
+.container-status {
+  color: #333;
+  display: block;
+}
+</style>
+<template>
+  <div class="list-item-container" on-click="onContainerClicked">
+    <span class="planet-name">{{planetName}}</span>
+    <span class="slash">/</span>
+    <span class="container-name">{{containerName}}</span>
+    <span class="container-status">{{containerStatus}}</span>
+  </div>
+</template>
+</dom-module>
+<script>
+Polymer({
+  is: 'cosmos-list-item-container',
+  planetName: undefined,
+  containerName: undefined,
+  containerStatus: undefined,
+  $container: undefined,
+  $pageContainer: undefined,
+  properties: {
+    container: {
+      type: Object,
+      observer: 'containerValueChanged'
+    },
+    isSelected: {
+      type: Boolean,
+      observer: 'isSelectedValueChanged'
+    }
+  },
+  ready: function() {
+    this.$container = $(this).find('.container-list-item');
+    this.$pageContainer = $(document.querySelector('cosmos-page-container'));
+  },
+  attached: function() {
+    var self = this;
+    setTimeout(function() {
+        self.$pageContainer.trigger('onContainerItemReady', self);
+    }, 20);
+  },
+  containerValueChanged: function() {
+    this.planetName = this.container.Planet;
+    this.containerName = this.container.Container;
+    this.containerStatus = this.container.Status[0][3];
+  },
+  isSelectedValueChanged: function() {
+    if (this.isSelected) {
+      this.$container.addClass('selected');
+      this.$pageContainer.trigger('onContainerItemSelected', this);
+    } else {
+      this.$container.removeClass('selected');
+      this.$pageContainer.trigger('onContainerItemDeselected', this);
+    }
+  },
+  onContainerClicked: function(e) {
+    e.preventDefault();
+    this.isSelected = !this.isSelected;
+  }
+});
+</script>

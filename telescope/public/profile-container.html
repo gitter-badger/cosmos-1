@@ -1,0 +1,50 @@
+<link rel="import" href="/vendor/polymer/polymer.html">
+<dom-module id="cosmos-profile-container">
+<style>
+.container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #fff;
+}
+h1 {
+  margin: 0 0 50px 0;
+  padding: 0;
+  text-align: center;
+  color: #333;
+}
+</style>
+<template>
+  <div id="profile-planet" class="container">
+    <h1>
+      <span>{{planetName}}</span>
+      <span>/</span>
+      <span>{{containerName}}</span>
+    </h1>
+  </div>
+</template>
+</dom-module>
+<script>
+Polymer({
+  is: 'cosmos-profile-container',
+  planetName: undefined,
+  containerName: undefined,
+  properties: {
+    container: {
+      type: Object,
+      value: undefined,
+      observer: 'containerValueChanged'
+    }
+  },
+  ready: function() {
+
+  },
+  attached: function() {
+
+  },
+  containerValueChanged: function() {
+    this.planetName = this.container.Planet;
+    this.containerName = this.container.Container;
+  }
+});
+</script>

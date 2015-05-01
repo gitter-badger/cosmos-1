@@ -1,4 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
+<link rel="import" href="/list-item-container.html">
+<link rel="import" href="/profile-container.html">
 <link rel="import" href="/graph-cpu.html">
 <link rel="import" href="/graph-memory.html">
 <link rel="import" href="/graph-network-in.html">
@@ -34,106 +36,6 @@
 <script>
 Polymer({
     is: 'dialog-metric'
-});
-</script>
-
-<!-- Cosmos Container List Item -->
-<dom-module id="cosmos-container-list-item">
-    <style>
-    .container-list-item {
-      padding: 10px;
-      border-bottom: 1px solid #f1f1f1;
-      color: #bbb;
-      cursor: pointer;
-    }
-
-    .container-list-item:hover,
-    .selected {
-        background-color: #fff;
-    }
-
-    .planet-name {
-      color: #4183c4;
-      cursor: pointer;
-    }
-
-    .planet-name:hover {
-      text-decoration: underline;
-    }
-
-    .container-name {
-      color: #4183c4;
-      cursor: pointer;
-    }
-
-    .container-name:hover {
-      text-decoration: underline;
-    }
-
-    .slash {
-      color: #4183c4;
-    }
-
-    .container-status {
-      color: #333;
-      display: block;
-    }
-    </style>
-    <template>
-        <div class="container-list-item" on-click="onContainerClicked">
-          <span class="planet-name">{{planetName}}</span>
-          <span class="slash">/</span>
-          <span class="container-name">{{containerName}}</span>
-          <span class="container-status">{{containerStatus}}</span>
-        </div>
-    </template>
-</dom-module>
-<script>
-Polymer({
-    is: 'cosmos-container-list-item',
-    planetName: undefined,
-    containerName: undefined,
-    containerStatus: undefined,
-    $container: undefined,
-    $pageContainer: undefined,
-    properties: {
-        container: {
-            type: Object,
-            observer: "containerValueChanged"
-        },
-        isSelected: {
-            type: Boolean,
-            observer: 'isSelectedValueChanged'
-        }
-    },
-    ready: function() {
-      this.$container = $(this).find('.container-list-item');
-      this.$pageContainer = $(document.querySelector('cosmos-page-container'));
-    },
-    attached: function() {
-      var self = this;
-      setTimeout(function() {
-          self.$pageContainer.trigger('onContainerItemReady', self);
-      }, 20);
-    },
-    containerValueChanged: function() {
-      this.planetName = this.container.Planet;
-      this.containerName = this.container.Container;
-      this.containerStatus = this.container.Status[0][3];
-    },
-    isSelectedValueChanged: function() {
-        if (this.isSelected) {
-            this.$container.addClass('selected');
-            this.$pageContainer.trigger('onContainerItemSelected', this);
-        } else {
-            this.$container.removeClass('selected');
-            this.$pageContainer.trigger('onContainerItemDeselected', this);
-        }
-    },
-    onContainerClicked: function(e) {
-      e.preventDefault();
-      this.isSelected = !this.isSelected;
-    }
 });
 </script>
 
@@ -192,7 +94,7 @@ Polymer({
 .main-container {
     width: 100%;
     margin: 0;
-    padding: 20px;
+    padding: 0 20px;
     background-color: #fff;
 }
 
@@ -231,24 +133,29 @@ container-item {
 </style>
 <template>
   <div class="container">
-    <div class="left-container col-md-4 col-xs-12">
+
+    <aside class="left-container col-md-4 col-xs-12">
       <div class="search">
         <input id="search-input" type="text" placeholder="Search all containers" autocomplete="off" style="" />
       </div>
       <div class="container-list">
         <template id="containerListTemplate" is="x-repeat" items="{{containers}}">
-          <cosmos-container-list-item container="{{item}}"></cosmos-container-list-item>
+          <cosmos-list-item-container container="{{item}}"></cosmos-list-item-container>
         </template>
       </div>
-    </div>
+    </aside>
+
     <div class="main-container col-md-8 col-xs-12">
       <div class="graph-list">
+        <cosmos-profile-container container="{{selectedContainer}}"></cosmos-profile-container>
+
         <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
         <cosmos-graph-memory class="graph"></cosmos-graph-memory>
         <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
         <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
       </div>
     </div>
+
   </div>
 </template>
 </dom-module>
@@ -257,7 +164,8 @@ Polymer({
     is: 'cosmos-page-container',
     _refresh: undefined,
     selectedContainerElement: undefined,
-    selectedContainerKey: undefined,
+    selectedContainerKey: undefined, /* is it used? */
+    selectedContainer: undefined,
     properties: {
         containers: {
             type: Array,
@@ -273,7 +181,7 @@ Polymer({
       this.getContainers();
     },
     attached: function() {
-      var chart = c3.generate({
+      /*var chart = c3.generate({
         bindto: this.querySelector('#c3-test'),
         data: {
           columns: [
@@ -287,8 +195,7 @@ Polymer({
           x: { tick: { outer: false } },
           y: { tick: { outer: false } }
         }
-      });
-
+      });*/
     },
     detached: function() {
 
@@ -302,6 +209,7 @@ Polymer({
         }
         self.selectedContainerElement = target;
         self.onContainerClicked(target);
+        self.selectedContainer = target.container;
       }).on('onContainerItemDeselected', function(e, target) {
         // nothing to do
       }).on('onContainerItemReady', function(e, target) {
@@ -386,25 +294,4 @@ Polymer({
       return metrics;
     }
 });
-
-/*$('#search-input').keypress(function(e) {
-  if (e.keyCode == 13) {
-    var containerItems = $("div.container-list").find("container-item");
-    var item = undefined;
-
-    for ( var i in containerItems ) {
-      if (i == "length") {
-        break;
-      }
-      item = containerItems[i];
-      var uncut_name = $(item).find("p").html().split("<span");
-      name = uncut_name[0];
-      $(item).show();
-      if ( name.indexOf(document.getElementById('search-input').value) == -1) {
-  $(item).hide();
-}
-    }
-    return false;
-  }
-});*/
 </script>

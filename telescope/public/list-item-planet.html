@@ -1,0 +1,69 @@
+<dom-module id="cosmos-planet-list-item">
+<style>
+.planet-list-item {
+    border-bottom: 1px solid #f1f1f1;
+    display: block;
+    cursor: pointer;
+}
+
+.planet-list-item:hover,
+.planet-list-item.selected {
+    background-color: #fff;
+}
+
+.planet-list-item a {
+    padding: 10px 10px;
+    color: #4183c4;
+    display: block;
+    text-decoration: none;
+}
+
+.planet-list-item a:hover {
+  text-decoration: underline;
+}
+</style>
+<template>
+  <div class="planet-list-item">
+    <a href="#" on-click="onPlanetClicked">{{planet.Planet}}</a>
+  </div>
+</template>
+</dom-module>
+<script>
+Polymer({
+  is: 'cosmos-planet-list-item',
+  $container: undefined,
+  $pagePlanet: undefined,
+  properties: {
+    planet: {
+      type: Object
+    },
+    isSelected: {
+      type: Boolean,
+      observer: 'isSelectedValueChanged'
+    }
+  },
+  ready: function() {
+    this.$container = $(this).find('.planet-list-item');
+    this.$pagePlanet = $(document.querySelector('cosmos-page-planet'));
+  },
+  attached: function() {
+    var self = this;
+    setTimeout(function() {
+      self.$pagePlanet.trigger('onPlanetItemReady', self);
+    }, 20);
+  },
+  isSelectedValueChanged: function() {
+    if (this.isSelected) {
+      this.$container.addClass('selected');
+      this.$pagePlanet.trigger('onPlanetItemSelected', this);
+    } else {
+      this.$container.removeClass('selected');
+      this.$pagePlanet.trigger('onPlanetItemDeselected', this);
+    }
+  },
+  onPlanetClicked: function(e) {
+    e.preventDefault();
+    this.isSelected = !this.isSelected;
+  }
+});
+</script>
