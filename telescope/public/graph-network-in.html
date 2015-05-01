@@ -42,6 +42,7 @@ Polymer({
         }
     },
     ready: function() {
+      return;
         $(this).find('.graph-title').text(this.graphTitle + ' (' + this.graphUnit + ')');
         $(this).find('.graph').attr('id', this.graphId);
         this.drawEmptyGraph('#' + this.graphId, this.graphUnit, this.graphPeriod);
@@ -64,6 +65,7 @@ Polymer({
         };
     },
     metricsChanged: function(newValue, oldValue) {
+      return;
         var self = this;
         var defaultDataOptions = this.makeDefaultDataOptions();
         var times = this.getTimeList();

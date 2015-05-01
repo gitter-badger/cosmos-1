@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,46 +10,28 @@
 
     <title>Cosmos</title>
 
-    <script src="/vendor/webcomponentsjs/webcomponents-lite.min.js"></script>
     <script src="/vendor/jquery/dist/jquery.min.js"></script>
-    <script src="/vendor/chartjs-1.0.2/chart.min.js"></script>
-    <script src="/vendor/vex/js/vex.combined.min.js"></script>
-    <script>vex.defaultOptions.className = 'vex-theme-plain';</script>
-    <script src="/vendor/moment/moment.js"></script>
-    <script src="/js/cosmos-api.js"></script>
+    <script src="/vendor/webcomponentsjs/webcomponents-lite.min.js"></script>
     <script src="/vendor/d3/d3.min.js"></script>
     <script src="/vendor/c3/c3.min.js"></script>
+    <script src="/vendor/moment/moment.js"></script>
+    <script src="/js/cosmos.js"></script>
+
     <link rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/vendor/vex/css/vex.css">
-    <link rel="stylesheet" href="/vendor/vex/css/vex-theme-plain.css">
     <link rel="stylesheet" href="/vendor/c3/c3.min.css">
     <link rel="stylesheet" href="/css/cosmos.css">
+
     <link rel="import" href="/layout-header.html">
     <link rel="import" href="/layout-content.html">
     <link rel="import" href="/layout-footer.html">
     <link rel="import" href="/service-route.html">
   </head>
-  <body>
-    <style>
-    #chartjs-tooltip {
-        opacity: 1;
-        position: absolute;
-        background: rgba(0, 0, 0, .7);
-        color: white;
-        padding: 5px;
-        border-radius: 5px;
-        pointer-events: none;
-    }
 
-    .chartjs-tooltip-key {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-    }
-    </style>
+  <body>
     <cosmos-layout-header></cosmos-layout-header>
     <cosmos-layout-content></cosmos-layout-content>
     <cosmos-layout-footer></cosmos-layout-footer>
     <cosmos-service-route></cosmos-service-route>
   </body>
+
 </html>

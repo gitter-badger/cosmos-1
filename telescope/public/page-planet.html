@@ -207,7 +207,6 @@ Polymer({
         // set planet graph runloop
         var self = this;
         var planet = target.planet.Planet;
-
         Cosmos.getMetricsOfPlanet(planet, function(response) {
             var $graphs = $(self).find('.graph-list > .graph');
             var totalMetrics = self.getTotalMetrics(response);

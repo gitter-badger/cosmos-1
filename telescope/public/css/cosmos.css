@@ -1,7 +1,3 @@
-/* Custom default button */
-/*
- * Base structure
- */
 html {
   margin: 0;
   padding: 0;
@@ -14,21 +10,4 @@ body {
   background-color: #fff;
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   color: #333;
-}
-
-.c3-line, .c3 path {
-  stroke: #fff;
-  stroke-width: 1px;
-}
-
-.c3 line {
-  stroke: #222;
-}
-
-.c3 text {
-  fill: #fff;
-}
-
-.c3 svg {
-  font: 12px sans-serif;
 }
