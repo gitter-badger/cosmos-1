@@ -1,76 +1,10 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
+<link rel="import" href="/list-item-planet.html">
+<link rel="import" href="/profile-planet.html">
 <link rel="import" href="/graph-cpu.html">
 <link rel="import" href="/graph-memory.html">
 <link rel="import" href="/graph-network-in.html">
 <link rel="import" href="/graph-network-out.html">
-
-<dom-module id="cosmos-planet-list-item">
-<style>
-.planet-list-item {
-    border-bottom: 1px solid #f1f1f1;
-    display: block;
-    cursor: pointer;
-}
-
-.planet-list-item:hover,
-.planet-list-item.selected {
-    background-color: #fff;
-}
-
-.planet-list-item a {
-    padding: 10px 10px;
-    color: #4183c4;
-    display: block;
-    text-decoration: none;
-}
-
-.planet-list-item a:hover {
-  text-decoration: underline;
-}
-</style>
-<template>
-  <div class="planet-list-item"><a href="#" on-click="onPlanetClicked">{{planet.Planet}}</a></div>
-</template>
-</dom-module>
-<script>
-Polymer({
-    is: 'cosmos-planet-list-item',
-    $container: undefined,
-    $pagePlanet: undefined,
-    properties: {
-        planet: {
-            type: Object
-        },
-        isSelected: {
-            type: Boolean,
-            observer: 'isSelectedValueChanged'
-        }
-    },
-    ready: function() {
-        this.$container = $(this).find('.planet-list-item');
-        this.$pagePlanet = $(document.querySelector('cosmos-page-planet'));
-    },
-    attached: function() {
-        var self = this;
-        setTimeout(function() {
-            self.$pagePlanet.trigger('onPlanetItemReady', self);
-        }, 20);
-    },
-    isSelectedValueChanged: function() {
-        if (this.isSelected) {
-            this.$container.addClass('selected');
-            this.$pagePlanet.trigger('onPlanetItemSelected', this);
-        } else {
-            this.$container.removeClass('selected');
-            this.$pagePlanet.trigger('onPlanetItemDeselected', this);
-        }
-    },
-    onPlanetClicked: function(e) {
-        e.preventDefault();
-        this.isSelected = !this.isSelected;
-    }
-});
-</script>
 
 <dom-module id="cosmos-page-planet">
 <style>
@@ -122,7 +56,7 @@ Polymer({
 .main-container {
   width: 100%;
   margin: 0;
-  padding: 20px;
+  padding: 0 20px;
   background-color: #fff;
 }
 
@@ -159,7 +93,7 @@ Polymer({
 <template>
   <div class="container">
 
-      <div class="left-container col-md-4 col-xs-12">
+      <aside class="left-container col-md-4 col-xs-12">
         <div class="search">
           <input id="search-input" type="text" placeholder="Search all planets" style="" />
         </div>
@@ -168,15 +102,19 @@ Polymer({
             <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
           </template>
         </div>
-      </div>
+      </aside>
 
       <div class="main-container col-md-8 col-xs-12">
+
+        <cosmos-profile-planet planet="{{selectedPlanet}}"></cosmos-profile-planet>
+
         <div class="graph-list">
           <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
           <cosmos-graph-memory class="graph"></cosmos-graph-memory>
           <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
           <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
         </div>
+
       </div>
 
   </div>
@@ -192,7 +130,8 @@ Polymer({
         }
     },
     selectedPlanetElement: undefined,
-    selectedPlanetKey: undefined,
+    selectedPlanetKey: undefined, /* is it used? */
+    selectedPlanet: undefined,
     loadSelectedPlanetKeyFromState: function() {
         if (history.state && history.state.key) {
             this.selectedPlanetKey = history.state.key;
@@ -232,6 +171,7 @@ Polymer({
           }
           self.selectedPlanetElement = target;
           self.onPlanetClicked(target);
+          self.selectedPlanet = target.planet;
       }).on('onPlanetItemDeselected', function(e, target) {
         // nothing to do
       }).on('onPlanetItemReady', function(e, target) {
