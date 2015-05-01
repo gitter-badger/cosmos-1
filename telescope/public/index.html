@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="description" content="Cosmos is a container monitoring system.">
     <meta name="author" content="Cosmos">
+
     <title>Cosmos</title>
+
     <script src="/vendor/webcomponentsjs/webcomponents-lite.min.js"></script>
     <script src="/vendor/jquery/dist/jquery.min.js"></script>
     <script src="/vendor/chartjs-1.0.2/chart.min.js"></script>
@@ -15,17 +16,19 @@
     <script>vex.defaultOptions.className = 'vex-theme-plain';</script>
     <script src="/vendor/moment/moment.js"></script>
     <script src="/js/cosmos-api.js"></script>
-    <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/cosmos.css">
-    <link rel="stylesheet" href="/vendor/vex/css/vex.css" />
-    <link rel="stylesheet" href="/vendor/vex/css/vex-theme-plain.css" />
+    <script src="/vendor/d3/d3.min.js"></script>
+    <script src="/vendor/c3/c3.min.js"></script>
+    <link rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendor/vex/css/vex.css">
+    <link rel="stylesheet" href="/vendor/vex/css/vex-theme-plain.css">
+    <link rel="stylesheet" href="/vendor/c3/c3.min.css">
+    <link rel="stylesheet" href="/css/cosmos.css">
     <link rel="import" href="/layout-header.html">
     <link rel="import" href="/layout-content.html">
     <link rel="import" href="/layout-footer.html">
     <link rel="import" href="/service-route.html">
-</head>
-
-<body>
+  </head>
+  <body>
     <style>
     #chartjs-tooltip {
         opacity: 1;
@@ -47,6 +50,5 @@
     <cosmos-layout-content></cosmos-layout-content>
     <cosmos-layout-footer></cosmos-layout-footer>
     <cosmos-service-route></cosmos-service-route>
-</body>
-
+  </body>
 </html>

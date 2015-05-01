@@ -42,36 +42,48 @@ Polymer({
     <style>
     .container-list-item {
       padding: 10px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #f1f1f1;
       color: #bbb;
+      cursor: pointer;
     }
 
     .container-list-item:hover,
     .selected {
-        background-color: #489dff;
-    }
-
-    .container-list-item:hover span,
-    .selected span {
-        color: #fff;
+        background-color: #fff;
     }
 
     .planet-name {
-      color: #bbb;
+      color: #4183c4;
+      cursor: pointer;
+    }
+
+    .planet-name:hover {
+      text-decoration: underline;
     }
 
     .container-name {
-      color: #bbb;
+      color: #4183c4;
+      cursor: pointer;
+    }
+
+    .container-name:hover {
+      text-decoration: underline;
+    }
+
+    .slash {
+      color: #4183c4;
     }
 
     .container-status {
-      color: #bbb;
+      color: #333;
       display: block;
     }
     </style>
     <template>
         <div class="container-list-item" on-click="onContainerClicked">
-          <span class="planet-name">{{planetName}}</span>.<span class="container-name">{{containerName}}</span>
+          <span class="planet-name">{{planetName}}</span>
+          <span class="slash">/</span>
+          <span class="container-name">{{containerName}}</span>
           <span class="container-status">{{containerStatus}}</span>
         </div>
     </template>
@@ -127,118 +139,118 @@ Polymer({
 
 <!-- Container Page -->
 <dom-module id="cosmos-page-container">
-    <style>
+<style>
+.container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+@media (min-width: 1080px) {
     .container {
-        width: 100%;
+        width: 1080px;
+        marign: 0 auto;
+    }
+}
+
+@media (min-width: 1400px) {
+    .container {
+        width: 1400px;
         margin: 0 auto;
-        padding: 0;
     }
+}
 
-    @media (min-width: 1080px) {
-        .container {
-            width: 1080px;
-            marign: 0 auto;
-        }
-    }
+.row {
+    margin: 0;
+    padding: 0;
+}
 
-    @media (min-width: 1400px) {
-        .container {
-            width: 1400px;
-            margin: 0 auto;
-        }
-    }
+.left-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
 
-    .row {
-        margin: 0;
-        padding: 0;
-    }
-
+@media (min-width: 1080px) {
     .left-container {
-        width: 100%;
-        margin: 0;
-        padding: 0;
+        width: 260px;
+        padding: 0 10px;
     }
+}
 
-    @media (min-width: 1080px) {
-        .left-container {
-            width: 260px;
-            padding: 0 10px;
-        }
+@media (min-width: 1400px) {
+    .left-container {
+        width: 320px;
+        padding: 0 10px;
     }
+}
 
-    @media (min-width: 1400px) {
-        .left-container {
-            width: 320px;
-            padding: 0 10px;
-        }
-    }
+.container-list {
+    padding: 20px 0;
+}
 
-    .container-list {
-        padding: 20px 0;
-    }
+.main-container {
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background-color: #fff;
+}
 
+@media (min-width: 1080px) {
     .main-container {
-        width: 100%;
-        margin: 0;
-        padding: 0;
+        width: 720px;
     }
+}
 
-    @media (min-width: 1080px) {
-        .main-container {
-            width: 720px;
-        }
+@media (min-width: 1400px) {
+    .main-container {
+        width: 1080px;
     }
+}
 
-    @media (min-width: 1400px) {
-        .main-container {
-            width: 1080px;
-        }
-    }
+.search {
+    padding: 10px 20px;
+    background-color: #fff;
+    border: 1px solid #f1f1f1;
+}
 
-    .search {
-        padding: 10px 20px;
-        background-color: #333;
-    }
+.search input {
+    width: 100%;
+    background-color: #fff;
+    outline: none;
+    border: none;
+    color: #333;
+}
 
-    .search input {
-        width: 100%;
-        background-color: #333;
-        outline: none;
-        border: none;
-        color: #fff;
-    }
-
-    .graph-list {
-        padding: 0;
-    }
-    container-item {
-        cursor: pointer;
-    }
-    </style>
-    <template>
-        <div class="container">
-            <div class="row">
-                <div class="left-container col-md-4 col-xs-12">
-                    <div class="search">
-                        <input id="search-input" type="text" placeholder="search" autocomplete="off" style="" />
-                    </div>
-                    <div class="container-list">
-                        <template id="containerListTemplate" is="x-repeat" items="{{containers}}">
-                            <cosmos-container-list-item container="{{item}}"></cosmos-container-list-item>
-                        </template>
-                    </div>
-                </div>
-                <div class="main-container col-md-8 col-xs-12">
-                    <div class="graph-list">
-                      <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
-                      <cosmos-graph-memory class="graph"></cosmos-graph-memory>
-                      <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
-                      <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </template>
+.graph-list {
+    padding: 0;
+}
+container-item {
+    cursor: pointer;
+}
+</style>
+<template>
+  <div class="container">
+    <div class="left-container col-md-4 col-xs-12">
+      <div class="search">
+        <input id="search-input" type="text" placeholder="Search all containers" autocomplete="off" style="" />
+      </div>
+      <div class="container-list">
+        <template id="containerListTemplate" is="x-repeat" items="{{containers}}">
+          <cosmos-container-list-item container="{{item}}"></cosmos-container-list-item>
+        </template>
+      </div>
+    </div>
+    <div class="main-container col-md-8 col-xs-12">
+      <div class="graph-list">
+        <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
+        <cosmos-graph-memory class="graph"></cosmos-graph-memory>
+        <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
+        <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
+      </div>
+    </div>
+  </div>
+</template>
 </dom-module>
 <script>
 Polymer({
@@ -261,6 +273,21 @@ Polymer({
       this.getContainers();
     },
     attached: function() {
+      var chart = c3.generate({
+        bindto: this.querySelector('#c3-test'),
+        data: {
+          columns: [
+            ['CPU', 30, 200, 100, 400, 150, 250]
+          ],
+          types: { CPU: 'area' }
+        },
+        point: { show: false },
+        tooltip: { show: true },
+        axis: {
+          x: { tick: { outer: false } },
+          y: { tick: { outer: false } }
+        }
+      });
 
     },
     detached: function() {
