@@ -15,11 +15,6 @@
   }
 }
 
-.row {
-  margin: 0;
-  padding: 0;
-}
-
 .col-md-12,
 .col-xs-12 {
   margin: 0;
@@ -28,23 +23,24 @@
 
 .stream {
   margin: 20px auto;
-  padding: 10px 0;
-  background-color: #222;
-  border-bottom: 1px solid #333;
+  padding: 10px;
+  background-color: #fff;
+  border-bottom: 1px solid #f1f1f1;
 }
 
 .stream:hover {
-  border-bottom: 1px solid #489dff;
+  background-color: #fff;
+  /*border-bottom: 1px solid #489dff;*/
 }
 
 .stream:hover a:hover {
-  color: #489dff;
+  color: #4183c4;
   text-decoration: underline;
 }
 
 .stream p {
   font-size: 15px;
-  color: #bbb;
+  color: #333;
 }
 
 .title {
@@ -53,43 +49,43 @@
 }
 
 .title a {
-  color: #fff;
+  color: #4183c4;
   text-decoration: none;
 }
 
 .title span {
+  color: #4183c4;
   display: inline-block;
 }
 
-.header span.ago {
-    color: #999;
+.header span.date {
+  font-size: 13px;
+  color: #bbb;
 }
 
-.header span.date {
-    color: #666;
-    font-size: 12px;
-    padding-left: 10px;
+.header span.ago {
+  font-size: 13px;
+  color: #bbb;
+  padding-left: 5px;
 }
 </style>
 <template>
   <div class="container">
     <template is="x-repeat" items="{{newsfeeds}}">
-      <div class="row">
-        <div class="col-md-12 col-xs-12">
-          <div class="stream">
-            <div class="header">
-              <h4 class="title">
-                <a href="/planets">{{item.Planet}}</a>
-                <span hidden$="{{item.Hidden}}">.</span>
-                <a hidden$="{{item.Hidden}}" href="/containers">{{item.Container}}</a>
-              </h4>
-              <p>
-                <span class="ago">{{item.AgoLabel}}</span>
-                <span class="date">{{item.TimeLabel}}</span>
-              </p>
-            </div>
-            <p>{{item.Content}}</p>
+      <div class="col-md-12 col-xs-12">
+        <div class="stream">
+          <div class="header">
+            <h4 class="title">
+              <a href="/planets">{{item.Planet}}</a>
+              <span hidden$="{{item.Hidden}}">/</span>
+              <a hidden$="{{item.Hidden}}" href="/containers">{{item.Container}}</a>
+            </h4>
+            <p>
+              <span class="date">{{item.TimeLabel}}</span>
+              <span class="ago">{{item.AgoLabel}}</span>
+            </p>
           </div>
+          <p>{{item.Content}}</p>
         </div>
       </div>
     </template>
