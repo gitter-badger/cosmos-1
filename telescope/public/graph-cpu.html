@@ -1,31 +1,23 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <dom-module id="cosmos-graph-cpu">
-    <style>
-    .container {
-        width: 100%;
-        min-height: 265px;
-        margin: 0;
-        padding: 0;
-    }
+<style>
+.container {
+    width: 100%;
+    min-height: 265px;
+    margin: 0;
+    padding: 0;
+}
 
-    .graph-title {
-        margin: 0;
-        padding-bottom: 10px;
-        font-size: 17px;
-        text-align: center;
-    }
-
-    .graph {
-        min-height: 265px;
-        cursor: pointer;
-    }
-    </style>
-    <template>
-        <div class="container">
-            <h3 class="graph-title"></h3>
-            <div class="graph"></div>
-        </div>
-    </template>
+.graph {
+    min-height: 265px;
+    cursor: pointer;
+}
+</style>
+<template>
+  <div class="container">
+    <div id="graph-cpu"></div>
+  </div>
+</template>
 </dom-module>
 <script>
 Polymer({
@@ -35,6 +27,7 @@ Polymer({
     graphUnit: '%',
     graphPeriod: '10m',
     graphMetricNames: ['StatsCpuTotalUtilization'],
+    chart: undefined,
     properties: {
         metrics: {
             type: Array,
@@ -42,19 +35,35 @@ Polymer({
         }
     },
     ready: function() {
-        $(this).find('.graph-title').text(this.graphTitle + ' (' + this.graphUnit + ')');
+        /*$(this).find('.graph-title').text(this.graphTitle + ' (' + this.graphUnit + ')');
         $(this).find('.graph').attr('id', this.graphId);
-        this.drawEmptyGraph('#' + this.graphId, this.graphUnit, this.graphPeriod);
+        this.drawEmptyGraph('#' + this.graphId, this.graphUnit, this.graphPeriod);*/
     },
     attached: function() {
         // turn on graph runloop
+        var chart = c3.generate({
+          bindto: this.querySelector('#' + this.graphId),
+          data: {
+            //x: 'x',
+            columns: [
+              //['x'],
+            ]
+          },
+          point: { show: false },
+          tooltip: { show: true },
+          axis: {
+            x: { tick: { outer: false } },
+            y: { tick: { outer: false } }
+          }
+        });
+        this.chart = chart;
     },
     detached: function() {
         // turn off graph runloop
     },
     makeDefaultDataOptions: function() {
         return {
-            label: 'Metrics',
+            label: 'CPU',
             fillColor: 'rgba(72,157,255,0.2)',
             strokeColor: 'rgba(72,157,255,1)',
             pointColor: 'rgba(72,157,255,1)',
@@ -64,6 +73,37 @@ Polymer({
         };
     },
     metricsChanged: function(newValue, oldValue) {
+      // temporary variables
+      var statsCpuTotal = this.metrics['StatsCpuTotalUtilization'];
+
+      var columns = [];
+
+      // timeseries
+      var timeseries = ['a'];
+
+      // output
+      var total = ['CPU'];
+
+      for (var i = statsCpuTotal.length - 1; i >= 0; i--) {
+        var stat = statsCpuTotal[i];
+        var timestamp = stat[0];
+        var value = stat[2];
+
+        timeseries.push(timestamp);
+        total.push(value);
+      }
+
+      //columns.push(timeseries);
+      columns.push(total);
+
+      this.chart.load({
+        columns: columns,
+        types: {
+          CPU: 'area'
+        }
+      });
+
+      return;
         var self = this;
         var defaultDataOptions = this.makeDefaultDataOptions();
         var times = this.getTimeList();

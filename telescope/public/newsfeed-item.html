@@ -1,0 +1,118 @@
+<link rel="import" href="/vendor/polymer/polymer.html">
+<dom-module id="cosmos-newsfeed-item">
+<style>
+.stream {
+  margin: 20px auto;
+  padding: 10px;
+  background-color: #fff;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.stream:hover {
+  background-color: #fff;
+}
+
+.stream:hover a:hover {
+  color: #4183c4;
+  text-decoration: underline;
+}
+
+.stream p {
+  font-size: 15px;
+  color: #333;
+}
+
+.title {
+    margin: 0;
+    padding: 0;
+}
+
+.title a {
+  color: #4183c4;
+  text-decoration: none;
+}
+
+.title span {
+  color: #4183c4;
+  display: inline-block;
+}
+
+.header span.date {
+  font-size: 13px;
+  color: #bbb;
+}
+
+.header span.ago {
+  font-size: 13px;
+  color: #bbb;
+  padding-left: 5px;
+}
+</style>
+<template>
+  <div class="stream">
+    <div class="header">
+      <h4 class="title">
+        <a href="{{planetLink}}" on-click="onPlanetClicked">{{planetName}}</a>
+        <span>{{dot}}</span>
+        <a href="{{containerLink}}" on-click="onContainerClicked">{{containerName}}</a>
+      </h4>
+      <p>
+        <span class="date">{{date}}</span>
+        <span class="ago">{{ago}}</span>
+      </p>
+    </div>
+    <p>{{text}}</p>
+  </div>
+</template>
+</dom-module>
+<script>
+Polymer({
+  is: 'cosmos-newsfeed-item',
+  planetName: undefined,
+  planetLink: undefined,
+  containerName: undefined,
+  dot: undefined,
+  date: undefined,
+  ago: undefined,
+  text: undefined,
+  properties: {
+    newsfeed: {
+      type: Object,
+      value: undefined,
+      observer: 'newsfeedValueChanged'
+    }
+  },
+  ready: function() {
+
+  },
+  attached: function() {
+
+  },
+  newsfeedValueChanged: function() {
+    this.planetName = this.newsfeed.Planet;
+    this.planetLink = '/planets/' + this.planetName;
+    this.containerName = this.newsfeed.Container;
+    //this.containerLink = '/containers/' + this.containerLink;
+    this.date = this.newsfeed.TimeLabel;
+    this.ago = this.newsfeed.AgoLabel;
+    this.text = this.newsfeed.Content;
+    if (this.planetName && this.containerName) this.dot = '/';
+  },
+  onPlanetClicked: function(e) {
+    e.preventDefault();
+    var target = e.target || e.srcElement;
+    history.pushState({
+      page: 'planet',
+      key: $(target).attr('href')
+    }, 'planet', '/planets');
+  },
+  onContainerClicked: function(e) {
+    e.preventDefault();
+    var target = e.target || e.srcElement;
+    history.pushState({
+      page: 'container',
+      key: $(target).attr('href')
+    }, 'container', '/containers');
+  }
+});
+</script>

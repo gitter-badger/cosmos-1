@@ -1,5 +1,5 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-
+<link rel="import" href="/newsfeed-item.html">
 <dom-module id="cosmos-page-cosmos">
 <style>
 .container {
@@ -20,73 +20,12 @@
   margin: 0;
   padding: 0;
 }
-
-.stream {
-  margin: 20px auto;
-  padding: 10px;
-  background-color: #fff;
-  border-bottom: 1px solid #f1f1f1;
-}
-
-.stream:hover {
-  background-color: #fff;
-  /*border-bottom: 1px solid #489dff;*/
-}
-
-.stream:hover a:hover {
-  color: #4183c4;
-  text-decoration: underline;
-}
-
-.stream p {
-  font-size: 15px;
-  color: #333;
-}
-
-.title {
-    margin: 0;
-    padding: 0;
-}
-
-.title a {
-  color: #4183c4;
-  text-decoration: none;
-}
-
-.title span {
-  color: #4183c4;
-  display: inline-block;
-}
-
-.header span.date {
-  font-size: 13px;
-  color: #bbb;
-}
-
-.header span.ago {
-  font-size: 13px;
-  color: #bbb;
-  padding-left: 5px;
-}
 </style>
 <template>
   <div class="container">
     <template is="x-repeat" items="{{newsfeeds}}">
       <div class="col-md-12 col-xs-12">
-        <div class="stream">
-          <div class="header">
-            <h4 class="title">
-              <a href="/planets">{{item.Planet}}</a>
-              <span hidden$="{{item.Hidden}}">/</span>
-              <a hidden$="{{item.Hidden}}" href="/containers">{{item.Container}}</a>
-            </h4>
-            <p>
-              <span class="date">{{item.TimeLabel}}</span>
-              <span class="ago">{{item.AgoLabel}}</span>
-            </p>
-          </div>
-          <p>{{item.Content}}</p>
-        </div>
+        <cosmos-newsfeed-item newsfeed={{item}}></cosmos-newsfeed-item>
       </div>
     </template>
   </div>
@@ -96,37 +35,22 @@
 Polymer({
   is: 'cosmos-page-cosmos',
   properties: {
-    newsfeeds: Array,
-    value: []
+    newsfeeds: {
+      type: Array,
+      value: []
+    }
   },
   ready: function() {
-    this.reload();
-
+    this.getNewsfeeds();
   },
-  onPlanetClicked: function(e) {
-    e.preventDefault();
-    var target = e.target || e.srcElement;
-    history.pushState({
-      page: 'planet',
-      key: $(target).attr('href')
-    }, 'planet', '/planets');
-  },
-  onContainerClicked: function(e) {
-    e.preventDefault();
-    var target = e.target || e.srcElement;
-    history.pushState({
-      page: 'container',
-      key: $(target).attr('href')
-    }, 'container', '/containers');
-  },
-  reload: function() {
+  getNewsfeeds: function() {
     var self = this;
-    Cosmos.getNewsFeeds(function(json) {
-      for (var i = 0; i < json.length; i++) {
-        json[i].TimeLabel = moment(json[i].Time * 1000).format('YYYY-MM-DD HH:mm');
-        json[i].AgoLabel = moment(json[i].Time * 1000).fromNow();
+    Cosmos.getNewsFeeds(function(response) {
+      for (var i = 0; i < response.length; i++) {
+        response[i].TimeLabel = moment(response[i].Time * 1000).format('YYYY-MM-DD HH:mm');
+        response[i].AgoLabel = moment(response[i].Time * 1000).fromNow();
       }
-      self.newsfeeds = json;
+      self.newsfeeds = response;
 
       if (self.newsfeeds.length == 0) {
         var notification = {
@@ -138,7 +62,7 @@ Polymer({
     }, function(jqXHR) {
       var notification = {
         type: 'error',
-        message: "Cosmos server didn't respond any response."
+        message: 'Cosmos server did not respond any response.'
       };
       $('cosmos-layout-header').trigger('cosmos-notification', notification);
     });

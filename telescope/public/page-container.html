@@ -147,12 +147,14 @@ container-item {
 
     <div class="main-container col-md-8 col-xs-12">
       <div class="graph-list">
+
         <cosmos-profile-container container="{{selectedContainer}}"></cosmos-profile-container>
 
         <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
         <cosmos-graph-memory class="graph"></cosmos-graph-memory>
         <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
         <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
+
       </div>
     </div>
 
@@ -181,21 +183,7 @@ Polymer({
       this.getContainers();
     },
     attached: function() {
-      /*var chart = c3.generate({
-        bindto: this.querySelector('#c3-test'),
-        data: {
-          columns: [
-            ['CPU', 30, 200, 100, 400, 150, 250]
-          ],
-          types: { CPU: 'area' }
-        },
-        point: { show: false },
-        tooltip: { show: true },
-        axis: {
-          x: { tick: { outer: false } },
-          y: { tick: { outer: false } }
-        }
-      });*/
+
     },
     detached: function() {
 
