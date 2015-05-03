@@ -16,7 +16,6 @@ import (
 	"github.com/cosmos-io/influxdbc"
     
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/render"
 )
 
 var (
@@ -101,7 +100,6 @@ func run() {
 	m.Handlers(
 		martini.Logger(),
 		martini.Static("telescope/public"),
-		render.Renderer(),
 		serveIndexHTML(),
 		serveCosmosService(),
 	)
@@ -121,7 +119,7 @@ func run() {
 		r.Get("/planets/:planetName/containers", router.GetContainersOfPlanet)
 
 		// get metrics of container
-		r.Get("/planets/:planetName/containers/:containerName", router.GetContainerMetrics)        
+		r.Get("/planets/:planetName/containers/:containerName", router.GetContainerMetrics)
 
 		// post container informations
 		r.Post("/planets/:planetName/containers", router.AddContainersOfPlanet)
