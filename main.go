@@ -13,8 +13,8 @@ import (
 	"github.com/cosmos-io/cosmos/service"
 	"github.com/cosmos-io/cosmos/worker"
 	"github.com/cosmos-io/influxdbc"
+    
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/gzip"
 	"github.com/martini-contrib/render"
 )
 
@@ -119,7 +119,6 @@ func run() {
 	m := martini.Classic()
 
 	m.Handlers(
-		gzip.All(),
 		martini.Logger(),
 		martini.Static("telescope/public"),
 		render.Renderer(),
