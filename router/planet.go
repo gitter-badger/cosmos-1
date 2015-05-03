@@ -13,10 +13,8 @@ import (
 
 func GetPlanets(w http.ResponseWriter, r *http.Request, cosmos *service.CosmosService) {
     w.Header().Set("Content-Type", "application/json")
-    
-	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 
-	planets, err := cosmos.GetPlanets(token)
+	planets, err := cosmos.GetPlanets()
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
@@ -38,11 +36,10 @@ func GetPlanets(w http.ResponseWriter, r *http.Request, cosmos *service.CosmosSe
 func GetPlanetMetrics(w http.ResponseWriter, params martini.Params, r *http.Request, cosmos *service.CosmosService) {
     w.Header().Set("Content-Type", "application/json")
     
-	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 	planet := params["planetName"]
 	metric := strings.Split(util.GetQueryParam(r, "metric", "all"), ",")
 
-	metrics, err := cosmos.GetPlanetMetrics(token, planet, metric)
+	metrics, err := cosmos.GetPlanetMetrics(planet, metric)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
