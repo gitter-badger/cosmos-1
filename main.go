@@ -15,7 +15,8 @@ import (
 	"github.com/cosmos-io/cosmos/worker"
 	"github.com/cosmos-io/influxdbc"
     
-	"github.com/go-martini/martini"
+    "github.com/gorilla/mux"
+    "github.com/gorilla/context"
 )
 
 var (
@@ -39,38 +40,40 @@ func getEnv(key, defaultValue string) string {
 	}
 }
 
-// to distingush text/html content type and others
+// A middleware to distingush text/html content type and others
 // 
-func serveIndexHTML() martini.Handler {
-	return func(w http.ResponseWriter, r *http.Request) {
+func serveIndexHTML(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		accept := strings.ToLower(r.Header.Get("Accept"))
 		if strings.Contains(accept, "text/html") {
             fp := path.Join("telescope", "public", "index.html")
             http.ServeFile(w, r, fp)
+            return
 		}
-	}
+        next.ServeHTTP(w, r)
+    })
 }
 
-//
-//
-func serveCosmosService() martini.Handler {
-	dbc := createInfluxDBClient()
-	dao.Initialize(dbc)
+// A middleware to serve cosmos instance
+// 
+func serveCosmos(next http.Handler) http.Handler {
+	db := createInfluxDBClient()
+	dao.Initialize(db)
 	cosmos := service.NewCosmosService(5)
 
 	newsFeedWorker := worker.NewNewsFeedWorker(cosmos.LifeTime, 30)
 	newsFeedWorker.Run()
 
-	return func(c martini.Context) {
-		c.Map(cosmos)
-		c.Next()
-	}
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        context.Set(r, "cosmos", cosmos)
+        next.ServeHTTP(w, r)
+    })
 }
 
 // to create an influxdb client
 //
 func createInfluxDBClient() *influxdbc.InfluxDB {
-	dbc := influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbDatabase, dbUsername, dbPassword)
+	db := influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbDatabase, dbUsername, dbPassword)
 	file, err := ioutil.ReadFile(dbShardConf)
 	if err != nil {
 		fmt.Println(err)
@@ -82,50 +85,37 @@ func createInfluxDBClient() *influxdbc.InfluxDB {
 	if err != nil {
 		fmt.Println(err)
 	}
-	_, err = dbc.CreateDatabase(conf)
+	_, err = db.CreateDatabase(conf)
 	if err != nil {
 		fmt.Println("It is failed to create a database.\n" + err.Error())
 	} else {
 		fmt.Println("A database is created.")
 	}
 
-	return dbc
+	return db
 }
 
-// to run a martini app
+// to run
 //
 func run() {
-	m := martini.Classic()
+    staticFilesPath := path.Join("telescope", "public")
+    
+    mux := mux.NewRouter()
+    mux.HandleFunc("/v1/newsfeeds", router.GetNewsFeeds).Methods("GET")
+    mux.HandleFunc("/v1/planets/{planet}/containers/{container}", router.GetContainerMetrics).Methods("GET")
+    mux.HandleFunc("/v1/planets/{planet}/containers", router.GetContainersOfPlanet).Methods("GET")
+    mux.HandleFunc("/v1/planets/{planet}", router.GetPlanetMetrics).Methods("GET")
+    mux.HandleFunc("/v1/planets", router.GetPlanets).Methods("GET")
+    mux.HandleFunc("/v1/containers", router.GetContainers).Methods("GET")
+    mux.HandleFunc("/v1/planets/{planet}/containers", router.AddContainersOfPlanet).Methods("POST")
 
-	m.Handlers(
-		martini.Logger(),
-		martini.Static("telescope/public"),
-		serveIndexHTML(),
-		serveCosmosService(),
-	)
+    mux.PathPrefix("/").Handler(http.FileServer(http.Dir(staticFilesPath)))
 
-	m.Group("/v1", func(r martini.Router) {
-		// get newsfeed
-		r.Get("/newsfeeds", router.GetNewsFeeds)
+    middlewares := serveIndexHTML(mux)
+    middlewares = serveCosmos(middlewares)
 
-        // get planet list
-		r.Get("/planets", router.GetPlanets)
-        
-		r.Get("/planets/:planetName", router.GetPlanetMetrics)
-        
-		r.Get("/containers", router.GetContainers)
-        
-		// get container list of planet
-		r.Get("/planets/:planetName/containers", router.GetContainersOfPlanet)
-
-		// get metrics of container
-		r.Get("/planets/:planetName/containers/:containerName", router.GetContainerMetrics)
-
-		// post container informations
-		r.Post("/planets/:planetName/containers", router.AddContainersOfPlanet)
-	})
-
-	m.RunOnAddr(":" + cosmosPort)
+    http.Handle("/", middlewares)
+    http.ListenAndServe(":" + cosmosPort, nil)
 }
 
 func main() {
