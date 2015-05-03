@@ -1,82 +1,126 @@
 package router
 
 import (
-	"fmt"
-	"net/http"
 	"strings"
+	"net/http"
+    "encoding/json"
 
 	"github.com/cosmos-io/cosmos/service"
 	"github.com/cosmos-io/cosmos/util"
+    
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/render"
 )
 
-func GetContainers(r render.Render, req *http.Request, cosmos *service.CosmosService) {
-	token := util.GetQueryParam(req, "token", DEFAULT_USER)
+func GetContainers(w http.ResponseWriter, r *http.Request, cosmos *service.CosmosService) {
+    w.Header().Set("Content-Type", "application/json")
+    
+	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 
-	result, err := cosmos.GetContainers(token)
+	containers, err := cosmos.GetContainers(token)
 	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
 		return
 	}
 
-	r.JSON(http.StatusOK, result)
+    js, err := json.Marshal(containers)
+    if err != nil {
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
+		return
+    }
+    
+    w.Write(js)
 }
 
-func AddContainersOfPlanet(r render.Render, params martini.Params, req *http.Request, cosmos *service.CosmosService) {
-	req.ParseForm()
-	token := util.GetQueryParam(req, "token", DEFAULT_USER)
+func AddContainersOfPlanet(w http.ResponseWriter, params martini.Params, r *http.Request, cosmos *service.CosmosService) {
+    w.Header().Set("Content-Type", "application/json")
+    
+	r.ParseForm()
+	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 	planet := params["planetName"]
-
-	body, err := util.GetBodyFromRequest(req)
+	body, err := util.GetBodyFromRequest(r)
 
 	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
 		return
 	}
 
 	err = cosmos.AddContainersOfPlanet(token, planet, body)
 	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
 		return
 	}
 
-	r.Status(http.StatusOK)
+    w.Write([]byte(""))
 }
 
-func GetContainersOfPlanet(r render.Render, params martini.Params, req *http.Request, cosmos *service.CosmosService) {
-	token := util.GetQueryParam(req, "token", DEFAULT_USER)
+func GetContainersOfPlanet(w http.ResponseWriter, params martini.Params, r *http.Request, cosmos *service.CosmosService) {
+    w.Header().Set("Content-Type", "application/json")
+    
+	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 	planet := params["planetName"]
 
-	result, err := cosmos.GetContainersOfPlanet(token, planet, true)
+	containers, err := cosmos.GetContainersOfPlanet(token, planet, true)
 	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
 		return
 	}
 
-	r.JSON(http.StatusOK, result)
+    js, err := json.Marshal(containers)
+    if err != nil {
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
+		return
+    }
+
+    w.Write(js)
 }
 
-func GetContainerMetrics(r render.Render, params martini.Params, req *http.Request, cosmos *service.CosmosService) {
-	req.ParseForm()
+func GetContainerMetrics(w http.ResponseWriter, params martini.Params, r *http.Request, cosmos *service.CosmosService) {
+    w.Header().Set("Content-Type", "application/json")
+    
+	r.ParseForm()
 
-	metric := strings.Split(util.GetQueryParam(req, "metric", "all"), ",")
-	period := util.GetQueryParam(req, "period", "10m")
-	token := util.GetQueryParam(req, "token", DEFAULT_USER)
+	metric := strings.Split(util.GetQueryParam(r, "metric", "all"), ",")
+	period := util.GetQueryParam(r, "period", "10m")
+	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 
 	planetName := params["planetName"]
 	containerName := strings.Replace(params["containerName"], ".", "_", -1)
 
-	result, err := cosmos.GetContainerMetrics(token, planetName, containerName, metric, period)
+	metrics, err := cosmos.GetContainerMetrics(token, planetName, containerName, metric, period)
 	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
 		return
 	}
 
-	r.JSON(http.StatusOK, result)
+    js, err := json.Marshal(metrics)
+    if err != nil {
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
+		return
+    }
+
+    w.Write(js)
 }

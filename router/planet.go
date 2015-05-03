@@ -1,41 +1,62 @@
 package router
 
 import (
-	"fmt"
+	"strings"    
 	"net/http"
-	"strings"
+    "encoding/json"
 
 	"github.com/cosmos-io/cosmos/service"
 	"github.com/cosmos-io/cosmos/util"
+    
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/render"
 )
 
-func GetPlanets(r render.Render, req *http.Request, cosmos *service.CosmosService) {
-	token := util.GetQueryParam(req, "token", DEFAULT_USER)
+func GetPlanets(w http.ResponseWriter, r *http.Request, cosmos *service.CosmosService) {
+    w.Header().Set("Content-Type", "application/json")
+    
+	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 
-	result, err := cosmos.GetPlanets(token)
+	planets, err := cosmos.GetPlanets(token)
 	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.Write(js)
 		return
 	}
 
-	r.JSON(http.StatusOK, result)
+    js, err := json.Marshal(planets)
+    if err != nil {
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.Write(js)
+		return
+    }
+
+    w.Write(js)
 }
 
-func GetPlanetMetrics(r render.Render, params martini.Params, req *http.Request, cosmos *service.CosmosService) {
-	token := util.GetQueryParam(req, "token", DEFAULT_USER)
+func GetPlanetMetrics(w http.ResponseWriter, params martini.Params, r *http.Request, cosmos *service.CosmosService) {
+    w.Header().Set("Content-Type", "application/json")
+    
+	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 	planet := params["planetName"]
+	metric := strings.Split(util.GetQueryParam(r, "metric", "all"), ",")
 
-	metric := strings.Split(util.GetQueryParam(req, "metric", "all"), ",")
-
-	result, err := cosmos.GetPlanetMetrics(token, planet, metric)
+	metrics, err := cosmos.GetPlanetMetrics(token, planet, metric)
 	if err != nil {
-		fmt.Println(err)
-		r.JSON(http.StatusInternalServerError, err)
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.Write(js)
 		return
 	}
 
-	r.JSON(http.StatusOK, result)
+    js, err := json.Marshal(metrics)
+    if err != nil {
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.Write(js)
+		return
+    }
+
+    w.Write(js)
 }
