@@ -1,12 +1,13 @@
 package main
 
 import (
-	"encoding/json"
+	"os"
 	"fmt"
+    "path"
+	"strings"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"strings"
+	"encoding/json"
 
 	"github.com/cosmos-io/cosmos/dao"
 	"github.com/cosmos-io/cosmos/router"
@@ -28,11 +29,6 @@ var (
 	dbShardConf = getEnv("INFLUXDB_SHARD_CONF", "./shard_config.json")
 )
 
-type Profile struct {
-    Name string
-    Hobbies []string
-}
-
 // to get an environment variable if it exists or default value
 //
 func getEnv(key, defaultValue string) string {
@@ -46,29 +42,29 @@ func getEnv(key, defaultValue string) string {
 
 // to distingush text/html content type and others
 // 
-func contentType() martini.Handler {
-	var (
-		index []byte
-		err   error
-	)
-	if martini.Env == "production" {
-		index, err = ioutil.ReadFile("telescope/public/index.html")
-	}
-
-	if err != nil {
-		fmt.Println("It is failed to read an index file.\n" + err.Error())
-	}
-
-	return func(r render.Render, req *http.Request, c martini.Context) {
-		accept := strings.ToLower(req.Header.Get("Accept"))
-
+func serveIndexHTML() martini.Handler {
+	return func(w http.ResponseWriter, r *http.Request) {
+		accept := strings.ToLower(r.Header.Get("Accept"))
 		if strings.Contains(accept, "text/html") {
-			if martini.Env == "development" {
-				index, err = ioutil.ReadFile("telescope/public/index.html")
-			}
-			r.Header().Set(render.ContentType, "text/html; charset=utf-8")
-			r.Data(http.StatusOK, index)
+            fp := path.Join("telescope", "public", "index.html")
+            http.ServeFile(w, r, fp)
 		}
+	}
+}
+
+//
+//
+func serveCosmosService() martini.Handler {
+	dbc := createInfluxDBClient()
+	dao.Initialize(dbc)
+	cosmos := service.NewCosmosService(5)
+
+	newsFeedWorker := worker.NewNewsFeedWorker(cosmos.LifeTime, 30)
+	newsFeedWorker.Run()
+
+	return func(c martini.Context) {
+		c.Map(cosmos)
+		c.Next()
 	}
 }
 
@@ -97,22 +93,6 @@ func createInfluxDBClient() *influxdbc.InfluxDB {
 	return dbc
 }
 
-//
-//
-func cosmosService() martini.Handler {
-	dbc := createInfluxDBClient()
-	dao.Initialize(dbc)
-	cosmos := service.NewCosmosService(5)
-
-	newsFeedWorker := worker.NewNewsFeedWorker(cosmos.LifeTime, 30)
-	newsFeedWorker.Run()
-
-	return func(c martini.Context) {
-		c.Map(cosmos)
-		c.Next()
-	}
-}
-
 // to run a martini app
 //
 func run() {
@@ -122,8 +102,8 @@ func run() {
 		martini.Logger(),
 		martini.Static("telescope/public"),
 		render.Renderer(),
-		contentType(),
-		cosmosService(),
+		serveIndexHTML(),
+		serveCosmosService(),
 	)
 
 	m.Group("/v1", func(r martini.Router) {
