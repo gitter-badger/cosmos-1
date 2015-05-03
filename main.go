@@ -14,7 +14,6 @@ import (
 	"github.com/cosmos-io/cosmos/worker"
 	"github.com/cosmos-io/influxdbc"
 	"github.com/go-martini/martini"
-	"github.com/attilaolah/strict"
 	"github.com/martini-contrib/gzip"
 	"github.com/martini-contrib/render"
 )
@@ -28,6 +27,11 @@ var (
 	dbDatabase  = getEnv("INFLUXDB_DATABASE", "cosmos")
 	dbShardConf = getEnv("INFLUXDB_SHARD_CONF", "./shard_config.json")
 )
+
+type Profile struct {
+    Name string
+    Hobbies []string
+}
 
 // to get an environment variable if it exists or default value
 //
@@ -118,7 +122,6 @@ func run() {
 		gzip.All(),
 		martini.Logger(),
 		martini.Static("telescope/public"),
-		strict.Strict,
 		render.Renderer(),
 		contentType(),
 		cosmosService(),
@@ -126,37 +129,23 @@ func run() {
 
 	m.Group("/v1", func(r martini.Router) {
 		// get newsfeed
-		r.Get("/newsfeeds",
-			strict.Accept("application/json"),
-			router.GetNewsFeeds)
-		// get planet list
-		r.Get("/planets",
-			strict.Accept("application/json"),
-			router.GetPlanets)
+		r.Get("/newsfeeds", router.GetNewsFeeds)
 
-		r.Get("/planets/:planetName",
-			strict.Accept("application/json"),
-			router.GetPlanetMetrics)
-
-		r.Get("/containers",
-			strict.Accept("application/json"),
-			router.GetContainers)
-
-		// post container informations
-		r.Post("/planets/:planetName/containers",
-			strict.Accept("application/json"),
-			strict.ContentType("application/json"),
-			router.AddContainersOfPlanet)
-
+        // get planet list
+		r.Get("/planets", router.GetPlanets)
+        
+		r.Get("/planets/:planetName", router.GetPlanetMetrics)
+        
+		r.Get("/containers", router.GetContainers)
+        
 		// get container list of planet
-		r.Get("/planets/:planetName/containers",
-			strict.Accept("application/json"),
-			router.GetContainersOfPlanet)
+		r.Get("/planets/:planetName/containers", router.GetContainersOfPlanet)
 
 		// get metrics of container
-		r.Get("/planets/:planetName/containers/:containerName",
-			strict.Accept("application/json"),
-			router.GetContainerMetrics)
+		r.Get("/planets/:planetName/containers/:containerName", router.GetContainerMetrics)        
+
+		// post container informations
+		r.Post("/planets/:planetName/containers", router.AddContainersOfPlanet)
 	})
 
 	m.RunOnAddr(":" + cosmosPort)
