@@ -13,45 +13,49 @@ type CosmosService struct {
 	LifeTime        int
 }
 
+var (
+    DEFAULT_USER = "default"
+)
+
 func NewCosmosService(lifeTime int) *CosmosService {
 	return &CosmosService{LifeTime: lifeTime, newsFeedService: &NewsFeedService{}}
 }
 
-func (this *CosmosService) GetContainers(token string) (map[string]map[string]interface{}, error) {
-	series, err := dao.Container.GetContainers(token, this.LifeTime)
+func (this *CosmosService) GetContainers() (map[string]map[string]interface{}, error) {
+	series, err := dao.Container.GetContainers(DEFAULT_USER, this.LifeTime)
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.ConvertFromContainerSeries(token, "", series), nil
+	return converter.ConvertFromContainerSeries(DEFAULT_USER, "", series), nil
 }
 
-func (this *CosmosService) AddContainersOfPlanet(token, planet string, data []byte) error {
+func (this *CosmosService) AddContainersOfPlanet(planet string, data []byte) error {
 	// Container metrics
-	series, err := converter.ConvertToContainerSeries(token, planet, data)
+	series, err := converter.ConvertToContainerSeries(DEFAULT_USER, planet, data)
 	if err != nil {
 		return err
 	}
-	savedContainerSeries, err := dao.Container.GetContainersOfPlanet(token, planet, false, this.LifeTime)
+	savedContainerSeries, err := dao.Container.GetContainersOfPlanet(DEFAULT_USER, planet, false, this.LifeTime)
 	if err != nil {
 		return err
 	}
-	savedPlanetSeries, err := dao.Planet.GetPlanetStatusesInLifeTimeOfUser(token, this.LifeTime)
+	savedPlanetSeries, err := dao.Planet.GetPlanetStatusesInLifeTimeOfUser(DEFAULT_USER, this.LifeTime)
 	if err != nil {
 		return err
 	}
-	feedSeries, err := this.newsFeedService.PostNewsFeedIfNeeded(token, planet, savedPlanetSeries, savedContainerSeries, series)
+	feedSeries, err := this.newsFeedService.PostNewsFeedIfNeeded(DEFAULT_USER, planet, savedPlanetSeries, savedContainerSeries, series)
 	if err != nil {
 		return err
 	}
 	series = append(series, feedSeries...)
 
 	// Add Host metric series
-	planetSeries := influxdbc.NewSeries(fmt.Sprintf("PLANET.%s.%s.Name", token, planet), "txt_value", "num_value")
+	planetSeries := influxdbc.NewSeries(fmt.Sprintf("PLANET.%s.%s.Name", DEFAULT_USER, planet), "txt_value", "num_value")
 	planetSeries.AddPoint(planet, nil)
 	series = append(series, planetSeries)
 
-	planetSeries = influxdbc.NewSeries(fmt.Sprintf("PLANET.%s.%s.Status", token, planet), "txt_value", "num_value")
+	planetSeries = influxdbc.NewSeries(fmt.Sprintf("PLANET.%s.%s.Status", DEFAULT_USER, planet), "txt_value", "num_value")
 	planetSeries.AddPoint("Up", nil)
 	series = append(series, planetSeries)
 
@@ -63,44 +67,44 @@ func (this *CosmosService) AddContainersOfPlanet(token, planet string, data []by
 	return nil
 }
 
-func (this *CosmosService) GetContainersOfPlanet(token, planet string, useRollup bool) (map[string]map[string]interface{}, error) {
-	series, err := dao.Container.GetContainersOfPlanet(token, planet, useRollup, this.LifeTime)
+func (this *CosmosService) GetContainersOfPlanet(planet string, useRollup bool) (map[string]map[string]interface{}, error) {
+	series, err := dao.Container.GetContainersOfPlanet(DEFAULT_USER, planet, useRollup, this.LifeTime)
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.ConvertFromContainerSeries(token, planet, series), nil
+	return converter.ConvertFromContainerSeries(DEFAULT_USER, planet, series), nil
 }
 
-func (this *CosmosService) GetContainerMetrics(token, planetName, containerName string, metric []string, period string) (map[string]interface{}, error) {
-	series, err := dao.Container.GetContainerMetrics(token, planetName, containerName, metric, period)
+func (this *CosmosService) GetContainerMetrics(planetName, containerName string, metric []string, period string) (map[string]interface{}, error) {
+	series, err := dao.Container.GetContainerMetrics(DEFAULT_USER, planetName, containerName, metric, period)
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.ConvertFromContainerMetricSeries(token, planetName, containerName, series), nil
+	return converter.ConvertFromContainerMetricSeries(DEFAULT_USER, planetName, containerName, series), nil
 }
 
-func (this *CosmosService) GetPlanets(token string) (interface{}, error) {
-	series, err := dao.Planet.GetPlanets(token, this.LifeTime)
+func (this *CosmosService) GetPlanets() (interface{}, error) {
+	series, err := dao.Planet.GetPlanets(DEFAULT_USER, this.LifeTime)
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.ConvertFromPlanetSeries(token, series), nil
+	return converter.ConvertFromPlanetSeries(DEFAULT_USER, series), nil
 }
 
-func (this *CosmosService) GetPlanetMetrics(token, planetName string, metric []string) (interface{}, error) {
-	series, err := dao.Container.GetContainerMetrics(token, planetName, "", metric, "10m")
+func (this *CosmosService) GetPlanetMetrics(planetName string, metric []string) (interface{}, error) {
+	series, err := dao.Container.GetContainerMetrics(DEFAULT_USER, planetName, "", metric, "10m")
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.ConvertFromContainerSeries(token, planetName, series), nil
+	return converter.ConvertFromContainerSeries(DEFAULT_USER, planetName, series), nil
 }
 
-func (this *CosmosService) GetNewsFeeds(token, time string) (interface{}, error) {
-	series, err := dao.NewsFeed.GetNewsFeeds(token, time)
+func (this *CosmosService) GetNewsFeeds(time string) (interface{}, error) {
+	series, err := dao.NewsFeed.GetNewsFeeds(DEFAULT_USER, time)
 	if err != nil {
 		return nil, err
 	}

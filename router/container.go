@@ -14,9 +14,7 @@ import (
 func GetContainers(w http.ResponseWriter, r *http.Request, cosmos *service.CosmosService) {
     w.Header().Set("Content-Type", "application/json")
     
-	token := util.GetQueryParam(r, "token", DEFAULT_USER)
-
-	containers, err := cosmos.GetContainers(token)
+	containers, err := cosmos.GetContainers()
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
@@ -41,7 +39,6 @@ func AddContainersOfPlanet(w http.ResponseWriter, params martini.Params, r *http
     w.Header().Set("Content-Type", "application/json")
     
 	r.ParseForm()
-	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 	planet := params["planetName"]
 	body, err := util.GetBodyFromRequest(r)
 
@@ -53,7 +50,7 @@ func AddContainersOfPlanet(w http.ResponseWriter, params martini.Params, r *http
 		return
 	}
 
-	err = cosmos.AddContainersOfPlanet(token, planet, body)
+	err = cosmos.AddContainersOfPlanet(planet, body)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
@@ -68,10 +65,9 @@ func AddContainersOfPlanet(w http.ResponseWriter, params martini.Params, r *http
 func GetContainersOfPlanet(w http.ResponseWriter, params martini.Params, r *http.Request, cosmos *service.CosmosService) {
     w.Header().Set("Content-Type", "application/json")
     
-	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 	planet := params["planetName"]
 
-	containers, err := cosmos.GetContainersOfPlanet(token, planet, true)
+	containers, err := cosmos.GetContainersOfPlanet(planet, true)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
@@ -99,12 +95,11 @@ func GetContainerMetrics(w http.ResponseWriter, params martini.Params, r *http.R
 
 	metric := strings.Split(util.GetQueryParam(r, "metric", "all"), ",")
 	period := util.GetQueryParam(r, "period", "10m")
-	token := util.GetQueryParam(r, "token", DEFAULT_USER)
 
 	planetName := params["planetName"]
 	containerName := strings.Replace(params["containerName"], ".", "_", -1)
 
-	metrics, err := cosmos.GetContainerMetrics(token, planetName, containerName, metric, period)
+	metrics, err := cosmos.GetContainerMetrics(planetName, containerName, metric, period)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
