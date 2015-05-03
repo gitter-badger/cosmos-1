@@ -8,13 +8,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/attilaolah/strict"
 	"github.com/cosmos-io/cosmos/dao"
 	"github.com/cosmos-io/cosmos/router"
 	"github.com/cosmos-io/cosmos/service"
 	"github.com/cosmos-io/cosmos/worker"
 	"github.com/cosmos-io/influxdbc"
 	"github.com/go-martini/martini"
+	"github.com/attilaolah/strict"
 	"github.com/martini-contrib/gzip"
 	"github.com/martini-contrib/render"
 )
@@ -29,16 +29,20 @@ var (
 	dbShardConf = getEnv("INFLUXDB_SHARD_CONF", "./shard_config.json")
 )
 
-func getEnv(key, defVal string) string {
-	val := os.Getenv(key)
-	if val == "" {
-		return defVal
+// to get an environment variable if it exists or default value
+//
+func getEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
 	} else {
-		return val
+		return value
 	}
 }
 
-func contentTypeRouter() martini.Handler {
+// to distingush text/html content type and others
+// 
+func contentType() martini.Handler {
 	var (
 		index []byte
 		err   error
@@ -48,7 +52,7 @@ func contentTypeRouter() martini.Handler {
 	}
 
 	if err != nil {
-		fmt.Printf("\nFailed to read index file - %s\n\n", err.Error())
+		fmt.Println("It is failed to read an index file.\n" + err.Error())
 	}
 
 	return func(r render.Render, req *http.Request, c martini.Context) {
@@ -64,30 +68,8 @@ func contentTypeRouter() martini.Handler {
 	}
 }
 
-func requiredParams(params ...string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		query := r.URL.Query()
-		valid := true
-		var param string
-		for _, param = range params {
-			if query.Get(param) == "" {
-				valid = false
-				break
-			}
-		}
-		if valid == false {
-			res := map[string]interface{}{"error": fmt.Sprintf("required parameter '%s' is missing", param)}
-			data, err := json.Marshal(res)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write(data)
-		}
-	}
-}
-
+// to create an influxdb client
+//
 func createInfluxDBClient() *influxdbc.InfluxDB {
 	dbc := influxdbc.NewInfluxDB(fmt.Sprintf("%s:%s", dbHost, dbPort), dbDatabase, dbUsername, dbPassword)
 	file, err := ioutil.ReadFile(dbShardConf)
@@ -103,14 +85,16 @@ func createInfluxDBClient() *influxdbc.InfluxDB {
 	}
 	_, err = dbc.CreateDatabase(conf)
 	if err != nil {
-		fmt.Println("Failed to create database - " + err.Error())
+		fmt.Println("It is failed to create a database.\n" + err.Error())
 	} else {
-		fmt.Println("Database has been created with sharding configuration")
+		fmt.Println("A database is created.")
 	}
 
 	return dbc
 }
 
+//
+//
 func cosmosService() martini.Handler {
 	dbc := createInfluxDBClient()
 	dao.Initialize(dbc)
@@ -125,7 +109,9 @@ func cosmosService() martini.Handler {
 	}
 }
 
-func startServer() {
+// to run a martini app
+//
+func run() {
 	m := martini.Classic()
 
 	m.Handlers(
@@ -133,10 +119,8 @@ func startServer() {
 		martini.Logger(),
 		martini.Static("telescope/public"),
 		strict.Strict,
-		render.Renderer(render.Options{
-			Delims: render.Delims{Left: "{{%", Right: "%}}"},
-		}),
-		contentTypeRouter(),
+		render.Renderer(),
+		contentType(),
 		cosmosService(),
 	)
 
@@ -179,5 +163,5 @@ func startServer() {
 }
 
 func main() {
-	startServer()
+	run()
 }
