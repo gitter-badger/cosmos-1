@@ -1,6 +1,4 @@
 .DS_Store
-*~
-/cosmos
-*.log*
+/bin
 *.log
-
+cosmos

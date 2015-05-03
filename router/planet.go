@@ -1,19 +1,21 @@
 package router
 
 import (
-	"strings"    
+	"strings"
 	"net/http"
     "encoding/json"
 
 	"github.com/cosmos-io/cosmos/service"
 	"github.com/cosmos-io/cosmos/util"
     
-	"github.com/go-martini/martini"
+    "github.com/gorilla/mux"
+    "github.com/gorilla/context"
 )
 
-func GetPlanets(w http.ResponseWriter, r *http.Request, cosmos *service.CosmosService) {
+func GetPlanets(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
 
+    cosmos := context.Get(r, "cosmos").(*service.CosmosService)
 	planets, err := cosmos.GetPlanets()
 	if err != nil {
         res := map[string]string { "error": err.Error() }
@@ -33,12 +35,13 @@ func GetPlanets(w http.ResponseWriter, r *http.Request, cosmos *service.CosmosSe
     w.Write(js)
 }
 
-func GetPlanetMetrics(w http.ResponseWriter, params martini.Params, r *http.Request, cosmos *service.CosmosService) {
+func GetPlanetMetrics(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     
-	planet := params["planetName"]
+    planet := mux.Vars(r)["planet"]
 	metric := strings.Split(util.GetQueryParam(r, "metric", "all"), ",")
 
+    cosmos := context.Get(r, "cosmos").(*service.CosmosService)
 	metrics, err := cosmos.GetPlanetMetrics(planet, metric)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
