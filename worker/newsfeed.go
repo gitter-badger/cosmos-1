@@ -29,11 +29,13 @@ func (this *NewsFeedWorker) Run() {
 				fmt.Println(err)
 				continue
 			}
+
 			containerSeries, err := this.checkRemovedContainers()
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
+
 			series := make([]*influxdbc.Series, 0)
 			series = append(series, planetSeries...)
 			series = append(series, containerSeries...)
@@ -54,6 +56,7 @@ func (this *NewsFeedWorker) checkRemovedPlanets() ([]*influxdbc.Series, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	current, err := dao.Planet.GetPlanetStatusesInLifeTime(this.lifeTime)
 	if err != nil {
 		return nil, err

@@ -5,18 +5,14 @@ import (
 	"net/http"
     "encoding/json"
 
-	"github.com/cosmos-io/cosmos/service"
-	"github.com/cosmos-io/cosmos/util"
-    
-    "github.com/gorilla/mux"
-    "github.com/gorilla/context"
+	"github.com/cosmos-io/cosmos/context"
+	"github.com/cosmos-io/cosmos/util"   
 )
 
-func GetPlanets(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
-
-    cosmos := context.Get(r, "cosmos").(*service.CosmosService)
-	planets, err := cosmos.GetPlanets()
+func GetPlanets(c context.CosmosContext,
+    w http.ResponseWriter,
+    r *http.Request) {
+	planets, err := c.CosmosService.GetPlanets()
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
@@ -35,14 +31,13 @@ func GetPlanets(w http.ResponseWriter, r *http.Request) {
     w.Write(js)
 }
 
-func GetPlanetMetrics(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
-    
-    planet := mux.Vars(r)["planet"]
+func GetPlanetMetrics(c context.CosmosContext,
+    w http.ResponseWriter,
+    r *http.Request) {
+    planet := c.Params["planet"]
 	metric := strings.Split(util.GetQueryParam(r, "metric", "all"), ",")
 
-    cosmos := context.Get(r, "cosmos").(*service.CosmosService)
-	metrics, err := cosmos.GetPlanetMetrics(planet, metric)
+	metrics, err := c.CosmosService.GetPlanetMetrics(planet, metric)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)

@@ -3,9 +3,10 @@ export GOPATH
 
 default: build
 
-build: vet
+build:
 	rm -rf ./vendor/src/github.com/cosmos-io/cosmos
 	mkdir -p ./vendor/src/github.com/cosmos-io/cosmos
+	cp -r ./context ./vendor/src/github.com/cosmos-io/cosmos/context
 	cp -r ./dao ./vendor/src/github.com/cosmos-io/cosmos/dao
 	cp -r ./model ./vendor/src/github.com/cosmos-io/cosmos/model
 	cp -r ./service ./vendor/src/github.com/cosmos-io/cosmos/service
