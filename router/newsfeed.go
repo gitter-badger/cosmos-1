@@ -4,17 +4,14 @@ import (
 	"net/http"
     "encoding/json"
 
-    "github.com/cosmos-io/cosmos/service"
-    
-    "github.com/gorilla/context"
+    "github.com/cosmos-io/cosmos/context"
 )
 
-func GetNewsFeeds(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
-    
-    cosmos := context.Get(r, "cosmos").(*service.CosmosService)
+func GetNewsFeeds(c context.CosmosContext,
+    w http.ResponseWriter,
+    r *http.Request) {
     time := ""
-	newsfeeds, err := cosmos.GetNewsFeeds(time)
+	newsfeeds, err := c.CosmosService.GetNewsFeeds(time)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)

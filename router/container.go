@@ -5,19 +5,14 @@ import (
 	"net/http"
     "encoding/json"
 
-	"github.com/cosmos-io/cosmos/service"
+    "github.com/cosmos-io/cosmos/context"
 	"github.com/cosmos-io/cosmos/util"
-
-    "github.com/gorilla/mux"
-    "github.com/gorilla/context"
 )
 
-func GetContainers(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
-
-    cosmos := context.Get(r, "cosmos").(*service.CosmosService)
-    
-	containers, err := cosmos.GetContainers()
+func GetContainers(c context.CosmosContext,
+    w http.ResponseWriter,
+    r *http.Request) {
+	containers, err := c.CosmosService.GetContainers()
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
@@ -38,11 +33,11 @@ func GetContainers(w http.ResponseWriter, r *http.Request) {
     w.Write(js)
 }
 
-func AddContainersOfPlanet(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
-    
+func AddContainersOfPlanet(c context.CosmosContext,
+    w http.ResponseWriter,
+    r *http.Request) {
 	r.ParseForm()
-    planet := mux.Vars(r)["planet"]
+    planet := c.Params["planet"]
 	body, err := util.GetBodyFromRequest(r)
 
 	if err != nil {
@@ -53,8 +48,7 @@ func AddContainersOfPlanet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    cosmos := context.Get(r, "cosmos").(*service.CosmosService)
-	err = cosmos.AddContainersOfPlanet(planet, body)
+	err = c.CosmosService.AddContainersOfPlanet(planet, body)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
@@ -66,13 +60,12 @@ func AddContainersOfPlanet(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte(""))
 }
 
-func GetContainersOfPlanet(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
-    
-    planet := mux.Vars(r)["planet"]
+func GetContainersOfPlanet(c context.CosmosContext,
+    w http.ResponseWriter,
+    r *http.Request) {
+    planet := c.Params["planet"]
 
-    cosmos := context.Get(r, "cosmos").(*service.CosmosService)
-	containers, err := cosmos.GetContainersOfPlanet(planet, true)
+	containers, err := c.CosmosService.GetContainersOfPlanet(planet, true)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
@@ -93,19 +86,18 @@ func GetContainersOfPlanet(w http.ResponseWriter, r *http.Request) {
     w.Write(js)
 }
 
-func GetContainerMetrics(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
-    
+func GetContainerMetrics(c context.CosmosContext,
+    w http.ResponseWriter,
+    r *http.Request) {
 	r.ParseForm()
 
 	metric := strings.Split(util.GetQueryParam(r, "metric", "all"), ",")
 	period := util.GetQueryParam(r, "period", "10m")
 
-    planet := mux.Vars(r)["planet"]
-	container := strings.Replace(mux.Vars(r)["container"], ".", "_", -1)
+    planet := c.Params["planet"]
+	container := strings.Replace(c.Params["container"], ".", "_", -1)
 
-    cosmos := context.Get(r, "cosmos").(*service.CosmosService)
-	metrics, err := cosmos.GetContainerMetrics(planet, container, metric, period)
+	metrics, err := c.CosmosService.GetContainerMetrics(planet, container, metric, period)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
