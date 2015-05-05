@@ -56,7 +56,7 @@ func New(config Config) (*InfluxDB, error) {
 
 // queryDB convenience function to query the database
 func queryDB(con *client.Client, cmd string) (res []client.Result, err error) {
-    q := client.Query{
+    q := client.Query {
         Command:  cmd,
         Database: databaseName,
     }

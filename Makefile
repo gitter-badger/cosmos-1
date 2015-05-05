@@ -6,6 +6,7 @@ default: build
 build:
 	@rm -rf ./vendor/src/github.com/cosmos-io/cosmos
 	@rm -rf ./bin/telescope
+	@mkdir -p ./bin
 	@mkdir -p ./vendor/src/github.com/cosmos-io/cosmos
 	@cp -r ./context ./vendor/src/github.com/cosmos-io/cosmos/context
 	@cp -r ./dao ./vendor/src/github.com/cosmos-io/cosmos/dao
