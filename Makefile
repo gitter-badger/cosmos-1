@@ -14,7 +14,6 @@ build:
 	@cp -r ./service ./vendor/src/github.com/cosmos-io/cosmos/service
 	@cp -r ./converter ./vendor/src/github.com/cosmos-io/cosmos/converter
 	@cp -r ./router ./vendor/src/github.com/cosmos-io/cosmos/router
-	@cp -r ./util ./vendor/src/github.com/cosmos-io/cosmos/util
 	@cp -r ./worker ./vendor/src/github.com/cosmos-io/cosmos/worker
 	@cp -r ./influxdb ./vendor/src/github.com/cosmos-io/cosmos/influxdb
 	@cp -r ./telescope ./bin/telescope

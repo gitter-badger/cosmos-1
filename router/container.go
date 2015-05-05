@@ -1,26 +1,19 @@
 package router
 
 import (
-    "fmt"
 	"strings"
 	"net/http"
     "encoding/json"
 
     "github.com/cosmos-io/cosmos/context"
-	"github.com/cosmos-io/cosmos/util"
 )
 
 func AddContainer(c context.CosmosContext,
     w http.ResponseWriter,
     r *http.Request) {
-    planet := c.Params["planet"]
-    container := c.Params["container"]
 
-    fmt.Println(planet)
-    fmt.Println(container)
-
-    c.InfluxDB.WriteExample()
-
+    
+    
     w.Write([]byte(""))
 }
 
@@ -53,17 +46,17 @@ func AddContainersOfPlanet(c context.CosmosContext,
     r *http.Request) {
 	r.ParseForm()
     planet := c.Params["planet"]
-	body, err := util.GetBodyFromRequest(r)
+    body := c.Body
 
-	if err != nil {
-        res := map[string]string { "error": err.Error() }
+	if body == nil {
+        res := map[string]string { "error": "HTTP body is invalid." }
         js, _ := json.Marshal(res)
         w.WriteHeader(http.StatusInternalServerError)
         w.Write(js)
 		return
 	}
 
-	err = c.CosmosService.AddContainersOfPlanet(planet, body)
+	err := c.CosmosService.AddContainersOfPlanet(planet, body)
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
@@ -106,8 +99,8 @@ func GetContainerMetrics(c context.CosmosContext,
     r *http.Request) {
 	r.ParseForm()
 
-	metric := strings.Split(util.GetQueryParam(r, "metric", "all"), ",")
-	period := util.GetQueryParam(r, "period", "10m")
+	metric := strings.Split(c.GetQueryParam("metric", "all"), ",")
+	period := c.GetQueryParam("period", "10m")
 
     planet := c.Params["planet"]
 	container := strings.Replace(c.Params["container"], ".", "_", -1)

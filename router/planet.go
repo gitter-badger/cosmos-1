@@ -6,7 +6,6 @@ import (
     "encoding/json"
 
 	"github.com/cosmos-io/cosmos/context"
-	"github.com/cosmos-io/cosmos/util"   
 )
 
 func GetPlanets(c context.CosmosContext,
@@ -35,7 +34,7 @@ func GetPlanetMetrics(c context.CosmosContext,
     w http.ResponseWriter,
     r *http.Request) {
     planet := c.Params["planet"]
-	metric := strings.Split(util.GetQueryParam(r, "metric", "all"), ",")
+	metric := strings.Split(c.GetQueryParam("metric", "all"), ",")
 
 	metrics, err := c.CosmosService.GetPlanetMetrics(planet, metric)
 	if err != nil {
