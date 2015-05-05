@@ -2,33 +2,50 @@ package influxdb
 
 import (
     "fmt"
+    "log"
+    "time"
     "net/url"
     
     "github.com/influxdb/influxdb/client"
 )
 
+type Config struct {
+    Host string
+    Port string
+    Username string
+    Password string
+}
+
 type InfluxDB struct {
     client *client.Client
 }
 
-func NewClient(host string,
-    port string,
-    username string,
-    password string) (*InfluxDB, error) {
-    u, err := url.Parse(fmt.Sprintf("http://%s:%s", host, port))
+var (
+    databaseName = "cosmos"
+    retentionPolicy = "default"
+)
+
+func New(config Config) (*InfluxDB, error) {
+    u, err := url.Parse(fmt.Sprintf("http://%s:%s", config.Host, config.Port))
     if err != nil {
         return nil, err
     }
 
     conf := client.Config {
         URL:      *u,
-        Username: username,
-        Password: password,
+        Username: config.Username,
+        Password: config.Password,
     }
 
     con, err := client.NewClient(conf)
     if err != nil {
         return nil, err
+    }
+
+    // creating a database
+    _, err = queryDB(con, fmt.Sprintf("create database %s", databaseName))
+    if err != nil {
+        log.Println(err)
     }
     
     influxdb := InfluxDB {
@@ -37,22 +54,22 @@ func NewClient(host string,
     return &influxdb, nil
 }
 
-/*u, err := url.Parse(fmt.Sprintf("http://%s:%s", "localhost", "8086"))
-    if err != nil {
-        fmt.Println(err)
+// queryDB convenience function to query the database
+func queryDB(con *client.Client, cmd string) (res []client.Result, err error) {
+    q := client.Query{
+        Command:  cmd,
+        Database: databaseName,
     }
-
-    conf := client.Config{
-        URL:      *u,
-        Username: "root",
-        Password: "root",
+    if response, err := con.Query(q); err == nil {
+        if response.Error() != nil {
+            return res, response.Error()
+        }
+        res = response.Results
     }
+    return
+}
 
-    con, err := client.NewClient(conf)
-    if err != nil {
-        fmt.Println(err)
-    }
-
+func (i *InfluxDB) WriteExample() {
     sampleSize := 1
     pts := make([]client.Point, sampleSize)
 
@@ -60,22 +77,23 @@ func NewClient(host string,
         Name: "cpu",
         Tags: map[string]string {
             "region": "useast",
-            "host": "server02",
+            "host": "server01",
         },
-        Fields: map[string]interface{}{
+        Fields: map[string]interface{} {
             "value": 100,
         },
         Timestamp: time.Now(),
         Precision: "s",
     }
 
-    bps := client.BatchPoints{
+    bps := client.BatchPoints {
         Points:          pts,
-        Database:        "cosmos",
-        RetentionPolicy: "default",
+        Database:        databaseName,
+        RetentionPolicy: retentionPolicy,
     }
 
-    _, err = con.Write(bps)
+    _, err := i.client.Write(bps)
     if err != nil {
-        fmt.Println(err)
-    }*/
+        fmt.Println(err) // for test
+    }
+}
