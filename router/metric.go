@@ -4,27 +4,22 @@ import (
     "log"
     "net/http"
     "encoding/json"
-    
+
     "github.com/cosmos-io/cosmos/context"
+    "github.com/cosmos-io/cosmos/model"
 )
 
-type Metric struct {
-    Planet string
-    Container string
-}
-
-func PostMetric(
+func PostMetrics(
     c context.CosmosContext,
     w http.ResponseWriter,
     r *http.Request) {
+    w.Write([]byte(""))
 
-    var metric *Metric
-    err := json.Unmarshal(c.Body, &metric)
+    var metrics *model.Metrics
+    err := json.Unmarshal(c.Body, &metrics)
     if err != nil {
         log.Println(err)
     }
 
-    log.Println(metric)
-
-    w.Write([]byte(""))
+    c.InfluxDB.WriteMetrics(metrics)
 }

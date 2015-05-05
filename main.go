@@ -138,8 +138,8 @@ func run() {
 
     mux := mux.NewRouter()
 
-    mux.HandleFunc("/metric",
-        serveContext(router.PostMetric)).Methods("POST")
+    mux.HandleFunc("/metrics",
+        serveContext(router.PostMetrics)).Methods("POST")
 
     mux.HandleFunc("/v1/newsfeeds",
         serveContext(router.GetNewsFeeds)).Methods("GET")
