@@ -5,6 +5,7 @@ default: build
 
 build:
 	rm -rf ./vendor/src/github.com/cosmos-io/cosmos
+	rm -rf ./bin/telescope
 	mkdir -p ./vendor/src/github.com/cosmos-io/cosmos
 	cp -r ./context ./vendor/src/github.com/cosmos-io/cosmos/context
 	cp -r ./dao ./vendor/src/github.com/cosmos-io/cosmos/dao
@@ -14,11 +15,11 @@ build:
 	cp -r ./router ./vendor/src/github.com/cosmos-io/cosmos/router
 	cp -r ./util ./vendor/src/github.com/cosmos-io/cosmos/util
 	cp -r ./worker ./vendor/src/github.com/cosmos-io/cosmos/worker
+	cp -r ./influxdb ./vendor/src/github.com/cosmos-io/cosmos/influxdb
+	cp -r ./telescope ./bin/telescope
 	go build -v -o ./bin/cosmos
 
 run: build
-	rm -rf ./bin/telescope
-	cp -r ./telescope ./bin/telescope
 	./bin/cosmos
 
 doc:
