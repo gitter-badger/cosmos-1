@@ -25,6 +25,7 @@ type InfluxDB struct {
 var (
     databaseName = "cosmos"
     retentionPolicy = "default"
+    cosmosName = "cosmos"
 )
 
 func New(config Config) (*InfluxDB, error) {
@@ -72,24 +73,29 @@ func queryDB(con *client.Client, cmd string) (res []client.Result, err error) {
 }
 
 func (i *InfluxDB) WriteMetrics(metrics *model.Metrics) {
-    
-}
+    cosmos := cosmosName
+    planet := metrics.Planet
+    if planet == "" { return }
 
-func (i *InfluxDB) WriteExample() {
-    sampleSize := 1
+    index := 0
+    sampleSize := len(metrics.Containers)
     pts := make([]client.Point, sampleSize)
-
-    pts[0] = client.Point {
-        Name: "cpu",
-        Tags: map[string]string {
-            "region": "useast",
-            "host": "server01",
-        },
-        Fields: map[string]interface{} {
-            "value": 100,
-        },
-        Timestamp: time.Now(),
-        Precision: "s",
+    for i := 0; i < sampleSize; i++ {
+        container := metrics.Containers[i]
+        if container.Container == "" { continue }
+        pts[index] = client.Point {
+            Name: "cpu",
+            Tags: map[string]string {
+                "cosmos": cosmos,
+                "planet": planet,
+            },
+            Fields: map[string]interface{} {
+                "value": container.Cpu,
+            },
+            Timestamp: time.Now(),
+            Precision: "s",
+        }
+        index += 1
     }
 
     bps := client.BatchPoints {
@@ -100,6 +106,6 @@ func (i *InfluxDB) WriteExample() {
 
     _, err := i.client.Write(bps)
     if err != nil {
-        fmt.Println(err) // for test
+        log.Println(err)
     }
 }

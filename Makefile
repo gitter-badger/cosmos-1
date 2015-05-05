@@ -1,4 +1,4 @@
-GOPATH := ${PWD}/vendor:${GOPATH}
+GOPATH := ${PWD}/vendor
 export GOPATH
 
 default: build
