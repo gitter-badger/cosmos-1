@@ -8,7 +8,29 @@ import (
 	"github.com/cosmos-io/cosmos/context"
 )
 
-func GetPlanets(c context.CosmosContext,
+func GetPlanets(
+    c context.Context,
+    w http.ResponseWriter,
+    r *http.Request) {
+    planets, err := c.InfluxDB.QueryPlanets()
+    if err != nil {
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
+		return
+    }
+
+    res := map[string]interface{} {
+        "data": planets,
+    }
+
+    js, _ := json.Marshal(res)
+    w.Write(js)
+}
+
+// legacy
+/*func GetPlanets(c context.CosmosContext,
     w http.ResponseWriter,
     r *http.Request) {
 	planets, err := c.CosmosService.GetPlanets()
@@ -28,9 +50,10 @@ func GetPlanets(c context.CosmosContext,
     }
 
     w.Write(js)
-}
+}*/
 
-func GetPlanetMetrics(c context.CosmosContext,
+func GetPlanetMetrics(
+    c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
     planet := c.Params["planet"]
@@ -40,6 +63,7 @@ func GetPlanetMetrics(c context.CosmosContext,
 	if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
         w.Write(js)
 		return
 	}
@@ -48,6 +72,7 @@ func GetPlanetMetrics(c context.CosmosContext,
     if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
         w.Write(js)
 		return
     }

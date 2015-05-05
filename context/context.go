@@ -5,7 +5,7 @@ import (
     "github.com/cosmos-io/cosmos/influxdb"
 )
 
-type CosmosContext struct {
+type Context struct {
     CosmosService *service.CosmosService
     InfluxDB *influxdb.InfluxDB
     Params map[string]string
@@ -13,7 +13,7 @@ type CosmosContext struct {
     QueryParams map[string][]string
 }
 
-func (c *CosmosContext) GetQueryParam(key string, defaultValue string) string {
+func (c *Context) GetQueryParam(key string, defaultValue string) string {
     values := c.QueryParams[key]
     if values == nil {
         return defaultValue

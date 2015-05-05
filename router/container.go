@@ -9,7 +9,7 @@ import (
 )
 
 func GetContainers(
-    c context.CosmosContext,
+    c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
 	containers, err := c.CosmosService.GetContainers()
@@ -34,7 +34,7 @@ func GetContainers(
 }
 
 func AddContainersOfPlanet(
-    c context.CosmosContext,
+    c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
 	r.ParseForm()
@@ -62,7 +62,7 @@ func AddContainersOfPlanet(
 }
 
 func GetContainersOfPlanet(
-    c context.CosmosContext,
+    c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
     planet := c.Params["planet"]
@@ -89,7 +89,7 @@ func GetContainersOfPlanet(
 }
 
 func GetContainerMetrics(
-    c context.CosmosContext,
+    c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
 	r.ParseForm()
