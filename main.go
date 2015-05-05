@@ -3,6 +3,7 @@ package main
 import (
     "os"
     "fmt"
+    "log"
     "path"
     "strings"
     "io/ioutil"
@@ -28,7 +29,7 @@ var (
 	influxdbUsername = getEnv("INFLUXDB_USERNAME", "root")
 	influxdbPassword = getEnv("INFLUXDB_PASSWORD", "root")
 	influxdbDatabase = getEnv("INFLUXDB_DATABASE", "cosmos")
-    influxdbClient   = newInfluxDBClient()
+    influxdbClient   = newInfluxDB()
     
 	dbShardConf      = getEnv("INFLUXDB_SHARD_CONF", "./shard_config.json")
 	cosmosService    = service.NewCosmosService(5)
@@ -68,9 +69,11 @@ func serveContext(prev func(
     *http.Request)) func(http.ResponseWriter, *http.Request) {
     return (func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
-        c := context.CosmosContext{
+        c := context.CosmosContext {
             cosmosService,
-            mux.Vars(r) }
+            mux.Vars(r),
+            influxdbClient,
+        }
         prev(c, w, r)
         return
     })
@@ -95,22 +98,24 @@ func createInfluxDBClient() (*influxdbc.InfluxDB, error) {
 	_, err = db.CreateDatabase(conf)
 	if err != nil {
         return db, err
-	} else {
-        fmt.Println("[InfluxDB] A database is created.")
-    }
+	}
 
 	return db, nil
 }
 
 // to create an influxdb client
 //
-func newInfluxDBClient() *influxdb.InfluxDB {
-    db, err := influxdb.NewClient(influxdbHost,
-        influxdbPort,
-        influxdbUsername,
-        influxdbPassword)
+func newInfluxDB() *influxdb.InfluxDB {
+    config := influxdb.Config {
+        Host: influxdbHost,
+        Port: influxdbPort,
+        Username: influxdbUsername,
+        Password: influxdbPassword,
+    }
+    
+    db, err := influxdb.New(config)
     if err != nil {
-        fmt.Println(err)
+        log.Println(err)
     }
     
     return db

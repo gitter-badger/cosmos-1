@@ -19,6 +19,8 @@ func AddContainer(c context.CosmosContext,
     fmt.Println(planet)
     fmt.Println(container)
 
+    c.InfluxDB.WriteExample()
+
     w.Write([]byte(""))
 }
 
