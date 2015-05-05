@@ -69,10 +69,14 @@ func serveContext(prev func(
     *http.Request)) func(http.ResponseWriter, *http.Request) {
     return (func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
+        body, _ := ioutil.ReadAll(r.Body)
+        queryParams := r.URL.Query()
         c := context.CosmosContext {
             cosmosService,
-            mux.Vars(r),
             influxdbClient,
+            mux.Vars(r),
+            body,
+            queryParams,
         }
         prev(c, w, r)
         return
