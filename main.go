@@ -63,10 +63,11 @@ func serveIndexHTML(next http.Handler) http.Handler {
 
 // A middleware to serve a cosmos context
 //
-func serveContext(prev func(
-    context.CosmosContext,
-    http.ResponseWriter,
-    *http.Request)) func(http.ResponseWriter, *http.Request) {
+func serveContext(
+    prev func(
+        context.CosmosContext,
+        http.ResponseWriter,
+        *http.Request)) func(http.ResponseWriter, *http.Request) {
     return (func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
         body, _ := ioutil.ReadAll(r.Body)
@@ -87,7 +88,12 @@ func serveContext(prev func(
 //
 func createInfluxDBClient() (*influxdbc.InfluxDB, error) {
     host := fmt.Sprintf("%s:%s", influxdbHost, influxdbPort)
-	db := influxdbc.NewInfluxDB(host, influxdbDatabase, influxdbUsername, influxdbPassword)
+	db := influxdbc.NewInfluxDB(
+        host,
+        influxdbDatabase,
+        influxdbUsername,
+        influxdbPassword,
+    )
 	file, err := ioutil.ReadFile(dbShardConf)
 	if err != nil {
         return db, err
@@ -132,6 +138,9 @@ func run() {
 
     mux := mux.NewRouter()
 
+    mux.HandleFunc("/metric",
+        serveContext(router.PostMetric)).Methods("POST")
+
     mux.HandleFunc("/v1/newsfeeds",
         serveContext(router.GetNewsFeeds)).Methods("GET")
 
@@ -149,9 +158,6 @@ func run() {
 
     mux.HandleFunc("/v1/containers",
         serveContext(router.GetContainers)).Methods("GET")
-
-    mux.HandleFunc("/v1/planets/{planet}/containers/{container}",
-        serveContext(router.AddContainer)).Methods("POST")
 
     mux.HandleFunc("/v1/planets/{planet}/containers",
         serveContext(router.AddContainersOfPlanet)).Methods("POST")
