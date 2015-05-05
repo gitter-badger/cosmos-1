@@ -10,25 +10,29 @@ import (
     "encoding/json"
 
     "github.com/cosmos-io/cosmos/context"
+    "github.com/cosmos-io/cosmos/influxdb"
     "github.com/cosmos-io/cosmos/dao"
     "github.com/cosmos-io/cosmos/router"
     "github.com/cosmos-io/cosmos/service"
     "github.com/cosmos-io/cosmos/worker"
+    
     "github.com/cosmos-io/influxdbc"
-
     "github.com/gorilla/mux"
 )
 
 var (
-    cosmosPort    = getEnv("COSMOS_PORT", "8888")
-	dbHost        = getEnv("INFLUXDB_HOST", "localhost")
-	dbPort        = getEnv("INFLUXDB_PORT", "8086")
-	dbUsername    = getEnv("INFLUXDB_USERNAME", "root")
-	dbPassword    = getEnv("INFLUXDB_PASSWORD", "root")
-	dbDatabase    = getEnv("INFLUXDB_DATABASE", "cosmos")
-	dbShardConf   = getEnv("INFLUXDB_SHARD_CONF", "./shard_config.json")
-	cosmosService = service.NewCosmosService(5)
-	newsFeedWorker = worker.NewNewsFeedWorker(cosmosService.LifeTime, 30)
+    cosmosPort       = getEnv("COSMOS_PORT", "8888")
+    
+	influxdbHost     = getEnv("INFLUXDB_HOST", "localhost")
+	influxdbPort     = getEnv("INFLUXDB_PORT", "8086")
+	influxdbUsername = getEnv("INFLUXDB_USERNAME", "root")
+	influxdbPassword = getEnv("INFLUXDB_PASSWORD", "root")
+	influxdbDatabase = getEnv("INFLUXDB_DATABASE", "cosmos")
+    influxdbClient   = newInfluxDBClient()
+    
+	dbShardConf      = getEnv("INFLUXDB_SHARD_CONF", "./shard_config.json")
+	cosmosService    = service.NewCosmosService(5)
+	newsFeedWorker   = worker.NewNewsFeedWorker(cosmosService.LifeTime, 30)
 )
 
 // to get an environment variable if it exists or default value
@@ -72,11 +76,11 @@ func serveContext(prev func(
     })
 }
 
-// to create an influxdb client
+// to create an influxdb client (legacy)
 //
 func createInfluxDBClient() (*influxdbc.InfluxDB, error) {
-    host := fmt.Sprintf("%s:%s", dbHost, dbPort)
-	db := influxdbc.NewInfluxDB(host, dbDatabase, dbUsername, dbPassword)
+    host := fmt.Sprintf("%s:%s", influxdbHost, influxdbPort)
+	db := influxdbc.NewInfluxDB(host, influxdbDatabase, influxdbUsername, influxdbPassword)
 	file, err := ioutil.ReadFile(dbShardConf)
 	if err != nil {
         return db, err
@@ -96,6 +100,20 @@ func createInfluxDBClient() (*influxdbc.InfluxDB, error) {
     }
 
 	return db, nil
+}
+
+// to create an influxdb client
+//
+func newInfluxDBClient() *influxdb.InfluxDB {
+    db, err := influxdb.NewClient(influxdbHost,
+        influxdbPort,
+        influxdbUsername,
+        influxdbPassword)
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    return db
 }
 
 // to run
