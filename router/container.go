@@ -8,16 +8,8 @@ import (
     "github.com/cosmos-io/cosmos/context"
 )
 
-func AddContainer(c context.CosmosContext,
-    w http.ResponseWriter,
-    r *http.Request) {
-
-    
-    
-    w.Write([]byte(""))
-}
-
-func GetContainers(c context.CosmosContext,
+func GetContainers(
+    c context.CosmosContext,
     w http.ResponseWriter,
     r *http.Request) {
 	containers, err := c.CosmosService.GetContainers()
@@ -41,7 +33,8 @@ func GetContainers(c context.CosmosContext,
     w.Write(js)
 }
 
-func AddContainersOfPlanet(c context.CosmosContext,
+func AddContainersOfPlanet(
+    c context.CosmosContext,
     w http.ResponseWriter,
     r *http.Request) {
 	r.ParseForm()
@@ -68,7 +61,8 @@ func AddContainersOfPlanet(c context.CosmosContext,
     w.Write([]byte(""))
 }
 
-func GetContainersOfPlanet(c context.CosmosContext,
+func GetContainersOfPlanet(
+    c context.CosmosContext,
     w http.ResponseWriter,
     r *http.Request) {
     planet := c.Params["planet"]
@@ -94,7 +88,8 @@ func GetContainersOfPlanet(c context.CosmosContext,
     w.Write(js)
 }
 
-func GetContainerMetrics(c context.CosmosContext,
+func GetContainerMetrics(
+    c context.CosmosContext,
     w http.ResponseWriter,
     r *http.Request) {
 	r.ParseForm()
