@@ -5,6 +5,8 @@ import (
     "log"
     "time"
     "net/url"
+
+    "github.com/cosmos-io/cosmos/model"
     
     "github.com/influxdb/influxdb/client"
 )
@@ -67,6 +69,10 @@ func queryDB(con *client.Client, cmd string) (res []client.Result, err error) {
         res = response.Results
     }
     return
+}
+
+func (i *InfluxDB) WriteMetrics(metrics *model.Metrics) {
+    
 }
 
 func (i *InfluxDB) WriteExample() {
