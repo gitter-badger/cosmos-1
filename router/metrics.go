@@ -1,7 +1,6 @@
 package router
 
 import (
-    "log"
     "net/http"
     "encoding/json"
     
@@ -10,13 +9,17 @@ import (
 )
 
 func PostMetrics(
-    c context.CosmosContext,
+    c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
     var metrics *model.Metrics
     err := json.Unmarshal(c.Body, &metrics)
     if err != nil {
-        log.Println(err)
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
+		return
     }
 
     c.InfluxDB.WriteMetrics(metrics)

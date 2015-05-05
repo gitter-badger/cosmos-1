@@ -88,6 +88,7 @@ func (i *InfluxDB) WriteMetrics(metrics *model.Metrics) {
             Tags: map[string]string {
                 "cosmos": cosmos,
                 "planet": planet,
+                "container": container.Container,
             },
             Fields: map[string]interface{} {
                 "value": container.Cpu,
@@ -108,4 +109,38 @@ func (i *InfluxDB) WriteMetrics(metrics *model.Metrics) {
     if err != nil {
         log.Println(err)
     }
+}
+
+func (i *InfluxDB) QueryPlanets() ([]string, error) {
+    c := fmt.Sprintf("SHOW TAG VALUES WITH KEY = %s WHERE cosmos = '%s'",
+        "planet",
+        cosmosName,
+    )
+    
+    q := client.Query {
+        Command: c,
+        Database: databaseName,
+    }
+
+    response, err := i.client.Query(q)
+    if err != nil {
+        return nil, err
+    }
+
+    if response.Error() != nil {
+        return nil, response.Error()
+    }
+
+    if len(response.Results) == 0 || len(response.Results[0].Series) == 0 {
+        // no value
+    }
+
+    values := response.Results[0].Series[0].Values
+    length := len(values)
+
+    planets := make([]string, length)
+    for i := 0; i < length; i++ {
+        planets[i] = values[i][0].(string)
+    }
+    return planets, nil
 }

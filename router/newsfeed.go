@@ -7,7 +7,7 @@ import (
     "github.com/cosmos-io/cosmos/context"
 )
 
-func GetNewsFeeds(c context.CosmosContext,
+func GetNewsFeeds(c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
     time := ""

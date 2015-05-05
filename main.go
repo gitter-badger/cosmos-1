@@ -65,14 +65,14 @@ func serveIndexHTML(next http.Handler) http.Handler {
 //
 func serveContext(
     prev func(
-        context.CosmosContext,
+        context.Context,
         http.ResponseWriter,
         *http.Request)) func(http.ResponseWriter, *http.Request) {
     return (func(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
         body, _ := ioutil.ReadAll(r.Body)
         queryParams := r.URL.Query()
-        c := context.CosmosContext {
+        c := context.Context {
             cosmosService,
             influxdbClient,
             mux.Vars(r),
@@ -141,6 +141,9 @@ func run() {
     mux.HandleFunc("/metrics",
         serveContext(router.PostMetrics)).Methods("POST")
 
+    mux.HandleFunc("/planets",
+        serveContext(router.GetPlanets)).Methods("GET")
+
     mux.HandleFunc("/v1/newsfeeds",
         serveContext(router.GetNewsFeeds)).Methods("GET")
 
@@ -153,8 +156,8 @@ func run() {
     mux.HandleFunc("/v1/planets/{planet}",
         serveContext(router.GetPlanetMetrics)).Methods("GET")
 
-    mux.HandleFunc("/v1/planets",
-        serveContext(router.GetPlanets)).Methods("GET")
+    /*mux.HandleFunc("/v1/planets",
+        serveContext(router.GetPlanets)).Methods("GET")*/
 
     mux.HandleFunc("/v1/containers",
         serveContext(router.GetContainers)).Methods("GET")
