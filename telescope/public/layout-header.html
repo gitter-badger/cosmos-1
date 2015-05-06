@@ -10,7 +10,7 @@
 }
 
 header {
-  padding-bottom: 40px;
+  /*padding-bottom: 40px;*/
 }
 
 nav {
@@ -71,13 +71,13 @@ nav {
   <!-- local DOM for your element -->
   <div class="container">
     <header class="clearfix">
-      <nav>
+      <!--<nav>
         <ul id="nav" class="nav header-nav">
-          <!--<li><a href="/" class="menu-link" on-click="onCosmosClicked">Cosmos</a></li>-->
+          <li><a href="/" class="menu-link" on-click="onCosmosClicked">Cosmos</a></li>
           <li><a href="/planets" class="menu-link" on-click="onPlanetsClicked">Planets</a></li>
-          <!--<li><a href="/containers" class="menu-link" on-click="onContainersClicked">Containers</a></li>-->
+          <li><a href="/containers" class="menu-link" on-click="onContainersClicked">Containers</a></li>
         </ul>
-      </nav>
+      </nav>-->
       <div class="notification" on-click="notificationClicked">
         <!--<p>Cosmos server didn't respond any response.</p>-->
       </div>
@@ -108,15 +108,15 @@ Polymer({
     var self = this;
     $(self.$.nav).find('a').removeClass('selected');
     switch (newValue) {
-      /*case 'cosmos':
+      case 'cosmos':
         $(self.$.nav).find('a:eq(0)').addClass('selected');
-        break;*/
+        break;
       case 'planet':
         $(self.$.nav).find('a:eq(0)').addClass('selected');
         break;
-      /*case 'container':
+      case 'container':
         $(self.$.nav).find('a:eq(2)').addClass('selected');
-        break;*/
+        break;
     }
   },
   onCosmosClicked: function(e) {
@@ -128,8 +128,8 @@ Polymer({
   onPlanetsClicked: function(e) {
     e.preventDefault();
     history.pushState({
-      page: 'planet'
-    }, 'planet', '/planets');
+      page: 'planets'
+    }, 'planets', '/planets');
   },
   onContainersClicked: function(e) {
     e.preventDefault();

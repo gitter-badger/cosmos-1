@@ -1,11 +1,10 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/list-item-planet.html">
-<link rel="import" href="/profile-planet.html">
-<link rel="import" href="/node-container.html">
+<!--<link rel="import" href="/profile-planet.html">
 <link rel="import" href="/graph-cpu.html">
 <link rel="import" href="/graph-memory.html">
 <link rel="import" href="/graph-network-in.html">
-<link rel="import" href="/graph-network-out.html">
+<link rel="import" href="/graph-network-out.html">-->
 
 <dom-module id="cosmos-page-planet">
 <style>
@@ -51,31 +50,32 @@
 
 .planet-list {
   margin: 0;
-  padding: 0;
+  padding: 20px 20px;
 }
 
 .main-container {
   width: 100%;
   margin: 0;
-  padding: 0 20px;
+  padding: 0;
   background-color: #fff;
 }
 
 @media (min-width: 1080px) {
   .main-container {
-    width: 720px;
+    width: 1080px;
   }
 }
 
 @media (min-width: 1400px) {
   .main-container {
-    width: 1080px;
+    width: 1400px;
   }
 }
 .search {
-  padding: 10px 20px;
+  padding: 20px;
   background-color: #fff;
-  border: 1px solid #f1f1f1;
+  border-bottom: 1px solid #e7e7ec;
+  font-size: 16px;
 }
 
 .search input {
@@ -94,33 +94,37 @@
 <template>
   <div class="container">
 
-      <aside class="left-container col-md-4 col-xs-12">
-        <!--<div class="search">
+      <!--<aside class="left-container col-md-4 col-xs-12">
+        <div class="search">
           <input id="search-input" type="text" placeholder="Search all planets" style="" />
-        </div>-->
+        </div>
         <div class="planet-list">
           <template id="planetListTemplate" is="x-repeat" items="{{planets}}">
             <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
           </template>
         </div>
-      </aside>
+      </aside>-->
 
-      <div class="main-container col-md-8 col-xs-12">
+      <div id="main" class="main-container col-md-8 col-xs-12">
 
-        <cosmos-profile-planet planet="{{selectedPlanet}}"></cosmos-profile-planet>
+        <div class="search">
+          <input id="search-input" type="text" placeholder="Search all planets" />
+        </div>
 
-        <div class="container-nodes">
-          <template id="containerListTemplate" is="x-repeat" items="{{containers}}">
-            <cosmos-node-container container="{{item}}"></cosmos-node-container>
+        <div class="planet-list">
+          <template id="planetListTemplate" is="x-repeat" items="{{planets}}">
+            <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
           </template>
         </div>
 
+        <!--<cosmos-profile-planet planet="{{selectedPlanet}}"></cosmos-profile-planet>
+
         <div class="graph-list">
-          <!--<cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
+          <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
           <cosmos-graph-memory class="graph"></cosmos-graph-memory>
           <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
-          <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>-->
-        </div>
+          <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
+        </div>-->
 
       </div>
 
@@ -170,7 +174,11 @@ Polymer({
 
     },
     onPlanetClicked: function(target) {
-      this.getContainers(target.planet);
+      history.pushState({
+        page: 'planet'
+      }, 'planets', '/planets/' + target.planet);
+
+      //this.getContainers(target.planet);
       //this.getMetricsOfPlanet(target);
     },
     setPlanetItemEventListener: function() {
@@ -187,31 +195,38 @@ Polymer({
       }).on('onPlanetItemDeselected', function(e, target) {
         // nothing to do
       }).on('onPlanetItemReady', function(e, target) {
-          var index = self.$.planetListTemplate.indexForElement(target);
-          if (!self.selectedPlanetKey && index == 0) {
-              // select first item if there's no selectedPlanetKey
-              target.isSelected = true;
-          }
+        return;
+        /*var index = self.$.planetListTemplate.indexForElement(target);
+        if (!self.selectedPlanetKey && index == 0) {
+          target.isSelected = true;
+        }*/
       });
     },
     getPlanets: function() {
-        var self = this;
-        Cosmos.getPlanets(function(response) {
-            self.planets = response.data;
-            if (self.planets.length == 0) {
-                var notification = {
-                    type: 'information',
-                    message: "There is no running planet yet."
-                };
-                $('cosmos-layout-header').trigger('cosmos-notification', notification);
-            }
-        }, function(jqXHR) {
-            var notification = {
-                type: 'error',
-                message: "Cosmos server didn't respond any response."
-            };
-            $('cosmos-layout-header').trigger('cosmos-notification', notification);
-        });
+      this.$.main.hidden = true;
+      NProgress.start();
+
+      var self = this;
+      Cosmos.getPlanets(function(response) {
+        self.planets = response.data;
+        if (self.planets.length == 0) {
+          var notification = {
+            type: 'information',
+            message: "There is no running planet yet."
+          };
+          $('cosmos-layout-header').trigger('cosmos-notification', notification);
+        }
+        self.$.main.hidden = false;
+        NProgress.done();
+      }, function(jqXHR) {
+        var notification = {
+          type: 'error',
+          message: "Cosmos server didn't respond any response."
+        };
+        $('cosmos-layout-header').trigger('cosmos-notification', notification);
+        self.$.main.hidden = false;
+        NProgress.done();
+      });
     },
     getContainers: function(planet) {
       var self = this;
