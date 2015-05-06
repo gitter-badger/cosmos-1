@@ -144,6 +144,9 @@ func run() {
     mux.HandleFunc("/planets",
         serveContext(router.GetPlanets)).Methods("GET")
 
+    mux.HandleFunc("/containers",
+        serveContext(router.GetContainers)).Methods("GET")
+
     mux.HandleFunc("/v1/newsfeeds",
         serveContext(router.GetNewsFeeds)).Methods("GET")
 
@@ -159,8 +162,8 @@ func run() {
     /*mux.HandleFunc("/v1/planets",
         serveContext(router.GetPlanets)).Methods("GET")*/
 
-    mux.HandleFunc("/v1/containers",
-        serveContext(router.GetContainers)).Methods("GET")
+    /*mux.HandleFunc("/v1/containers",
+        serveContext(router.GetContainers)).Methods("GET")*/
 
     mux.HandleFunc("/v1/planets/{planet}/containers",
         serveContext(router.AddContainersOfPlanet)).Methods("POST")
