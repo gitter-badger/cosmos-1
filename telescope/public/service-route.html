@@ -96,16 +96,17 @@ Polymer({
         });
 
         this.match('/', function() {
-            self.changePage('cosmos');
+            //self.changePage('cosmos');
+            self.chagnePage('planet');
         });
         this.match('/planets', function() {
             self.changePage('planet');
         });
-        this.match('/containers', function() {
+        /*this.match('/containers', function() {
             self.changePage('container');
-        });
+        });*/
         this.defaultRoute = function() {
-            window.location.replace("/");
+            window.location.replace('/');
         };
         this.regist();
 

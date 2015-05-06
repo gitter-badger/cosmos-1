@@ -50,15 +50,9 @@
         },
         getContainers: function(planet, done, fail, complete) {
             var self = this;
-            var url = '/' + Cosmos.API_VER;
-            if (planet) {
-                url = url + '/planets/' + planet + '/containers';
-            } else {
-                url = url + '/containers';
-            }
-
+            planet = encodeURIComponent(planet);
             var xhr = $.ajax({
-                url: url,
+                url: '/containers?planet=' + planet,
                 method: 'GET',
                 cache: false,
                 headers: { 'Accept': 'application/json' }
@@ -66,7 +60,7 @@
 
             if (typeof done == 'function') {
                 xhr.done(function(json) {
-                    done(self._convertContainerResponse(json));
+                    done(json);
                 });
             }
             if (typeof fail == 'function') {

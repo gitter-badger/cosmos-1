@@ -1,6 +1,7 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/list-item-planet.html">
 <link rel="import" href="/profile-planet.html">
+<link rel="import" href="/node-container.html">
 <link rel="import" href="/graph-cpu.html">
 <link rel="import" href="/graph-memory.html">
 <link rel="import" href="/graph-network-in.html">
@@ -50,7 +51,7 @@
 
 .planet-list {
   margin: 0;
-  padding: 20px 0;
+  padding: 0;
 }
 
 .main-container {
@@ -94,9 +95,9 @@
   <div class="container">
 
       <aside class="left-container col-md-4 col-xs-12">
-        <div class="search">
+        <!--<div class="search">
           <input id="search-input" type="text" placeholder="Search all planets" style="" />
-        </div>
+        </div>-->
         <div class="planet-list">
           <template id="planetListTemplate" is="x-repeat" items="{{planets}}">
             <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
@@ -108,11 +109,17 @@
 
         <cosmos-profile-planet planet="{{selectedPlanet}}"></cosmos-profile-planet>
 
+        <div class="container-nodes">
+          <template id="containerListTemplate" is="x-repeat" items="{{containers}}">
+            <cosmos-node-container container="{{item}}"></cosmos-node-container>
+          </template>
+        </div>
+
         <div class="graph-list">
-          <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
+          <!--<cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
           <cosmos-graph-memory class="graph"></cosmos-graph-memory>
           <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
-          <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
+          <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>-->
         </div>
 
       </div>
@@ -127,6 +134,10 @@ Polymer({
         planets: {
             type: Array,
             value: []
+        },
+        containers: {
+          type: Array,
+          value: []
         }
     },
     selectedPlanetElement: undefined,
@@ -159,8 +170,8 @@ Polymer({
 
     },
     onPlanetClicked: function(target) {
-      console.log(target);
-        //this.getMetricsOfPlanet(target);
+      this.getContainers(target.planet);
+      //this.getMetricsOfPlanet(target);
     },
     setPlanetItemEventListener: function() {
       // Listening select event
@@ -171,8 +182,8 @@ Polymer({
               self.selectedPlanetElement.isSelected = false;
           }
           self.selectedPlanetElement = target;
-          self.onPlanetClicked(target);
           self.selectedPlanet = target.planet;
+          self.onPlanetClicked(target);
       }).on('onPlanetItemDeselected', function(e, target) {
         // nothing to do
       }).on('onPlanetItemReady', function(e, target) {
@@ -201,6 +212,18 @@ Polymer({
             };
             $('cosmos-layout-header').trigger('cosmos-notification', notification);
         });
+    },
+    getContainers: function(planet) {
+      var self = this;
+      Cosmos.getContainers(planet, function(response){
+        self.containers = response.data;
+      },function(jqXHR){
+        var notification = {
+            type: 'error',
+            message: "Cosmos server didn't respond any response."
+        };
+        $('cosmos-layout-header').trigger('cosmos-notification', notification);
+      });
     },
     getMetricsOfPlanet: function(target) {
         // remove planet, container graph runloop
