@@ -12,6 +12,38 @@ func GetContainers(
     c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
+    planet := c.GetQueryParam("planet", "")
+    
+    if planet == "" {
+        res := map[string]string { "error": "" }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
+		return
+    }
+
+    containers, err := c.InfluxDB.QueryContainers(planet)
+    if err != nil {
+        res := map[string]string { "error": err.Error() }
+        js, _ := json.Marshal(res)
+        w.WriteHeader(http.StatusInternalServerError)
+        w.Write(js)
+		return
+    }
+
+    res := map[string]interface{} {
+        "data": containers,
+    }
+
+    js, _ := json.Marshal(res)
+    w.Write(js)
+}
+
+// legacy
+/*func GetContainers(
+    c context.Context,
+    w http.ResponseWriter,
+    r *http.Request) {
 	containers, err := c.CosmosService.GetContainers()
 	if err != nil {
         res := map[string]string { "error": err.Error() }
@@ -31,7 +63,7 @@ func GetContainers(
     }
 
     w.Write(js)
-}
+}*/
 
 func AddContainersOfPlanet(
     c context.Context,

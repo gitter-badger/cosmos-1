@@ -72,7 +72,7 @@ func queryDB(con *client.Client, cmd string) (res []client.Result, err error) {
     return
 }
 
-func (i *InfluxDB) WriteMetrics(metrics *model.Metrics) {
+func (i *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
     cosmos := cosmosName
     planet := metrics.Planet
     if planet == "" { return }
@@ -116,26 +116,17 @@ func (i *InfluxDB) QueryPlanets() ([]string, error) {
         "planet",
         cosmosName,
     )
-    
-    q := client.Query {
-        Command: c,
-        Database: databaseName,
-    }
 
-    response, err := i.client.Query(q)
+    result, err := queryDB(i.client, c)
     if err != nil {
         return nil, err
     }
 
-    if response.Error() != nil {
-        return nil, response.Error()
-    }
-
-    if len(response.Results) == 0 || len(response.Results[0].Series) == 0 {
+    if len(result) == 0 || len(result[0].Series) == 0 {
         // no value
     }
 
-    values := response.Results[0].Series[0].Values
+    values := result[0].Series[0].Values
     length := len(values)
 
     planets := make([]string, length)
@@ -143,4 +134,30 @@ func (i *InfluxDB) QueryPlanets() ([]string, error) {
         planets[i] = values[i][0].(string)
     }
     return planets, nil
+}
+
+func (i *InfluxDB) QueryContainers(planet string) ([]string, error) {
+    c := fmt.Sprintf("SHOW TAG VALUES WITH KEY = %s WHERE cosmos = '%s' AND planet = '%s'",
+        "container",
+        cosmosName,
+        planet,
+    )
+
+    result, err := queryDB(i.client, c)
+    if err != nil {
+        return nil, err
+    }
+
+    if len(result) == 0 || len(result[0].Series) == 0 {
+        // no value
+    }
+
+    values := result[0].Series[0].Values
+    length := len(values)
+
+    containers := make([]string, length)
+    for i := 0; i < length; i++ {
+        containers[i] = values[i][0].(string)
+    }
+    return containers, nil
 }

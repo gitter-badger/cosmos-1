@@ -12,7 +12,7 @@ func PostMetrics(
     c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
-    var metrics *model.Metrics
+    var metrics *model.MetricsParam
     err := json.Unmarshal(c.Body, &metrics)
     if err != nil {
         res := map[string]string { "error": err.Error() }

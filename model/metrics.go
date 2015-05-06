@@ -1,11 +1,11 @@
 package model
 
-type MetricsContainer struct {
+type MetricsContainerParam struct {
     Container string
     Cpu float32
 }
 
-type Metrics struct {
+type MetricsParam struct {
     Planet string
-    Containers []*MetricsContainer
+    Containers []*MetricsContainerParam
 }
