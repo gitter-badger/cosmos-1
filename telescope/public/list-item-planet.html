@@ -24,7 +24,7 @@
 </style>
 <template>
   <div class="planet-list-item">
-    <a href="#" on-click="onPlanetClicked">{{planet.Planet}}</a>
+    <a href="#" on-click="onPlanetClicked">{{planet}}</a>
   </div>
 </template>
 </dom-module>
@@ -35,7 +35,8 @@ Polymer({
   $pagePlanet: undefined,
   properties: {
     planet: {
-      type: Object
+      type: String,
+      value: ''
     },
     isSelected: {
       type: Boolean,

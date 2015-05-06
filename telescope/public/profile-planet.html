@@ -18,18 +18,17 @@ h1 {
 </style>
 <template>
   <div id="profile-planet" class="container">
-    <h1>{{planetName}}</h1>
+    <h1>{{planet}}</h1>
   </div>
 </template>
 </dom-module>
 <script>
 Polymer({
   is: 'cosmos-profile-planet',
-  planetName: undefined,
   properties: {
     planet: {
-      type: Object,
-      value: undefined,
+      type: String,
+      value: '',
       observer: 'planetValueChanged'
     }
   },
@@ -40,7 +39,7 @@ Polymer({
 
   },
   planetValueChanged: function() {
-    this.planetName = this.planet.Planet;
+
   }
 });
 </script>

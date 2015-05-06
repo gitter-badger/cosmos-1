@@ -1,6 +1,7 @@
 package router
 
 import (
+    "strconv"
 	"strings"
 	"net/http"
     "encoding/json"
@@ -17,7 +18,9 @@ func GetContainers(
     if planet == "" {
         res := map[string]string { "error": "" }
         js, _ := json.Marshal(res)
+        contentLength := strconv.Itoa(len(js))
         w.WriteHeader(http.StatusInternalServerError)
+        w.Header().Set("Content-Length", contentLength)
         w.Write(js)
 		return
     }
@@ -26,7 +29,9 @@ func GetContainers(
     if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
+        contentLength := strconv.Itoa(len(js))
         w.WriteHeader(http.StatusInternalServerError)
+        w.Header().Set("Content-Length", contentLength)
         w.Write(js)
 		return
     }
@@ -36,6 +41,8 @@ func GetContainers(
     }
 
     js, _ := json.Marshal(res)
+    contentLength := strconv.Itoa(len(js))
+    w.Header().Set("Content-Length", contentLength)
     w.Write(js)
 }
 

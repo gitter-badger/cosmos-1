@@ -11,14 +11,14 @@
         getPlanets: function(done, fail, complete) {
             var self = this;
             var xhr = $.ajax({
-                url: '/' + Cosmos.API_VER + '/planets',
+                url: '/planets',
                 method: 'GET',
-                accept: 'application/json',
-                dataType: 'json'
+                cache: false,
+                headers: { 'Accept': 'application/json' }
             });
             if (typeof done == 'function') {
                 xhr.done(function(json) {
-                    done(self._convertPlanetResponse(json));
+                    done(json);
                 });
             }
             if (typeof fail == 'function') {
@@ -33,8 +33,8 @@
             var xhr = $.ajax({
                 url: '/' + Cosmos.API_VER + '/planets/' + planet,
                 method: 'GET',
-                accept: 'application/json',
-                dataType: 'json'
+                cache: false,
+                headers: { 'Accept': 'application/json' }
             });
             if (typeof done == 'function') {
                 xhr.done(function(json) {
@@ -60,8 +60,8 @@
             var xhr = $.ajax({
                 url: url,
                 method: 'GET',
-                accept: 'application/json',
-                dataType: 'json'
+                cache: false,
+                headers: { 'Accept': 'application/json' }
             });
 
             if (typeof done == 'function') {
@@ -86,8 +86,8 @@
                     period: period
                 },
                 method: 'GET',
-                accept: 'application/json',
-                dataType: 'json'
+                cache: false,
+                headers: { 'Accept': 'application/json' }
             });
 
             if (typeof done == 'function') {
@@ -107,8 +107,8 @@
             var xhr = $.ajax({
                 url: '/' + Cosmos.API_VER + '/newsfeeds',
                 method: 'GET',
-                accept: 'application/json',
-                dataType: 'json'
+                cache: false,
+                headers: { 'Accept': 'application/json' }
             });
 
             if (typeof done == 'function') {
