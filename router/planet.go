@@ -1,6 +1,7 @@
 package router
 
 import (
+    "strconv"
 	"strings"
 	"net/http"
     "encoding/json"
@@ -16,7 +17,9 @@ func GetPlanets(
     if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
+        contentLength := strconv.Itoa(len(js))
         w.WriteHeader(http.StatusInternalServerError)
+        w.Header().Set("Content-Length", contentLength)
         w.Write(js)
 		return
     }
@@ -26,6 +29,8 @@ func GetPlanets(
     }
 
     js, _ := json.Marshal(res)
+    contentLength := strconv.Itoa(len(js))
+    w.Header().Set("Content-Length", contentLength)
     w.Write(js)
 }
 

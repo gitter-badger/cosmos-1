@@ -1,6 +1,7 @@
 package router
 
 import (
+    "strconv"
     "net/http"
     "encoding/json"
     
@@ -17,12 +18,17 @@ func PostMetrics(
     if err != nil {
         res := map[string]string { "error": err.Error() }
         js, _ := json.Marshal(res)
+        contentLength := strconv.Itoa(len(js))
         w.WriteHeader(http.StatusInternalServerError)
+        w.Header().Set("Content-Length", contentLength)
         w.Write(js)
 		return
     }
 
     c.InfluxDB.WriteMetrics(metrics)
 
-    w.Write([]byte(""))
+    content := []byte("")
+    contentLength := strconv.Itoa(len(content))
+    w.Header().Set("Content-Length", contentLength)
+    w.Write(content)
 }

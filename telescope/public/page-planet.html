@@ -159,7 +159,8 @@ Polymer({
 
     },
     onPlanetClicked: function(target) {
-        this.getMetricsOfPlanet(target);
+      console.log(target);
+        //this.getMetricsOfPlanet(target);
     },
     setPlanetItemEventListener: function() {
       // Listening select event
@@ -185,8 +186,7 @@ Polymer({
     getPlanets: function() {
         var self = this;
         Cosmos.getPlanets(function(response) {
-            self.planets = response;
-
+            self.planets = response.data;
             if (self.planets.length == 0) {
                 var notification = {
                     type: 'information',
