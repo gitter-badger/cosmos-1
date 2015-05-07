@@ -1,0 +1,32 @@
+<link rel="import" href="/vendor/polymer/polymer.html">
+<link rel="import" href="/list-item-container.html">
+<dom-module id="cosmos-list-container">
+<style>
+.container {
+  width: 100%;
+  margin: 0;
+  padding: 40px 20px;
+}
+</style>
+<template>
+  <div class="container">
+    <template id="list" is="x-repeat" items="{{containers}}">
+      <cosmos-list-item-container planet="{{planet}}" container="{{item}}"></cosmos-list-item-container>
+    </template>
+  </div>
+</template>
+</dom-module>
+<script>
+Polymer({
+  is: 'cosmos-list-container',
+  properties: {
+    containers: {
+      type: Array,
+      value: [],
+    }
+  },
+  ready: function() {
+
+  }
+});
+</script>

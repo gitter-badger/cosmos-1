@@ -59,14 +59,17 @@ Polymer({
   changePage: function(page) {
     if (!history.state) history.replaceState({page: page});
 
+    var target = document.querySelector('cosmos-layout-content');
     setTimeout(function() {
       switch (page) {
         case 'planets':
-          document.querySelector('cosmos-layout-content').page = 'planets';
+          target.page = 'planets';
           break;
         case 'planet':
-          document.querySelector('cosmos-layout-content').page = 'planet';
+          target.page = 'planet';
           break;
+        case 'container':
+          target.page = 'container';
       }
     }, 10);
   },
@@ -99,6 +102,10 @@ Polymer({
 
       this.match('/planets/:planet', function() {
         self.changePage('planet');
+      });
+
+      this.match('/planets/:planet/containers/:container', function() {
+        self.changePage('container');
       });
 
       this.applyDefaultRoute = function() {

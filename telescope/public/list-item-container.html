@@ -3,97 +3,69 @@
 <style>
 .list-item-container {
   padding: 10px;
-  border-bottom: 1px solid #f1f1f1;
-  color: #bbb;
+  border-bottom: 1px solid #e7e7ec;
   cursor: pointer;
 }
 
-.list-item-container:hover,
-.selected {
-    background-color: #fff;
+.list-item-container:hover {
+    background-color: #f1f1f1;
 }
 
 .planet-name {
-  color: #4183c4;
+  color: #212121;
   cursor: pointer;
 }
 
 .planet-name:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .container-name {
-  color: #4183c4;
+  color: #212121;
   cursor: pointer;
 }
 
 .container-name:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
-.slash {
-  color: #4183c4;
-}
-
-.container-status {
-  color: #333;
-  display: block;
+.dot {
+  color: #212121;
 }
 </style>
 <template>
   <div class="list-item-container" on-click="onContainerClicked">
-    <span class="planet-name">{{planetName}}</span>
-    <span class="slash">/</span>
-    <span class="container-name">{{containerName}}</span>
-    <span class="container-status">{{containerStatus}}</span>
+    <span class="planet-name">{{planet}}</span>
+    <span class="dot">/</span>
+    <span class="container-name">{{container}}</span>
   </div>
 </template>
 </dom-module>
 <script>
 Polymer({
   is: 'cosmos-list-item-container',
-  planetName: undefined,
-  containerName: undefined,
-  containerStatus: undefined,
-  $container: undefined,
-  $pageContainer: undefined,
+  dot: undefined,
+  planet: undefined,
   properties: {
     container: {
-      type: Object,
-      observer: 'containerValueChanged'
-    },
-    isSelected: {
-      type: Boolean,
-      observer: 'isSelectedValueChanged'
+      type: String,
+      value: ''
     }
   },
   ready: function() {
-    this.$container = $(this).find('.container-list-item');
-    this.$pageContainer = $(document.querySelector('cosmos-page-container'));
+    var paths = location.pathname.split('/');
+    var planet = paths[2];
+    this.planet = planet;
   },
   attached: function() {
-    var self = this;
-    setTimeout(function() {
-        self.$pageContainer.trigger('onContainerItemReady', self);
-    }, 20);
-  },
-  containerValueChanged: function() {
-    this.planetName = this.container.Planet;
-    this.containerName = this.container.Container;
-    this.containerStatus = this.container.Status[0][3];
-  },
-  isSelectedValueChanged: function() {
-    if (this.isSelected) {
-      this.$container.addClass('selected');
-      this.$pageContainer.trigger('onContainerItemSelected', this);
-    } else {
-      this.$container.removeClass('selected');
-      this.$pageContainer.trigger('onContainerItemDeselected', this);
-    }
+
   },
   onContainerClicked: function(e) {
     e.preventDefault();
-    this.isSelected = !this.isSelected;
+
+    history.pushState({
+      page: 'container'
+    }, 'container', '/planets/' + this.planet + '/containers/' + this.container);
   }
 });
 </script>

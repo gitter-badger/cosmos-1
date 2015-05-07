@@ -1,285 +1,143 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<link rel="import" href="/list-item-container.html">
-<link rel="import" href="/profile-container.html">
-<link rel="import" href="/graph-cpu.html">
-<link rel="import" href="/graph-memory.html">
-<link rel="import" href="/graph-network-in.html">
-<link rel="import" href="/graph-network-out.html">
-
-<!-- Dialog -->
-<dom-module id="dialog-metric">
-    <style>
-    p.title {
-        display: inline-block;
-        font-weight: bold;
-        margin-right: 20px;
-    }
-
-    div.controls {
-        display: inline-block;
-    }
-    </style>
-    <template>
-        <p class="title"></p>
-        <div class="controls">
-            <label>Last</label>
-            <select name="period">
-                <option selected="selected" value="30m">30 minutes</option>
-                <option value="3h">3 hours</option>
-                <option value="8h">8 hours</option>
-                <option value="24h">24 hours</option>
-            </select>
-        </div>
-        <div id="graph"></div>
-    </template>
-</dom-module>
-<script>
-Polymer({
-    is: 'dialog-metric'
-});
-</script>
-
-<!-- Container Page -->
 <dom-module id="cosmos-page-container">
 <style>
 .container {
-    width: 100%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  background-color: #fff;
+}
+
+@media (min-width: 1080px) {
+  .container {
+    width: 1080px;
+    marign: 0 auto;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container {
+    width: 1400px;
     margin: 0 auto;
-    padding: 0;
+  }
 }
 
-@media (min-width: 1080px) {
-    .container {
-        width: 1080px;
-        marign: 0 auto;
-    }
+header {
+  min-height: 60px;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+  border-bottom: 1px solid #e7e7ec;
 }
 
-@media (min-width: 1400px) {
-    .container {
-        width: 1400px;
-        margin: 0 auto;
-    }
+header h3 {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  font-weight: normal;
+  text-align: center;
 }
 
-.row {
-    margin: 0;
-    padding: 0;
+nav {
+  margin: 0 10px;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #e7e7ec;
 }
 
-.left-container {
-    width: 100%;
-    margin: 0;
-    padding: 0;
+nav a {
+  margin: 0;
+  padding: 12px;
+  color: #333;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-@media (min-width: 1080px) {
-    .left-container {
-        width: 260px;
-        padding: 0 10px;
-    }
+@media (min-width: 600px) {
+  nav {
+    margin: 0 20px;
+    padding: 20px;
+  }
+  nav a {
+    padding: 22px;
+    font-size: 14px;
+  }
 }
 
-@media (min-width: 1400px) {
-    .left-container {
-        width: 320px;
-        padding: 0 10px;
-    }
-}
-
-.container-list {
-    padding: 20px 0;
+nav a:hover,
+nav a.selected {
+  color: #29d;
+  text-decoration: none;
+  border-bottom: 1px solid #29d;
 }
 
 .main-container {
-    width: 100%;
-    margin: 0;
-    padding: 0 20px;
-    background-color: #fff;
-}
-
-@media (min-width: 1080px) {
-    .main-container {
-        width: 720px;
-    }
-}
-
-@media (min-width: 1400px) {
-    .main-container {
-        width: 1080px;
-    }
-}
-
-.search {
-    padding: 10px 20px;
-    background-color: #fff;
-    border: 1px solid #f1f1f1;
-}
-
-.search input {
-    width: 100%;
-    background-color: #fff;
-    outline: none;
-    border: none;
-    color: #333;
-}
-
-.graph-list {
-    padding: 0;
-}
-container-item {
-    cursor: pointer;
+  min-height: 400px;
 }
 </style>
 <template>
   <div class="container">
 
-    <aside class="left-container col-md-4 col-xs-12">
-      <div class="search">
-        <input id="search-input" type="text" placeholder="Search all containers" autocomplete="off" style="" />
-      </div>
-      <div class="container-list">
-        <template id="containerListTemplate" is="x-repeat" items="{{containers}}">
-          <cosmos-list-item-container container="{{item}}"></cosmos-list-item-container>
-        </template>
-      </div>
-    </aside>
+    <header>
+      <h3>{{navTitle}}</h3>
+    </header>
 
-    <div class="main-container col-md-8 col-xs-12">
-      <div class="graph-list">
+    <nav id="nav">
+      <a on-click="onTimelineClicked">Timeline</a>
+      <a on-click="onCpuClicked">CPU</a>
+      <a on-click="onMemoryClicked">Memory</a>
+      <a on-click="onNetworkClicked">Network</a>
+    </nav>
 
-        <cosmos-profile-container container="{{selectedContainer}}"></cosmos-profile-container>
-
-        <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
-        <cosmos-graph-memory class="graph"></cosmos-graph-memory>
-        <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
-        <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
-
-      </div>
-    </div>
+    <div id="main" class="main-container"></div>
 
   </div>
 </template>
 </dom-module>
 <script>
 Polymer({
-    is: 'cosmos-page-container',
-    _refresh: undefined,
-    selectedContainerElement: undefined,
-    selectedContainerKey: undefined, /* is it used? */
-    selectedContainer: undefined,
-    properties: {
-        containers: {
-            type: Array,
-            value: []
-        },
-        charts: {
-            type: Array,
-            value: []
-        }
-    },
-    ready: function() {
-      this.setContainerItemEventListener();
-      //this.getContainers();
-    },
-    attached: function() {
+  is: 'cosmos-page-container',
+  navTitle: undefined,
+  container: undefined,
+  title: undefined,
+  properties: {
 
-    },
-    detached: function() {
+  },
+  ready: function() {
+    var paths = location.pathname.split('/');
+    var planet = paths[2];
+    var container = paths[4];
+    this.planet = planet;
+    this.container = container;
+    this.navTitle = planet + '/' + container;
 
-    },
-    setContainerItemEventListener: function() {
-      var self = this;
-      $(this).on('onContainerItemSelected', function(e, target) {
-        var index = self.$.containerListTemplate.indexForElement(target);
-        if (self.selectedContainerElement && self.selectedContainerElement.isSelected) {
-            self.selectedContainerElement.isSelected = false;
-        }
-        self.selectedContainerElement = target;
-        self.onContainerClicked(target);
-        self.selectedContainer = target.container;
-      }).on('onContainerItemDeselected', function(e, target) {
-        // nothing to do
-      }).on('onContainerItemReady', function(e, target) {
-        var index = self.$.containerListTemplate.indexForElement(target);
-        if (index != 0 || self.selectedContainerKey) return;
-        target.isSelected = true;
-      });
-    },
-    onContainerClicked: function(target) {
-      //this.getContainerMetrics(target);
-    },
-    getContainers: function() {
-        var self = this;
-        var planet = undefined;
-        Cosmos.getContainers(planet, function(response) {
-            self.containers = response;
-            if (self.containers.length == 0) {
-              var notification = {
-                type: 'information',
-                message: 'There is no running container yet.'
-              };
-              $('cosmos-layout-header').trigger('cosmos-notification', notification);
-            }
-        }, function(jqXHR) {
-            var notification = {
-                type: 'error',
-                message: 'Cosmos server did not respond any response.'
-            };
-            $('cosmos-layout-header').trigger('cosmos-notification', notification);
-        });
-    },
-    getContainerMetrics: function(target) {
-      var self = this;
-      var planet = target.container.Planet;
-      var container = target.container.Container;
-      var metricType = 'all';
-      var period = '';
-      Cosmos.getContainerMetrics(planet, container, metricType, period, function(response){
-        var $graphs = $(self).find('.graph-list > .graph');
+    var links = this.$.nav.querySelectorAll('a');
+    links[0].classList.add('selected');
+  },
+  attached: function() {
 
-        var totalMetrics = self.getTotalMetrics(response);
-        $graphs.each(function(i, target) {
-          target.metrics = totalMetrics;
-        });
-      }, function(jqXHR){
-        var notification = {
-            type: 'error',
-            message: 'Cosmos server did not respond any response.'
-        };
-        $('cosmos-layout-header').trigger('cosmos-notification', notification);
-      });
-    },
-    getTotalMetrics: function(response) {
-      var metrics = {};
-
-      var container = response;
-      var keys = Object.keys(container);
-
-      for (var j = 0; j < keys.length; j++) {
-        var key = keys[j];
-        if (key.match(/^Stats.*/)) {
-          var values = container[key];
-          var saved = metrics[key];
-          if (saved) {
-            // sum
-            for (var k = 0; k < saved.length; k++) {
-              var row = saved[k];
-              for (var l = 0; l < values.length; l++) {
-                if (row[0] == values[l][0]) {
-                  // compare whether two timestamp is same
-                  row[2] += values[l][2];
-                  break;
-                }
-              }
-            }
-          } else {
-            // new one
-            metrics[key] = values;
-          }
-        }
-      }
-      return metrics;
-    }
+  },
+  deselectNavgationItem() {
+    var selected = this.$.nav.querySelector('.selected');
+    selected.classList.remove('selected');
+  },
+  selectNavigationItemAtIndex(index) {
+    this.deselectNavgationItem();
+    var links = this.$.nav.querySelectorAll('a');
+    links[index].classList.add('selected');
+  },
+  onTimelineClicked: function() {
+    this.selectNavigationItemAtIndex(0);
+  },
+  onCpuClicked: function() {
+    this.selectNavigationItemAtIndex(1);
+  },
+  onMemoryClicked: function() {
+    this.selectNavigationItemAtIndex(2);
+  },
+  onNetworkClicked: function() {
+    this.selectNavigationItemAtIndex(3);
+  }
 });
 </script>

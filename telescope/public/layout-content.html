@@ -1,6 +1,7 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/page-planets.html">
 <link rel="import" href="/page-planet.html">
+<link rel="import" href="/page-container.html">
 <dom-module id="cosmos-layout-content">
 <style>
 </style>
@@ -24,13 +25,18 @@ Polymer({
         break;
       case 'planet':
         target = document.createElement('cosmos-page-planet');
+        break;
+      case 'container':
+        target = document.createElement('cosmos-page-container');
+        break;
     }
-    if (target) {
-      for (var i = 0, len = Polymer.dom(this).childNodes.length; i < len; i++) {
-        Polymer.dom(this).removeChild(Polymer.dom(this).childNodes[i]);
-      }
-      Polymer.dom(this).appendChild(target);
+
+    if (!target) return;
+
+    for (var i = 0, len = Polymer.dom(this).childNodes.length; i < len; i++) {
+      Polymer.dom(this).removeChild(Polymer.dom(this).childNodes[i]);
     }
+    Polymer.dom(this).appendChild(target);
   }
 });
 </script>
