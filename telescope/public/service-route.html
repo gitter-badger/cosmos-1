@@ -1,128 +1,111 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <dom-module id="cosmos-service-route">
-    <template></template>
+<template></template>
 </dom-module>
 <script>
 Polymer({
-    is: 'cosmos-service-route',
-    routes: [],
-    defaultRoute: function() {},
-    register: function() {
-        var loc;
-        if (location.pathname.length > 1 && location.pathname[location.pathname.length - 1] == '/') {
-            loc = location.pathname.slice(0, location.pathname.length - 1);
-        } else {
-            loc = location.pathname;
+  is: 'cosmos-service-route',
+  routes: [],
+  applyDefaultRoute: function() {},
+  register: function() {
+    var path;
+    if (location.pathname.length > 1 &&
+        location.pathname[location.pathname.length - 1] == '/') {
+      path = location.pathname.slice(0, location.pathname.length - 1);
+    } else {
+      path = location.pathname;
+    }
+
+    var paths = path.split('/');
+    var isMatched = false;
+    for (var i in this.routes) {
+      if (this.routes[i](paths)) {
+        isMatched = true;
+        break;
+      }
+    }
+    if (isMatched === false &&
+        typeof this.defaultRoute === 'function') {
+      this.applyDefaultRoute();
+    }
+  },
+  match: function(route, callback) {
+    var self = this;
+    this.routes.push(function(paths) {
+      if (typeof callback == 'function') {
+        var routePaths = route.split('/');
+
+        if (paths.length != routePaths.length) return false;
+
+        var params = {};
+        for (var i in routePaths) {
+          var p = routePaths[i];
+          if (p.indexOf(':') == 0) {
+            p = p.slice(1, p.length);
+            params[p] = paths[i];
+          } else {
+            if (p != paths[i]) return false;
+          }
         }
 
-        var locPaths = loc.split('/');
-        var match = false;
-        for (var i in this.routes) {
-            if (this.routes[i](locPaths)) {
-                match = true;
-                break;
-            }
-        }
-        if (match === false && typeof this.defaultRoute === 'function') {
-            this.defaultRoute();
-        }
-    },
-    match: function(route, fn) {
-        var self = this;
-        this.routes.push(function(locPaths) {
-            if (typeof fn == 'function') {
-                var routePaths = route.split('/');
+        // Invoke handler after DOM ready
+        self.params = params;
+        callback();
 
-                if (locPaths.length != routePaths.length) {
-                    return false;
-                }
+        return true;
+      }
+    });
+  },
+  changePage: function(page) {
+    if (!history.state) history.replaceState({page: page});
 
-                var params = {};
-                for (var i in routePaths) {
-                    var p = routePaths[i];
-                    if (p.indexOf(':') == 0) {
-                        p = p.slice(1, p.length);
-                        params[p] = locPaths[i];
-                    } else {
-                        if (p != locPaths[i]) {
-                            return false;
-                        }
-                    }
-                }
+    setTimeout(function() {
+      switch (page) {
+        case 'planets':
+          document.querySelector('cosmos-layout-content').page = 'planets';
+          break;
+        case 'planet':
+          document.querySelector('cosmos-layout-content').page = 'planet';
+          break;
+      }
+    }, 10);
+  },
+  ready: function() {
+      var self = this;
 
-                // Invoke handler after DOM ready
-                self.params = params;
-                fn();
-
-                return true;
-            }
-        });
-    },
-    changePage: function(page) {
-      console.log('chagnePage()');
-      if (!history.state) {
-        history.replaceState({page: page});
-        console.log(history.state);
+      var pushState = history.pushState;
+      history.pushState = function(state) {
+          $(window).trigger('pushstate', state);
+          // ... whatever else you want to do
+          // maybe call onhashchange e.handler
+          return pushState.apply(history, arguments);
       }
 
-      setTimeout(function() {
-        switch (page) {
-          /*case 'cosmos':
-              document.querySelector('cosmos-layout-content').page = 'cosmos';
-              //document.querySelector('cosmos-layout-header').page = 'cosmos';
-              break;*/
-          case 'planets':
-            document.querySelector('cosmos-layout-content').page = 'planets';
-            //document.querySelector('cosmos-layout-header').page = 'planet';
-            break;
-          case 'planet':
-            document.querySelector('cosmos-layout-content').page = 'planet';
-            break;
-          /*case 'container':
-              document.querySelector('cosmos-layout-content').page = 'container';
-              //document.querySelector('cosmos-layout-header').page = 'container';
-              break;*/
-        }
-      }, 10);
-    },
-    ready: function() {
-        var self = this;
+      $(window).on('pushstate', function(e, param) {
+          if (!param) return;
+          self.changePage(param.page);
+      }).on('popstate', function(e) {
+          if (!e.originalEvent || !e.originalEvent.state) return;
+          self.changePage(e.originalEvent.state.page);
+      });
 
-        var pushState = history.pushState;
-        history.pushState = function(state) {
-            $(window).trigger('pushstate', state);
-            // ... whatever else you want to do
-            // maybe call onhashchange e.handler
-            return pushState.apply(history, arguments);
-        }
+      this.match('/', function() {
+        self.changePage('planets');
+      });
 
-        $(window).on('pushstate', function(e, param) {
-            if (!param) return;
-            self.changePage(param.page);
-        }).on('popstate', function(e) {
-            if (!e.originalEvent || !e.originalEvent.state) return;
-            self.changePage(e.originalEvent.state.page);
-        });
+      this.match('/planets', function() {
+        self.changePage('planets');
+      });
 
-        this.match('/', function() {
-          //self.changePage('cosmos');
-          self.changePage('planets');
-        });
+      this.match('/planets/:planet', function() {
+        self.changePage('planet');
+      });
 
-        this.match('/planets', function() {
-          self.changePage('planets');
-        });
+      this.applyDefaultRoute = function() {
+        window.location.replace('/');
+      };
 
-        this.match('/planets/:planet', function() {
-          self.changePage('planet');
-        });
-        /*this.match('/containers', function() {
-            self.changePage('container');
-        });*/
-        this.defaultRoute = function() {
-            window.location.replace('/');
-        };
-        this.register();
-    }
+      this.register();
+  }
 });
 </script>

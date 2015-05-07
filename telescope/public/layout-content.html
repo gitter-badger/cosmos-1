@@ -1,19 +1,13 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<!--<link rel="import" href="/page-cosmos.html">-->
+<link rel="import" href="/page-planets.html">
 <link rel="import" href="/page-planet.html">
-<!--<link rel="import" href="/page-container.html">-->
-<link rel="import" href="/profile-planet.html">
 <dom-module id="cosmos-layout-content">
 <style>
-/* CSS rules for your element */
-/* Extra markup and styles for table-esque vertical and horizontal centering */
 </style>
 <template>
-<!-- local DOM for your element -->
 </template>
 </dom-module>
 <script>
-// element registration
 Polymer({
   is: 'cosmos-layout-content',
   properties: {
@@ -22,20 +16,14 @@ Polymer({
       observer: 'pageValueChanged'
     }
   },
-  pageValueChanged: function(newVal, oldVal) {
-    var target;
-    switch (newVal) {
-      /*case 'cosmos':
-        elem = document.createElement('cosmos-page-cosmos');
-        break;*/
+  pageValueChanged: function() {
+    var target = undefined;
+    switch (this.page) {
       case 'planets':
-        target = document.createElement('cosmos-page-planet');
+        target = document.createElement('cosmos-page-planets');
         break;
       case 'planet':
-        target = document.createElement('cosmos-profile-planet');
-      /*case 'container':
-        elem = document.createElement('cosmos-page-container');
-        break;*/
+        target = document.createElement('cosmos-page-planet');
     }
     if (target) {
       for (var i = 0, len = Polymer.dom(this).childNodes.length; i < len; i++) {
