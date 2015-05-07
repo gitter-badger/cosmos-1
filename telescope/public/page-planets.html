@@ -1,6 +1,5 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/list-item-planet.html">
-
 <dom-module id="cosmos-page-planets">
 <style>
 .container {
@@ -89,185 +88,185 @@
 <template>
   <div class="container">
 
-      <!--<aside class="left-container col-md-4 col-xs-12">
-        <div class="search">
-          <input id="search-input" type="text" placeholder="Search all planets" style="" />
-        </div>
-        <div class="planet-list">
-          <template id="planetListTemplate" is="x-repeat" items="{{planets}}">
-            <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
-          </template>
-        </div>
-      </aside>-->
-
-      <div id="main" class="main-container col-md-8 col-xs-12">
-
-        <div class="search">
-          <input id="search-input" type="text" placeholder="Search all planets" />
-        </div>
-
-        <div class="planet-list">
-          <template id="planetListTemplate" is="x-repeat" items="{{planets}}">
-            <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
-          </template>
-        </div>
-
-        <!--<cosmos-profile-planet planet="{{selectedPlanet}}"></cosmos-profile-planet>
-
-        <div class="graph-list">
-          <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
-          <cosmos-graph-memory class="graph"></cosmos-graph-memory>
-          <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
-          <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
-        </div>-->
-
+    <!--<aside class="left-container col-md-4 col-xs-12">
+      <div class="search">
+        <input id="search-input" type="text" placeholder="Search all planets" style="" />
       </div>
+      <div class="planet-list">
+        <template id="planetListTemplate" is="x-repeat" items="{{planets}}">
+          <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
+        </template>
+      </div>
+    </aside>-->
+
+    <div id="main" class="main-container col-md-8 col-xs-12">
+
+      <div class="search">
+        <input id="search-input" type="text" placeholder="Search all planets" />
+      </div>
+
+      <div class="planet-list">
+        <template id="planetListTemplate" is="x-repeat" items="{{planets}}">
+          <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
+        </template>
+      </div>
+
+      <!--<cosmos-profile-planet planet="{{selectedPlanet}}"></cosmos-profile-planet>
+
+      <div class="graph-list">
+        <cosmos-graph-cpu class="graph"></cosmos-graph-cpu>
+        <cosmos-graph-memory class="graph"></cosmos-graph-memory>
+        <cosmos-graph-network-in class="graph"></cosmos-graph-network-in>
+        <cosmos-graph-network-out class="graph"></cosmos-graph-network-out>
+      </div>-->
+
+    </div>
 
   </div>
 </template>
 </dom-module>
 <script>
 Polymer({
-    is: 'cosmos-page-planets',
-    properties: {
-        planets: {
-            type: Array,
-            value: []
-        },
-        containers: {
-          type: Array,
-          value: []
-        }
+  is: 'cosmos-page-planets',
+  properties: {
+    planets: {
+      type: Array,
+      value: []
     },
-    selectedPlanetElement: undefined,
-    selectedPlanetKey: undefined, /* is it used? */
-    selectedPlanet: undefined,
-    loadSelectedPlanetKeyFromState: function() {
-        if (history.state && history.state.key) {
-            this.selectedPlanetKey = history.state.key;
-        } else {
-            var keyValues = location.search.split('&');
-            if (keyValues.length > 0) {
-                for (var i = 0; i < keyValues.length; i++) {
-                    var comp = keyValues[i].split('=');
-                    if (comp[0] == 'key') {
-                        this.selectedPlanetKey = comp[1];
-                    }
-                }
-            }
-        }
-    },
-    ready: function() {
-        this.setPlanetItemEventListener();
-        // Retrieve planet's list
-        this.getPlanets();
-    },
-    attached: function() {
-
-    },
-    detached: function() {
-
-    },
-    onPlanetClicked: function(target) {
-      history.pushState({
-        page: 'planet'
-      }, 'planet', '/planets/' + target.planet);
-    },
-    setPlanetItemEventListener: function() {
-      // Listening select event
-      var self = this;
-      $(this).on('onPlanetItemSelected', function(e, target) {
-          var index = self.$.planetListTemplate.indexForElement(target);
-          if (self.selectedPlanetElement && self.selectedPlanetElement.isSelected) {
-              self.selectedPlanetElement.isSelected = false;
-          }
-          self.selectedPlanetElement = target;
-          self.selectedPlanet = target.planet;
-          self.onPlanetClicked(target);
-      }).on('onPlanetItemDeselected', function(e, target) {
-        // nothing to do
-      }).on('onPlanetItemReady', function(e, target) {
-        return;
-        /*var index = self.$.planetListTemplate.indexForElement(target);
-        if (!self.selectedPlanetKey && index == 0) {
-          target.isSelected = true;
-        }*/
-      });
-    },
-    getPlanets: function() {
-      this.$.main.hidden = true;
-      NProgress.start();
-
-      var self = this;
-      Cosmos.getPlanets(function(response) {
-        self.planets = response.data;
-        if (self.planets.length == 0) {
-
-        }
-        self.$.main.hidden = false;
-        NProgress.done();
-      }, function(jqXHR) {
-
-        self.$.main.hidden = false;
-        NProgress.done();
-      });
-    },
-    getContainers: function(planet) {
-      var self = this;
-      Cosmos.getContainers(planet, function(response){
-        self.containers = response.data;
-      },function(jqXHR){
-
-      });
-    },
-    getMetricsOfPlanet: function(target) {
-        // remove planet, container graph runloop
-        // set planet graph runloop
-        var self = this;
-        var planet = target.planet.Planet;
-        Cosmos.getMetricsOfPlanet(planet, function(response) {
-            var $graphs = $(self).find('.graph-list > .graph');
-            var totalMetrics = self.getTotalMetrics(response);
-            $graphs.each(function(i, target) {
-              target.metrics = totalMetrics;
-            });
-        }, function(jqXHR) {
-
-        });
-    },
-    getTotalMetrics: function(response) {
-      var metrics = {};
-
-      for (var i = 0; i < response.length; i++) {
-        var container = response[i];
-        var keys = Object.keys(container);
-
-        for (var j = 0; j < keys.length; j++) {
-          var key = keys[j];
-          if (key.match(/^Stats.*/)) {
-            var values = container[key];
-            var saved = metrics[key];
-            if (saved) {
-              // sum
-              for (var k = 0; k < saved.length; k++) {
-                var row = saved[k];
-                for (var l = 0; l < values.length; l++) {
-                  if (row[0] == values[l][0]) {
-                    // compare whether two timestamp is same
-                    row[2] += values[l][2];
-                    break;
-                  }
-                }
-              }
-            } else {
-              // new one
-              metrics[key] = values;
-            }
+    containers: {
+      type: Array,
+      value: []
+    }
+  },
+  selectedPlanetElement: undefined,
+  selectedPlanetKey: undefined, /* is it used? */
+  selectedPlanet: undefined,
+  loadSelectedPlanetKeyFromState: function() {
+    if (history.state && history.state.key) {
+        this.selectedPlanetKey = history.state.key;
+    } else {
+      var keyValues = location.search.split('&');
+      if (keyValues.length > 0) {
+        for (var i = 0; i < keyValues.length; i++) {
+          var comp = keyValues[i].split('=');
+          if (comp[0] == 'key') {
+              this.selectedPlanetKey = comp[1];
           }
         }
       }
-
-      return metrics;
     }
+  },
+  ready: function() {
+      this.setPlanetItemEventListener();
+      // Retrieve planet's list
+      this.getPlanets();
+  },
+  attached: function() {
+
+  },
+  detached: function() {
+
+  },
+  onPlanetClicked: function(target) {
+    history.pushState({
+      page: 'planet'
+    }, 'planet', '/planets/' + target.planet);
+  },
+  setPlanetItemEventListener: function() {
+    // Listening select event
+    var self = this;
+    $(this).on('onPlanetItemSelected', function(e, target) {
+        var index = self.$.planetListTemplate.indexForElement(target);
+        if (self.selectedPlanetElement && self.selectedPlanetElement.isSelected) {
+            self.selectedPlanetElement.isSelected = false;
+        }
+        self.selectedPlanetElement = target;
+        self.selectedPlanet = target.planet;
+        self.onPlanetClicked(target);
+    }).on('onPlanetItemDeselected', function(e, target) {
+      // nothing to do
+    }).on('onPlanetItemReady', function(e, target) {
+      return;
+      /*var index = self.$.planetListTemplate.indexForElement(target);
+      if (!self.selectedPlanetKey && index == 0) {
+        target.isSelected = true;
+      }*/
+    });
+  },
+  getPlanets: function() {
+    this.$.main.hidden = true;
+    NProgress.start();
+
+    var self = this;
+    Cosmos.getPlanets(function(response) {
+      self.planets = response.data;
+      if (self.planets.length == 0) {
+
+      }
+      self.$.main.hidden = false;
+      NProgress.done();
+    }, function(jqXHR) {
+
+      self.$.main.hidden = false;
+      NProgress.done();
+    });
+  },
+  getContainers: function(planet) {
+    var self = this;
+    Cosmos.getContainers(planet, function(response){
+      self.containers = response.data;
+    },function(jqXHR){
+
+    });
+  },
+  getMetricsOfPlanet: function(target) {
+      // remove planet, container graph runloop
+      // set planet graph runloop
+      var self = this;
+      var planet = target.planet.Planet;
+      Cosmos.getMetricsOfPlanet(planet, function(response) {
+          var $graphs = $(self).find('.graph-list > .graph');
+          var totalMetrics = self.getTotalMetrics(response);
+          $graphs.each(function(i, target) {
+            target.metrics = totalMetrics;
+          });
+      }, function(jqXHR) {
+
+      });
+  },
+  getTotalMetrics: function(response) {
+    var metrics = {};
+
+    for (var i = 0; i < response.length; i++) {
+      var container = response[i];
+      var keys = Object.keys(container);
+
+      for (var j = 0; j < keys.length; j++) {
+        var key = keys[j];
+        if (key.match(/^Stats.*/)) {
+          var values = container[key];
+          var saved = metrics[key];
+          if (saved) {
+            // sum
+            for (var k = 0; k < saved.length; k++) {
+              var row = saved[k];
+              for (var l = 0; l < values.length; l++) {
+                if (row[0] == values[l][0]) {
+                  // compare whether two timestamp is same
+                  row[2] += values[l][2];
+                  break;
+                }
+              }
+            }
+          } else {
+            // new one
+            metrics[key] = values;
+          }
+        }
+      }
+    }
+
+    return metrics;
+  }
 });
 </script>
