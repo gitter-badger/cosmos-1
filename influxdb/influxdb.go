@@ -84,10 +84,12 @@ func (i *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
 
     index := 0
     sampleSize := len(metrics.Containers)
-    pts := make([]client.Point, sampleSize)
+    pts := make([]client.Point, sampleSize * 2) // cpu, memory
     for i := 0; i < sampleSize; i++ {
         container := metrics.Containers[i]
         if container.Container == "" { continue }
+
+        // cpu
         pts[index] = client.Point {
             Name: "cpu",
             Tags: map[string]string {
@@ -101,7 +103,23 @@ func (i *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
             Timestamp: time.Now(),
             Precision: "s",
         }
-        index += 1
+
+        // memory
+        pts[index+1] = client.Point {
+            Name: "memory",
+            Tags: map[string]string {
+                "cosmos": cosmos,
+                "planet": planet,
+                "container": container.Container,
+            },
+            Fields: map[string]interface{} {
+                "value": container.Memory,
+            },
+            Timestamp: time.Now(),
+            Precision: "s",
+        }
+        
+        index += 2 // cpu, memory
     }
 
     bps := client.BatchPoints {
