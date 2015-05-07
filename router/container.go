@@ -1,9 +1,7 @@
 package router
 
 import (
-    "strconv"
 	"net/http"
-    "encoding/json"
 
     "github.com/cosmos-io/cosmos/context"
 )
@@ -11,38 +9,31 @@ import (
 func GetContainers(
     c context.Context,
     w http.ResponseWriter,
-    r *http.Request) {
+    r *http.Request) (int, map[string]interface{}) {
     planet := c.GetQueryParam("planet", "")
+
+    var status int
+    var res map[string]interface{}
     
     if planet == "" {
-        res := map[string]string { "error": "" }
-        js, _ := json.Marshal(res)
-        contentLength := strconv.Itoa(len(js))
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Header().Set("Content-Length", contentLength)
-        w.Write(js)
-		return
+        status = http.StatusBadRequest
+        res := map[string]interface{} { "error": "planet is empty." }
+        return status, res
     }
 
     containers, err := c.InfluxDB.QueryContainers(planet)
     if err != nil {
-        res := map[string]string { "error": err.Error() }
-        js, _ := json.Marshal(res)
-        contentLength := strconv.Itoa(len(js))
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Header().Set("Content-Length", contentLength)
-        w.Write(js)
-		return
+        status = http.StatusBadRequest
+        res = map[string]interface{} { "error": err.Error() }
+        return status, res
     }
 
-    res := map[string]interface{} {
+    status = http.StatusOK
+    res = map[string]interface{} {
         "data": containers,
     }
 
-    js, _ := json.Marshal(res)
-    contentLength := strconv.Itoa(len(js))
-    w.Header().Set("Content-Length", contentLength)
-    w.Write(js)
+    return status, res
 }
 
 // legacy

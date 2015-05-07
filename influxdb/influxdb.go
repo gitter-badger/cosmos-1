@@ -185,12 +185,36 @@ func (i *InfluxDB) QueryContainers(planet string) ([]string, error) {
     return containers, nil
 }
 
-func (i *InfluxDB) QueryMetrics(planet string, container string, t string) (interface{}, error) {
-    c := fmt.Sprintf("SELECT value FROM %s WHERE cosmos = '%s' AND planet = '%s' AND container = '%s'",
+func (i *InfluxDB) QueryPlanetMetrics(planet string, t string) (interface{}, error) {
+    c := fmt.Sprintf("SELECT max(value) FROM %s WHERE cosmos = '%s' AND planet = '%s' AND time > now() - %s group by time(%s), value fill(0)",
+        t,
+        cosmos,
+        planet,
+        "1h",
+        "1m",
+    )
+
+    result, err := queryDB(i.client, i.database, c)
+    if err != nil {
+        return nil, err
+    }
+
+    if len(result) == 0 || len(result[0].Series) == 0 {
+        return nil, nil
+    }
+
+    values := result[0].Series[0].Values
+    return values, nil
+}
+
+func (i *InfluxDB) QueryContainerMetrics(planet string, container string, t string) (interface{}, error) {
+    c := fmt.Sprintf("SELECT max(value) FROM %s WHERE cosmos = '%s' AND planet = '%s' AND container = '%s' AND time > now() - %s group by time(%s), value fill(0)",
         t,
         cosmos,
         planet,
         container,
+        "1h",
+        "1m",
     )
 
     result, err := queryDB(i.client, i.database, c)

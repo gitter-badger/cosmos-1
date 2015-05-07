@@ -201,7 +201,7 @@ Polymer({
     Cosmos.getPlanets(function(response) {
       self.planets = response.data;
       if (!self.planets || self.planets.length == 0) {
-        
+
       }
       self.$.main.hidden = false;
       NProgress.done();

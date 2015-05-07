@@ -2,7 +2,6 @@ package router
 
 import (
     "fmt"
-    "strconv"
     "net/http"
     "encoding/json"
     
@@ -20,63 +19,62 @@ var (
 func PostMetrics(
     c context.Context,
     w http.ResponseWriter,
-    r *http.Request) {
+    r *http.Request) (int, map[string]interface{}) {
     var metrics *model.MetricsParam
     err := json.Unmarshal(c.Body, &metrics)
+
+    var status int
+    var res map[string]interface{}
+    
     if err != nil {
-        res := map[string]string { "error": err.Error() }
-        js, _ := json.Marshal(res)
-        contentLength := strconv.Itoa(len(js))
-        w.WriteHeader(http.StatusInternalServerError)
-        w.Header().Set("Content-Length", contentLength)
-        w.Write(js)
-		return
+        status = http.StatusBadRequest
+        res = map[string]interface{} { "error": err.Error() }
+        return status, res
     }
 
     c.InfluxDB.WriteMetrics(metrics)
 
-    content := []byte("")
-    contentLength := strconv.Itoa(len(content))
-    w.Header().Set("Content-Length", contentLength)
-    w.Write(content)
+    status = http.StatusOK
+    
+    return status, res
 }
 
 func GetMetrics(
     c context.Context,
     w http.ResponseWriter,
-    r *http.Request) {
+    r *http.Request) (int, map[string]interface{}) {
     t := c.GetQueryParam("type", "")
     planet := c.GetQueryParam("planet", "")
     container := c.GetQueryParam("container", "")
 
+    var status int
+    var res map[string]interface{}
+
     if types[t] == false {
+        status = http.StatusBadRequest
         err := fmt.Sprintf("%s type is not supported.", t)
-        res := map[string]string { "error": err }
-        js, _ := json.Marshal(res)
-        contentLength := strconv.Itoa(len(js))
-        w.WriteHeader(http.StatusBadRequest)
-        w.Header().Set("Content-Length", contentLength)
-        w.Write(js)
-        return
+        res = map[string]interface{} { "error": err }
+        return status, res
     }
 
-    metrics, err := c.InfluxDB.QueryMetrics(planet, container, t)
+    if planet == "" {
+        status = http.StatusBadRequest
+        err := fmt.Sprintf("%s is empty.", planet)
+        res = map[string]interface{} { "error": err }
+        return status, res
+    }
+    
+    metrics, err := c.InfluxDB.QueryContainerMetrics(planet, container, t)
     if err != nil {
-        res := map[string]string { "error": err.Error() }
-        js, _ := json.Marshal(res)
-        contentLength := strconv.Itoa(len(js))
-        w.WriteHeader(http.StatusBadRequest)
-        w.Header().Set("Content-Length", contentLength)
-        w.Write(js)
-        return
+        status = http.StatusInternalServerError
+        res := map[string]interface{} { "error": err.Error() }
+        return status, res
     }
 
-    res := map[string]interface{} {
+    status = http.StatusOK
+    res = map[string]interface{} {
         "data": metrics,
     }
 
-    js, _ := json.Marshal(res)
-    contentLength := strconv.Itoa(len(js))
-    w.Header().Set("Content-Length", contentLength)
-    w.Write(js)
+    return status, res
 }

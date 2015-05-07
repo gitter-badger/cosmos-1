@@ -5,8 +5,10 @@ import (
     "log"
     "path"
     "strings"
+    "strconv"
     "io/ioutil"
     "net/http"
+    "encoding/json"
 
     "github.com/cosmos-io/cosmos/context"
     "github.com/cosmos-io/cosmos/influxdb"
@@ -54,12 +56,11 @@ func serveIndexHTML(next http.Handler) http.Handler {
 // A middleware to serve a cosmos context
 //
 func serveContext(
-    prev func(
+    next func(
         context.Context,
         http.ResponseWriter,
-        *http.Request)) func(http.ResponseWriter, *http.Request) {
+        *http.Request)(int, map[string]interface{})) func(http.ResponseWriter, *http.Request) {
     return (func(w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Content-Type", "application/json")
         body, _ := ioutil.ReadAll(r.Body)
         queryParams := r.URL.Query()
         c := context.Context {
@@ -68,7 +69,16 @@ func serveContext(
             body,
             queryParams,
         }
-        prev(c, w, r)
+        
+        status, res := next(c, w, r)
+        js, _ := json.Marshal(res)
+        len := strconv.Itoa(len(js))
+
+        w.Header().Set("Content-Type", "application/json")
+        w.Header().Set("Content-Length", len)
+        w.WriteHeader(status)
+        w.Write(js)
+        
         return
     })
 }
