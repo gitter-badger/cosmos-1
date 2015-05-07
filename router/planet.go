@@ -2,7 +2,6 @@ package router
 
 import (
     "strconv"
-	"strings"
 	"net/http"
     "encoding/json"
 
@@ -57,7 +56,7 @@ func GetPlanets(
     w.Write(js)
 }*/
 
-func GetPlanetMetrics(
+/*func GetPlanetMetrics(
     c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
@@ -83,4 +82,4 @@ func GetPlanetMetrics(
     }
 
     w.Write(js)
-}
+}*/

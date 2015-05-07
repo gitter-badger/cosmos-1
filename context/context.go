@@ -1,12 +1,10 @@
 package context
 
 import (
-    "github.com/cosmos-io/cosmos/service"
     "github.com/cosmos-io/cosmos/influxdb"
 )
 
 type Context struct {
-    CosmosService *service.CosmosService
     InfluxDB *influxdb.InfluxDB
     Params map[string]string
     Body []byte

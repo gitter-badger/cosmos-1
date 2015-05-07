@@ -16,16 +16,17 @@ type Config struct {
     Port string
     Username string
     Password string
+    Database string
 }
 
 type InfluxDB struct {
     client *client.Client
+    database string
 }
 
 var (
-    databaseName = "cosmos"
     retentionPolicy = "default"
-    cosmosName = "cosmos"
+    cosmos = "cosmos"
 )
 
 func New(config Config) (*InfluxDB, error) {
@@ -46,22 +47,27 @@ func New(config Config) (*InfluxDB, error) {
     }
 
     // creating a database
-    _, err = queryDB(con, fmt.Sprintf("create database %s", databaseName))
+    _, err = queryDB(
+        con,
+        config.Database,
+        fmt.Sprintf("create database %s", config.Database),
+    )
     if err != nil {
         log.Println(err)
     }
     
     influxdb := InfluxDB {
         client: con,
+        database: config.Database,
     }
     return &influxdb, nil
 }
 
 // queryDB convenience function to query the database
-func queryDB(con *client.Client, cmd string) (res []client.Result, err error) {
+func queryDB(con *client.Client, database string, cmd string) (res []client.Result, err error) {
     q := client.Query {
         Command:  cmd,
-        Database: databaseName,
+        Database: database,
     }
     if response, err := con.Query(q); err == nil {
         if response.Error() != nil {
@@ -73,7 +79,6 @@ func queryDB(con *client.Client, cmd string) (res []client.Result, err error) {
 }
 
 func (i *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
-    cosmos := cosmosName
     planet := metrics.Planet
     if planet == "" { return }
 
@@ -101,7 +106,7 @@ func (i *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
 
     bps := client.BatchPoints {
         Points:          pts,
-        Database:        databaseName,
+        Database:        i.database,
         RetentionPolicy: retentionPolicy,
     }
 
@@ -114,10 +119,10 @@ func (i *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
 func (i *InfluxDB) QueryPlanets() ([]string, error) {
     c := fmt.Sprintf("SHOW TAG VALUES WITH KEY = %s WHERE cosmos = '%s'",
         "planet",
-        cosmosName,
+        cosmos,
     )
 
-    result, err := queryDB(i.client, c)
+    result, err := queryDB(i.client, i.database, c)
     if err != nil {
         return nil, err
     }
@@ -139,11 +144,11 @@ func (i *InfluxDB) QueryPlanets() ([]string, error) {
 func (i *InfluxDB) QueryContainers(planet string) ([]string, error) {
     c := fmt.Sprintf("SHOW TAG VALUES WITH KEY = %s WHERE cosmos = '%s' AND planet = '%s'",
         "container",
-        cosmosName,
+        cosmos,
         planet,
     )
 
-    result, err := queryDB(i.client, c)
+    result, err := queryDB(i.client, i.database, c)
     if err != nil {
         return nil, err
     }

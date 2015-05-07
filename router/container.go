@@ -2,7 +2,6 @@ package router
 
 import (
     "strconv"
-	"strings"
 	"net/http"
     "encoding/json"
 
@@ -72,7 +71,7 @@ func GetContainers(
     w.Write(js)
 }*/
 
-func AddContainersOfPlanet(
+/*func AddContainersOfPlanet(
     c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
@@ -158,4 +157,4 @@ func GetContainerMetrics(
     }
 
     w.Write(js)
-}
+}*/
