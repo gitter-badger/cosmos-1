@@ -3,7 +3,7 @@ package influxdb
 import (
     "fmt"
     "log"
-    "time"
+    //"time"
     "net/url"
 
     "github.com/cosmos-io/cosmos/model"
@@ -100,7 +100,7 @@ func (i *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
             Fields: map[string]interface{} {
                 "value": container.Cpu,
             },
-            Timestamp: time.Now(),
+            //Timestamp: time.Now(),
             Precision: "s",
         }
 
@@ -115,7 +115,7 @@ func (i *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
             Fields: map[string]interface{} {
                 "value": container.Memory,
             },
-            Timestamp: time.Now(),
+            //Timestamp: time.Now(),
             Precision: "s",
         }
         
@@ -146,7 +146,7 @@ func (i *InfluxDB) QueryPlanets() ([]string, error) {
     }
 
     if len(result) == 0 || len(result[0].Series) == 0 {
-        // no value
+        return nil, nil
     }
 
     values := result[0].Series[0].Values
@@ -172,7 +172,7 @@ func (i *InfluxDB) QueryContainers(planet string) ([]string, error) {
     }
 
     if len(result) == 0 || len(result[0].Series) == 0 {
-        // no value
+        return nil, nil
     }
 
     values := result[0].Series[0].Values
