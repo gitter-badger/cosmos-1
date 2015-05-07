@@ -108,6 +108,9 @@ func run() {
     mux.HandleFunc("/containers",
         serveContext(router.GetContainers)).Methods("GET")
 
+    mux.HandleFunc("/metrics",
+        serveContext(router.GetMetrics)).Methods("GET")
+
     /*mux.HandleFunc("/v1/newsfeeds",
         serveContext(router.GetNewsFeeds)).Methods("GET")
 

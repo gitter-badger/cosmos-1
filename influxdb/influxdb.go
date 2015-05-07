@@ -184,3 +184,24 @@ func (i *InfluxDB) QueryContainers(planet string) ([]string, error) {
     }
     return containers, nil
 }
+
+func (i *InfluxDB) QueryMetrics(planet string, container string, t string) (interface{}, error) {
+    c := fmt.Sprintf("SELECT value FROM %s WHERE cosmos = '%s' AND planet = '%s' AND container = '%s'",
+        t,
+        cosmos,
+        planet,
+        container,
+    )
+
+    result, err := queryDB(i.client, i.database, c)
+    if err != nil {
+        return nil, err
+    }
+
+    if len(result) == 0 || len(result[0].Series) == 0 {
+        return nil, nil
+    }
+
+    values := result[0].Series[0].Values
+    return values, nil
+}
