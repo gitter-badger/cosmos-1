@@ -118,11 +118,14 @@ Polymer({
   attached: function() {
 
   },
-  deselectNavgationItem() {
+  detached: function() {
+
+  },
+  deselectNavgationItem: function() {
     var selected = this.$.nav.querySelector('.selected');
     selected.classList.remove('selected');
   },
-  selectNavigationItemAtIndex(index) {
+  selectNavigationItemAtIndex: function(index) {
     this.deselectNavgationItem();
     var links = this.$.nav.querySelectorAll('a');
     links[index].classList.add('selected');

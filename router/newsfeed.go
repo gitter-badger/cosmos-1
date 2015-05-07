@@ -1,13 +1,13 @@
 package router
 
 import (
-	"net/http"
-    "encoding/json"
+	//"net/http"
+    //"encoding/json"
 
-    "github.com/cosmos-io/cosmos/context"
+    //"github.com/cosmos-io/cosmos/context"
 )
 
-func GetNewsFeeds(c context.Context,
+/*func GetNewsFeeds(c context.Context,
     w http.ResponseWriter,
     r *http.Request) {
     time := ""
@@ -30,4 +30,4 @@ func GetNewsFeeds(c context.Context,
     }
 
     w.Write(js)
-}
+}*/
