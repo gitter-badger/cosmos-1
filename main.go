@@ -72,10 +72,10 @@ func serveContext(
         
         status, res := next(c, w, r)
         js, _ := json.Marshal(res)
-        len := strconv.Itoa(len(js))
+        length := strconv.Itoa(len(js))
 
         w.Header().Set("Content-Type", "application/json")
-        w.Header().Set("Content-Length", len)
+        w.Header().Set("Content-Length", length)
         w.WriteHeader(status)
         w.Write(js)
         
