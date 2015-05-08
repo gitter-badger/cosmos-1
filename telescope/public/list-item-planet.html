@@ -30,6 +30,7 @@
 <script>
 Polymer({
   is: 'cosmos-planet-list-item',
+  $container: undefined,
   properties: {
     planet: {
       type: String,
@@ -37,17 +38,14 @@ Polymer({
     }
   },
   ready: function() {
-
+    this.$container = $(document.querySelector('cosmos-page-cosmos'));
   },
   attached: function() {
 
   },
   onPlanetClicked: function(e) {
     e.preventDefault();
-
-    history.pushState({
-      page: 'planet'
-    }, 'planet', '/planets/' + this.planet);
+    this.$container.trigger('onPlanetItemSelected', this);
   }
 });
 </script>
