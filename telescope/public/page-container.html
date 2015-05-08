@@ -1,4 +1,5 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
+<link rel="import" href="/graph-cpu.html">
 <dom-module id="cosmos-page-container">
 <style>
 .container {
@@ -90,7 +91,11 @@ nav a.selected {
       <!--<a on-click="onNetworkClicked">Network</a>-->
     </nav>
 
-    <div id="main" class="main-container"></div>
+    <div id="main" class="main-container">
+
+      <cosmos-graph-cpu></cosmos-graph-cpu>
+
+    </div>
 
   </div>
 </template>

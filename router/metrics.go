@@ -59,11 +59,18 @@ func GetMetrics(
 
     if planet == "" {
         status = http.StatusBadRequest
-        err := fmt.Sprintf("%s is empty.", planet)
+        err := fmt.Sprintf("planet is empty.")
         res = map[string]interface{} { "error": err }
         return status, res
     }
-    
+
+    if container == "" {
+        status = http.StatusBadRequest
+        err := fmt.Sprintf("container is empty.")
+        res = map[string]interface{} { "error": err }
+        return status, res
+    }
+
     metrics, err := c.InfluxDB.QueryContainerMetrics(planet, container, t)
     if err != nil {
         status = http.StatusInternalServerError
