@@ -61,16 +61,7 @@ Polymer({
 
     var target = document.querySelector('cosmos-layout-content');
     setTimeout(function() {
-      switch (page) {
-        case 'planets':
-          target.page = 'planets';
-          break;
-        case 'planet':
-          target.page = 'planet';
-          break;
-        case 'container':
-          target.page = 'container';
-      }
+      target.changePage(page);
     }, 50);
   },
   ready: function() {
@@ -93,11 +84,11 @@ Polymer({
       });
 
       this.match('/', function() {
-        self.changePage('planets');
+        self.changePage('cosmos');
       });
 
-      this.match('/planets', function() {
-        self.changePage('planets');
+      this.match('/cosmos', function() {
+        self.changePage('cosmos');
       });
 
       this.match('/planets/:planet', function() {

@@ -1,33 +1,82 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<link rel="import" href="/newsfeed-item.html">
+<link rel="import" href="/list-item-planet.html">
 <dom-module id="cosmos-page-cosmos">
 <style>
 .container {
   width: 100%;
-  margin: 0;
+  height: 100%;
+  margin: 0 auto;
   padding: 0;
 }
 
-@media (min-width: 1080px) {
-  .container {
-    width: 1080px;
-    margin: 0 auto;
+.left-container {
+  width: 320px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  float: left;
+  border-right: 1px solid #e7e7ec;
+  background-color: #fff;
+  display: none;
+}
+
+@media (min-width: 800px) {
+  .left-container {
+    display: block;
   }
 }
 
-.col-md-12,
-.col-xs-12 {
+.planet-list {
+  margin: 0;
+  padding: 20px 20px;
+}
+
+.main-container {
+  margin: 0 0 0 320px;
+  padding: 0;
+  background-color: #fff;
+}
+
+.search {
+  padding: 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #e7e7ec;
+  font-size: 15px;
+}
+
+.search input {
+  width: 100%;
+  background-color: #fff;
+  outline: none;
+  border: none;
+  color: #333;
+}
+
+.graph-list {
   margin: 0;
   padding: 0;
 }
 </style>
 <template>
   <div class="container">
-    <template is="x-repeat" items="{{newsfeeds}}">
-      <div class="col-md-12 col-xs-12">
-        <cosmos-newsfeed-item newsfeed={{item}}></cosmos-newsfeed-item>
+
+    <div id="left" class="left-container">
+
+      <div class="search">
+        <input id="search-input" type="text" placeholder="Search all planets" />
       </div>
-    </template>
+
+      <div class="planet-list">
+        <template id="planetListTemplate" is="dom-repeat" items="{{planets}}">
+          <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
+        </template>
+      </div>
+
+    </div>
+
+    <div id="main" class="main-container">
+    </div>
+
   </div>
 </template>
 </dom-module>
@@ -35,36 +84,82 @@
 Polymer({
   is: 'cosmos-page-cosmos',
   properties: {
-    newsfeeds: {
+    planets: {
+      type: Array,
+      value: []
+    },
+    containers: {
       type: Array,
       value: []
     }
   },
   ready: function() {
-    //this.getNewsfeeds();
+    this.getPlanets();
+    this.setPlanetItemEventListener();
   },
-  getNewsfeeds: function() {
-    var self = this;
-    Cosmos.getNewsFeeds(function(response) {
-      for (var i = 0; i < response.length; i++) {
-        response[i].TimeLabel = moment(response[i].Time * 1000).format('YYYY-MM-DD HH:mm');
-        response[i].AgoLabel = moment(response[i].Time * 1000).fromNow();
-      }
-      self.newsfeeds = response;
+  attached: function() {
 
-      if (self.newsfeeds.length == 0) {
-        var notification = {
-          type: 'information',
-          message: "There is not news feed yet."
-        };
-        $('cosmos-layout-header').trigger('cosmos-notification', notification);
+  },
+  detached: function() {
+
+  },
+  renderCosmos: function() {
+
+  },
+  renderPlanet: function() {
+    var target = this.$.main;
+
+    var element = document.createElement('cosmos-page-planet');
+    for (var i = 0, len = target.childNodes.length; i < len; i++) {
+      target.removeChild(target.childNodes[i]);
+    }
+    target.appendChild(element);
+  },
+  renderContainer: function() {
+    var target = this.$.main;
+
+    var element = document.createElement('cosmos-page-container');
+    for (var i = 0, len = target.childNodes.length; i < len; i++) {
+      target.removeChild(target.childNodes[i]);
+    }
+    target.appendChild(element);
+  },
+  setPlanetItemEventListener: function() {
+    $(this).on('onPlanetItemSelected', function(e, target) {
+      history.pushState({
+        page: 'planet'
+      }, 'planet', '/planets/' + target.planet);
+    });
+  },
+  onPlanetClicked: function(target) {
+    history.pushState({
+      page: 'planet'
+    }, 'planet', '/planets/' + target.planet);
+  },
+  getPlanets: function() {
+    this.$.left.hidden = true;
+    NProgress.start();
+
+    var self = this;
+    Cosmos.getPlanets(function(response) {
+      self.planets = response.data;
+      if (!self.planets || self.planets.length == 0) {
+
       }
+      self.$.left.hidden = false;
+      NProgress.done();
     }, function(jqXHR) {
-      var notification = {
-        type: 'error',
-        message: 'Cosmos server did not respond any response.'
-      };
-      $('cosmos-layout-header').trigger('cosmos-notification', notification);
+
+      self.$.left.hidden = false;
+      NProgress.done();
+    });
+  },
+  getContainers: function(planet) {
+    var self = this;
+    Cosmos.getContainers(planet, function(response){
+      self.containers = response.data;
+    },function(jqXHR){
+
     });
   }
 });

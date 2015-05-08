@@ -1,42 +1,35 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<link rel="import" href="/page-planets.html">
+<link rel="import" href="/page-cosmos.html">
 <link rel="import" href="/page-planet.html">
 <link rel="import" href="/page-container.html">
 <dom-module id="cosmos-layout-content">
 <style>
 </style>
 <template>
+  <cosmos-page-cosmos></cosmos-page-cosmos>
 </template>
 </dom-module>
 <script>
 Polymer({
   is: 'cosmos-layout-content',
+  page: undefined,
   properties: {
-    page: {
-      type: String,
-      observer: 'pageValueChanged'
-    }
   },
-  pageValueChanged: function() {
-    var target = undefined;
+  changePage: function(page) {
+    this.page = page;
+
+    var target = this.querySelector('cosmos-page-cosmos');
     switch (this.page) {
-      case 'planets':
-        target = document.createElement('cosmos-page-planets');
+      case 'cosmos':
+        target.renderCosmos();
         break;
       case 'planet':
-        target = document.createElement('cosmos-page-planet');
+        target.renderPlanet();
         break;
       case 'container':
-        target = document.createElement('cosmos-page-container');
+        target.renderContainer();
         break;
     }
-
-    if (!target) return;
-
-    for (var i = 0, len = Polymer.dom(this).childNodes.length; i < len; i++) {
-      Polymer.dom(this).removeChild(Polymer.dom(this).childNodes[i]);
-    }
-    Polymer.dom(this).appendChild(target);
   }
 });
 </script>
