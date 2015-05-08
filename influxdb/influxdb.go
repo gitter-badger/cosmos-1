@@ -191,8 +191,8 @@ func (i *InfluxDB) QueryContainerMetrics(planet string, container string, t stri
         cosmos,
         planet,
         container,
-        "3h",
-        "1m",
+        "24h",
+        "10m",
     )
 
     result, err := queryDB(i.client, i.database, c)

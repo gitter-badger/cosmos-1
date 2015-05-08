@@ -1,5 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/chart-cpu.html">
+<link rel="import" href="/chart-memory.html">
 <dom-module id="cosmos-page-container">
 <style>
 .cosmos-container {
@@ -27,7 +28,7 @@
 
 .nav {
   height: 60px;
-  margin: 0 10px;
+  margin: 0;
   padding: 10px;
   text-align: center;
   border-bottom: 1px solid #e7e7ec;
@@ -35,7 +36,7 @@
 
 .nav a {
   margin: 0;
-  padding: 12px;
+  padding: 3px;
   color: #333;
   font-size: 12px;
   text-decoration: none;
@@ -44,7 +45,6 @@
 
 @media (min-width: 600px) {
   .nav {
-    margin: 0 20px;
     padding: 20px;
   }
   .nav a {
@@ -61,7 +61,8 @@
 }
 
 .main-container {
-  
+  width: 100%;
+  display: block;
 }
 </style>
 <template>
@@ -81,6 +82,7 @@
     <div id="main" class="main-container">
 
       <cosmos-chart-cpu id="chartCpu"></cosmos-chart-cpu>
+      <cosmos-chart-memory id="chartMemory"></cosmos-chart-memory>
 
     </div>
 
@@ -106,9 +108,12 @@ Polymer({
 
     var links = this.$.nav.querySelectorAll('a');
     links[0].classList.add('selected');
+
+
   },
   attached: function() {
-
+    this.$.chartCpu.hidden = true;
+    this.$.chartMemory.hidden = true;
   },
   detached: function() {
 
@@ -117,7 +122,8 @@ Polymer({
     var selected = this.$.nav.querySelector('.selected');
     selected.classList.remove('selected');
 
-    this.$.chartCpu.hide();
+    this.$.chartCpu.hidden = true;
+    this.$.chartMemory.hidden = true;
   },
   selectNavigationItemAtIndex: function(index) {
     this.deselectNavgationItem();
@@ -130,7 +136,7 @@ Polymer({
   },
   onCpuClicked: function() {
     this.selectNavigationItemAtIndex(1);
-    this.$.chartCpu.show();
+    this.$.chartCpu.hidden = false;
 
     var self = this;
     var type = 'cpu';
@@ -148,6 +154,21 @@ Polymer({
   },
   onMemoryClicked: function() {
     this.selectNavigationItemAtIndex(2);
+    this.$.chartMemory.hidden = false;
+
+    var self = this;
+    var type = 'memory';
+    var planet = this.planet;
+    var container = this.container;
+
+    NProgress.start();
+    Cosmos.getMetrics(type, planet, container, function(response){
+      var metrics = response.data;
+      self.$.chartMemory.load(metrics);
+      NProgress.done();
+    }, function(jqXHR){
+      NProgress.done();
+    });
   },
   onNetworkClicked: function() {
     this.selectNavigationItemAtIndex(3);

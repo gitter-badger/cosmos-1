@@ -7,7 +7,13 @@
   height: 100%;
   margin: 0;
   padding: 0;
-  display: table;
+  display: block;
+}
+
+@media (min-width: 700px) {
+  .cosmos-container {
+    display: table;
+  }
 }
 
 .cosmos-row {
@@ -15,11 +21,18 @@
   height: 100%;
   margin: 0;
   padding: 0;
-  display: table-row;
+  display: block;
+}
+
+@media (min-width: 700px) {
+  .cosmos-row {
+    display: table-row;
+  }
 }
 
 .left-container {
   width: 320px;
+  min-width: 320px;
   height: 100%;
   margin: 0;
   padding: 0;
@@ -27,12 +40,9 @@
   background-color: #fff;
   display: none;
   vertical-align: top;
-  box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
 }
 
-@media (min-width: 800px) {
+@media (min-width: 700px) {
   .left-container {
     display: table-cell;
   }
@@ -44,14 +54,17 @@
 }
 
 .main-container {
-  margin: 0;
+  width: 100%;
   padding: 0;
   background-color: #fff;
-  display: table-cell;
+  display: block;
   vertical-align: top;
-  box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
+}
+
+@media (min-width: 700px) {
+  .main-container {
+    display: table-cell;
+  }
 }
 
 .search {
@@ -79,7 +92,7 @@
 
     <div class="cosmos-row">
 
-      <div id="left" class="left-container">
+      <aside id="left" class="left-container">
         <div class="search">
           <input id="search-input" type="text" placeholder="Search all planets" />
         </div>
@@ -89,7 +102,7 @@
             <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
           </template>
         </div>
-      </div>
+      </aside>
 
       <div id="main" class="main-container"></div>
 

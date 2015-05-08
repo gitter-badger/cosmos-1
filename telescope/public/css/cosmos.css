@@ -13,3 +13,11 @@ body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   color: #333;
 }
+
+.c3 .tick line {
+  stroke: #fff;
+}
+
+.c3 text {
+
+}
