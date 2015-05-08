@@ -3,14 +3,13 @@
 <style>
 .cosmos-container {
   width: 100%;
-  height: 2000px;
   margin: 0 auto;
-  padding: 40px;
+  padding: 40px 0;
   display: block;
 }
 </style>
 <template>
-  <div class="cosmos-container">
+  <div id="container" class="cosmos-container">
     <div id="chart"></div>
   </div>
 </template>
@@ -39,12 +38,11 @@ Polymer({
       tooltip: { show: true },
       axis: {
         x: { tick: { outer: false, format: '%m-%dT%H:%M' }, type: 'timeseries' },
-        y: { tick: { outer: false } }
+        y: { tick: { outer: false }, min: 0 }
       }
     });
 
     this.chart = chart;
-    this.$.chart.hidden = true;
   },
   detached: function() {
 
