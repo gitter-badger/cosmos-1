@@ -1,0 +1,79 @@
+<link rel="import" href="/vendor/polymer/polymer.html">
+<dom-module id="cosmos-chart-cpu">
+<style>
+.container {
+  width: 100%;
+  margin: 0;
+  padding: 40px;
+}
+</style>
+<template>
+  <div class="container">
+    <div id="chart"></div>
+  </div>
+</template>
+</dom-module>
+<script>
+Polymer({
+  is: 'cosmos-chart-cpu',
+  chart: undefined,
+  properties: {
+
+  },
+  ready: function() {
+
+  },
+  attached: function() {
+    var chart = c3.generate({
+      bindto: this.$.chart,
+      data: {
+        x: 'x',
+        columns: [
+          ['x'],
+          ['cpu'],
+        ]
+      },
+      point: { show: false },
+      tooltip: { show: true },
+      axis: {
+        x: { tick: { outer: false, format: '%Y-%m-%dT%H:%M:%SZ' }, type: 'timeseries' },
+        y: { tick: { outer: false } }
+      }
+    });
+
+    this.chart = chart;
+    this.$.chart.hidden = true;
+  },
+  detached: function() {
+
+  },
+  show: function() {
+    this.$.chart.hidden = false;
+  },
+  hide: function() {
+    this.$.chart.hidden = true;
+  },
+  load: function(metrics) {
+    var times = ['x'];
+    var values = ['cpu'];
+
+    var time = undefined;
+    var value = undefined;
+    for (var i = 0, len = metrics.length; i < len; i++) {
+      time = new Date(metrics[i][0]);
+      value = metrics[i][1];
+
+      times.push(time);
+      values.push(value);
+    }
+
+    this.chart.load({
+      columns: [
+        times,
+        values
+      ]
+    });
+
+  }
+});
+</script>

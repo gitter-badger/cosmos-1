@@ -25,27 +25,7 @@
                 xhr.fail(fail);
             }
             if (typeof complete == 'function') {
-                xhr.complete(complete)
-            }
-        },
-        getMetricsOfPlanet: function(planet, done, fail, complete) {
-            var self = this;
-            var xhr = $.ajax({
-                url: '/' + Cosmos.API_VER + '/planets/' + planet,
-                method: 'GET',
-                cache: false,
-                headers: { 'Accept': 'application/json' }
-            });
-            if (typeof done == 'function') {
-                xhr.done(function(json) {
-                    done(self._convertContainerResponse(json));
-                });
-            }
-            if (typeof fail == 'function') {
-                xhr.fail(fail);
-            }
-            if (typeof complete == 'function') {
-                xhr.complete(complete)
+                xhr.complete(complete);
             }
         },
         getContainers: function(planet, done, fail, complete) {
@@ -67,7 +47,50 @@
                 xhr.fail(fail);
             }
             if (typeof complete == 'function') {
-                xhr.complete(complete)
+                xhr.complete(complete);
+            }
+        },
+        getMetrics: function(type, planet, container, done, fail, complete) {
+          var self = this;
+          planet = encodeURIComponent(planet);
+          container = encodeURIComponent(container);
+          var xhr = $.ajax({
+              url: '/metrics?type=' + type + '&planet=' + planet + '&container=' + container,
+              method: 'GET',
+              cache: false,
+              headers: { 'Accept': 'application/json' }
+          });
+
+          if (typeof done == 'function') {
+              xhr.done(function(json) {
+                  done(json);
+              });
+          }
+          if (typeof fail == 'function') {
+              xhr.fail(fail);
+          }
+          if (typeof complete == 'function') {
+              xhr.complete(complete);
+          }
+        },
+        getMetricsOfPlanet: function(planet, done, fail, complete) {
+            var self = this;
+            var xhr = $.ajax({
+                url: '/' + Cosmos.API_VER + '/planets/' + planet,
+                method: 'GET',
+                cache: false,
+                headers: { 'Accept': 'application/json' }
+            });
+            if (typeof done == 'function') {
+                xhr.done(function(json) {
+                    done(self._convertContainerResponse(json));
+                });
+            }
+            if (typeof fail == 'function') {
+                xhr.fail(fail);
+            }
+            if (typeof complete == 'function') {
+                xhr.complete(complete);
             }
         },
         getContainerMetrics: function(planet, container, metric, period, done, fail, complete) {
@@ -93,7 +116,7 @@
                 xhr.fail(fail);
             }
             if (typeof complete == 'function') {
-                xhr.complete(complete)
+                xhr.complete(complete);
             }
         },
         getNewsFeeds: function(done, fail, complete) {
@@ -114,7 +137,7 @@
                 xhr.fail(fail);
             }
             if (typeof complete == 'function') {
-                xhr.complete(complete)
+                xhr.complete(complete);
             }
         },
         _convertNewsFeedsResponse: function(json) {

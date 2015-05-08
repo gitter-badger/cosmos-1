@@ -1,5 +1,5 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<link rel="import" href="/graph-cpu.html">
+<link rel="import" href="/chart-cpu.html">
 <dom-module id="cosmos-page-container">
 <style>
 .container {
@@ -93,7 +93,7 @@ nav a.selected {
 
     <div id="main" class="main-container">
 
-      <cosmos-graph-cpu></cosmos-graph-cpu>
+      <cosmos-chart-cpu id="chartCpu"></cosmos-chart-cpu>
 
     </div>
 
@@ -129,6 +129,8 @@ Polymer({
   deselectNavgationItem: function() {
     var selected = this.$.nav.querySelector('.selected');
     selected.classList.remove('selected');
+
+    this.$.chartCpu.hide();
   },
   selectNavigationItemAtIndex: function(index) {
     this.deselectNavgationItem();
@@ -137,9 +139,25 @@ Polymer({
   },
   onTimelineClicked: function() {
     this.selectNavigationItemAtIndex(0);
+
   },
   onCpuClicked: function() {
     this.selectNavigationItemAtIndex(1);
+    this.$.chartCpu.show();
+
+    var self = this;
+    var type = 'cpu';
+    var planet = this.planet;
+    var container = this.container;
+
+    NProgress.start();
+    Cosmos.getMetrics(type, planet, container, function(response){
+      var metrics = response.data;
+      self.$.chartCpu.load(metrics);
+      NProgress.done();
+    }, function(jqXHR){
+      NProgress.done();
+    });
   },
   onMemoryClicked: function() {
     this.selectNavigationItemAtIndex(2);
