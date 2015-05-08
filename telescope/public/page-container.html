@@ -2,14 +2,14 @@
 <link rel="import" href="/chart-cpu.html">
 <dom-module id="cosmos-page-container">
 <style>
-.container {
+.cosmos-container {
   width: 100%;
   margin: 0 auto;
   padding: 0;
   background-color: #fff;
 }
 
-header {
+.header {
   min-height: 64px;
   margin: 0;
   padding: 20px;
@@ -17,7 +17,7 @@ header {
   border-bottom: 1px solid #e7e7ec;
 }
 
-header h3 {
+.header h3 {
   margin: 0;
   padding: 0;
   font-size: 17px;
@@ -25,14 +25,15 @@ header h3 {
   text-align: center;
 }
 
-nav {
+.nav {
+  height: 60px;
   margin: 0 10px;
   padding: 10px;
   text-align: center;
   border-bottom: 1px solid #e7e7ec;
 }
 
-nav a {
+.nav a {
   margin: 0;
   padding: 12px;
   color: #333;
@@ -42,35 +43,35 @@ nav a {
 }
 
 @media (min-width: 600px) {
-  nav {
+  .nav {
     margin: 0 20px;
     padding: 20px;
   }
-  nav a {
-    padding: 22px;
+  .nav a {
+    padding: 21px;
     font-size: 14px;
   }
 }
 
-nav a:hover,
-nav a.selected {
+.nav a:hover,
+.nav a.selected {
   color: #29d;
   text-decoration: none;
   border-bottom: 1px solid #29d;
 }
 
 .main-container {
-  min-height: 400px;
+  
 }
 </style>
 <template>
-  <div class="container">
+  <div class="cosmos-container">
 
-    <header>
+    <div class="header">
       <h3>{{navTitle}}</h3>
-    </header>
+    </div>
 
-    <nav id="nav">
+    <nav id="nav" class="nav">
       <a on-click="onTimelineClicked">Timeline</a>
       <a on-click="onCpuClicked">CPU</a>
       <a on-click="onMemoryClicked">Memory</a>
