@@ -2,14 +2,14 @@
 <link rel="import" href="/list-item-container.html">
 <dom-module id="cosmos-list-container">
 <style>
-.container {
+.cosmos-container {
   width: 100%;
   margin: 0;
-  padding: 40px 20px;
+  padding: 40px;
 }
 </style>
 <template>
-  <div class="container">
+  <div class="cosmos-container">
     <template id="list" is="dom-repeat" items="{{containers}}">
       <cosmos-list-item-container planet="{{planet}}" container="{{item}}"></cosmos-list-item-container>
     </template>

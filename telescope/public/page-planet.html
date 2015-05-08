@@ -2,22 +2,22 @@
 <link rel="import" href="/list-container.html">
 <dom-module id="cosmos-page-planet">
 <style>
-.container {
+.cosmos-container {
   width: 100%;
-  margin: 0 auto;
+  margin: 0;
   padding: 0;
   background-color: #fff;
 }
 
-header {
-  min-height: 64px;
+.header {
+  height: 64px;
   margin: 0;
   padding: 20px;
   color: #333;
   border-bottom: 1px solid #e7e7ec;
 }
 
-header h3 {
+.header h3 {
   margin: 0;
   padding: 0;
   font-size: 17px;
@@ -25,14 +25,15 @@ header h3 {
   text-align: center;
 }
 
-nav {
+.nav {
+  height: 60px;
   margin: 0 10px;
   padding: 10px;
   text-align: center;
   border-bottom: 1px solid #e7e7ec;
 }
 
-nav a {
+.nav a {
   margin: 0;
   padding: 12px;
   color: #333;
@@ -42,38 +43,38 @@ nav a {
 }
 
 @media (min-width: 600px) {
-  nav {
+  .nav {
     margin: 0 20px;
     padding: 20px;
   }
-  nav a {
-    padding: 22px;
+  .nav a {
+    padding: 21px;
     font-size: 14px;
   }
 }
 
-nav a:hover,
-nav a.selected {
+.nav a:hover,
+.nav a.selected {
   color: #29d;
   text-decoration: none;
   border-bottom: 1px solid #29d;
 }
 
 .main-container {
-  min-height: 400px;
+
 }
 </style>
 <template>
-  <div class="container">
+  <div class="cosmos-container">
 
-    <header>
+    <div class="header">
       <h3>{{planet}}</h3>
-    </header>
+    </div>
 
-    <nav id="nav">
+    <div id="nav" class="nav">
       <a on-click="onTimelineClicked">Timeline</a>
       <a on-click="onContainersClicked">Containers</a>
-    </nav>
+    </div>
 
     <div id="main" class="main-container">
 
