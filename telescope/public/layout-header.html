@@ -1,8 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <dom-module id="cosmos-layout-header">
 <style>
-/* CSS rules for your element */
-/* Extra markup and styles for table-esque vertical and horizontal centering */
 .container {
   width: 100%;
   margin: 0;
@@ -10,7 +8,7 @@
 }
 
 header {
-  /*padding-bottom: 40px;*/
+
 }
 
 nav {
@@ -68,31 +66,17 @@ nav {
 
 </style>
 <template>
-  <!-- local DOM for your element -->
   <div class="container">
     <header class="clearfix">
-      <!--<nav>
-        <ul id="nav" class="nav header-nav">
-          <li><a href="/" class="menu-link" on-click="onCosmosClicked">Cosmos</a></li>
-          <li><a href="/planets" class="menu-link" on-click="onPlanetsClicked">Planets</a></li>
-          <li><a href="/containers" class="menu-link" on-click="onContainersClicked">Containers</a></li>
-        </ul>
-      </nav>-->
-      <div class="notification" on-click="notificationClicked">
-        <!--<p>Cosmos server didn't respond any response.</p>-->
-      </div>
+
     </header>
 </div>
-  <!-- data bindings in local DOM -->
 </template>
 </dom-module>
 <script>
-// element registration
 Polymer({
   is: 'cosmos-layout-header',
-  // add properties and methods on the element's prototype
   properties: {
-    // declare properties for the element's public API
     page: {
       type: String,
       observer: 'pageChanged'
