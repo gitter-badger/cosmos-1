@@ -23,47 +23,31 @@
 </style>
 <template>
   <div class="planet-list-item">
-    <a href="#" on-click="onPlanetClicked">{{planet}}</a>
+    <a href="/planets/{{planet}}" on-click="onPlanetClicked">{{planet}}</a>
   </div>
 </template>
 </dom-module>
 <script>
 Polymer({
   is: 'cosmos-planet-list-item',
-  $container: undefined,
-  $pagePlanets: undefined,
   properties: {
     planet: {
       type: String,
       value: ''
-    },
-    isSelected: {
-      type: Boolean,
-      observer: 'isSelectedValueChanged'
     }
   },
   ready: function() {
-    this.$container = $(this).find('.planet-list-item');
-    this.$pagePlanets = $(document.querySelector('cosmos-page-planets'));
+
   },
   attached: function() {
-    var self = this;
-    setTimeout(function() {
-      self.$pagePlanets.trigger('onPlanetItemReady', self);
-    }, 20);
-  },
-  isSelectedValueChanged: function() {
-    if (this.isSelected) {
-      this.$container.addClass('selected');
-      this.$pagePlanets.trigger('onPlanetItemSelected', this);
-    } else {
-      this.$container.removeClass('selected');
-      this.$pagePlanets.trigger('onPlanetItemDeselected', this);
-    }
+
   },
   onPlanetClicked: function(e) {
     e.preventDefault();
-    this.isSelected = !this.isSelected;
+
+    history.pushState({
+      page: 'planet'
+    }, 'planet', '/planets/' + this.planet);
   }
 });
 </script>
