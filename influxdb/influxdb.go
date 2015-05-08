@@ -191,7 +191,7 @@ func (i *InfluxDB) QueryContainerMetrics(planet string, container string, t stri
         cosmos,
         planet,
         container,
-        "1h",
+        "3h",
         "1m",
     )
 
