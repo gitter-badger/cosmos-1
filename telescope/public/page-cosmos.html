@@ -82,9 +82,22 @@
   color: #333;
 }
 
-.graph-list {
-  margin: 0;
-  padding: 0;
+.links {
+  padding: 20px;
+}
+
+.links a {
+  padding: 10px;
+  color: #212121;
+  cursor: pointer;
+  display: block;
+  text-decoration: none;
+}
+
+.links a:hover,
+.link a:focus {
+  background-color: #f1f1f1;
+  text-decoration: none;
 }
 </style>
 <template>
@@ -95,6 +108,10 @@
       <aside id="left" class="left-container">
         <div class="search">
           <input id="search-input" type="text" placeholder="Search all planets" />
+        </div>
+
+        <div class="links">
+          <a href="/" on-click="onNewsFeedClicked">News Feed</a>
         </div>
 
         <div class="planet-list">
@@ -134,8 +151,14 @@ Polymer({
   detached: function() {
 
   },
-  renderCosmos: function() {
+  renderNewsFeed: function() {
+    var target = this.$.main;
 
+    var element = document.createElement('cosmos-page-planet');
+    for (var i = 0, len = target.childNodes.length; i < len; i++) {
+      target.removeChild(target.childNodes[i]);
+    }
+    
   },
   renderPlanet: function() {
     var target = this.$.main;
@@ -161,6 +184,12 @@ Polymer({
         page: 'planet'
       }, 'planet', '/planets/' + target.planet);
     });
+  },
+  onNewsFeedClicked: function(e) {
+    e.preventDefault();
+    history.pushState({
+      page: 'newsfeed'
+    }, 'newsfeed', '/');
   },
   onPlanetClicked: function(target) {
     history.pushState({
