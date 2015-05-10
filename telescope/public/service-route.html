@@ -84,11 +84,7 @@ Polymer({
       });
 
       this.match('/', function() {
-        self.changePage('cosmos');
-      });
-
-      this.match('/cosmos', function() {
-        self.changePage('cosmos');
+        self.changePage('newsfeed');
       });
 
       this.match('/planets/:planet', function() {
