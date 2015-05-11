@@ -35,7 +35,7 @@
             if (planet) queryParams['planet'] = planet;
 
             var queryString = this._getQueryString(queryParams);
-            
+
             var xhr = $.ajax({
                 url: '/containers' + queryString,
                 method: 'GET',
@@ -151,7 +151,7 @@
                 xhr.complete(complete);
             }
         },
-        _getQueryString(queryParams) {
+        _getQueryString: function(queryParams) {
           var queryString = '';
 
           for (var i = 0, len = Object.keys(queryParams).length; i < len; i++) {
