@@ -1,5 +1,7 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/list-container.html">
+<link rel="import" href="/chart-planet-cpu.html">
+<link rel="import" href="/chart-planet-memory.html">
 <dom-module id="cosmos-page-planet">
 <style>
 .cosmos-container {
@@ -74,11 +76,15 @@
     <div id="nav" class="nav">
       <a on-click="onTimelineClicked">Timeline</a>
       <a on-click="onContainersClicked">Containers</a>
+      <a on-click="onCpuClicked">CPU</a>
+      <a on-click="onMemoryClicked">Memory</a>
     </div>
 
     <div id="main" class="main-container">
 
-      <cosmos-list-container containers="{{containers}}"></cosmos-list-container>
+      <cosmos-list-container id="listContainer" containers="{{containers}}"></cosmos-list-container>
+      <cosmos-chart-planet-cpu id="chartCpu"></cosmos-chart-planet-cpu>
+      <cosmos-chart-planet-memory id="chartMemory"></cosmos-chart-planet-memory>
 
     </div>
 
@@ -102,7 +108,9 @@ Polymer({
     links[0].classList.add('selected');
   },
   attached: function() {
-
+    this.$.listContainer.hidden = true;
+    this.$.chartCpu.hidden = true;
+    this.$.chartMemory.hidden = true;
   },
   detached: function() {
 
@@ -112,6 +120,9 @@ Polymer({
     selected.classList.remove('selected');
 
     this.containers = [];
+    this.$.listContainer.hidden = true;
+    this.$.chartCpu.hidden = true;
+    this.$.chartMemory.hidden = true;
   },
   selectNavigationItemAtIndex: function(index) {
     this.deselectNavgationItem();
@@ -123,8 +134,9 @@ Polymer({
   },
   onContainersClicked: function() {
     this.selectNavigationItemAtIndex(1);
-    NProgress.start();
+    this.$.listContainer.hidden = false;
 
+    NProgress.start();
     var self = this;
     Cosmos.getContainers(this.planet, function(response){
       self.containers = response.data;
@@ -135,9 +147,39 @@ Polymer({
   },
   onCpuClicked: function() {
     this.selectNavigationItemAtIndex(2);
+    this.$.chartCpu.hidden = false;
+
+    var self = this;
+    var type = 'cpu';
+    var planet = this.planet;
+    var container = undefined;
+
+    NProgress.start();
+    Cosmos.getMetrics(type, planet, container, function(response){
+      var metrics = response.data;
+      self.$.chartCpu.load(metrics);
+      NProgress.done();
+    }, function(jqXHR){
+      NProgress.done();
+    });
   },
   onMemoryClicked: function() {
     this.selectNavigationItemAtIndex(3);
+    this.$.chartMemory.hidden = false;
+
+    var self = this;
+    var type = 'memory';
+    var planet = this.planet;
+    var container = undefined;
+
+    NProgress.start();
+    Cosmos.getMetrics(type, planet, container, function(response){
+      var metrics = response.data;
+      self.$.chartMemory.load(metrics);
+      NProgress.done();
+    }, function(jqXHR){
+      NProgress.done();
+    });
   },
   onNetworkClicked: function() {
     this.selectNavigationItemAtIndex(4);

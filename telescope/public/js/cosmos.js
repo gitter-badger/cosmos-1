@@ -30,9 +30,14 @@
         },
         getContainers: function(planet, done, fail, complete) {
             var self = this;
-            planet = encodeURIComponent(planet);
+            var queryParams = {};
+
+            if (planet) queryParams['planet'] = planet;
+
+            var queryString = this._getQueryString(queryParams);
+            
             var xhr = $.ajax({
-                url: '/containers?planet=' + planet,
+                url: '/containers' + queryString,
                 method: 'GET',
                 cache: false,
                 headers: { 'Accept': 'application/json' }
@@ -52,10 +57,16 @@
         },
         getMetrics: function(type, planet, container, done, fail, complete) {
           var self = this;
-          planet = encodeURIComponent(planet);
-          container = encodeURIComponent(container);
+          var queryParams = {};
+
+          if (type) queryParams['type'] = type;
+          if (planet) queryParams['planet'] = planet;
+          if (container) queryParams['container'] = container;
+
+          var queryString = this._getQueryString(queryParams);
+
           var xhr = $.ajax({
-              url: '/metrics?type=' + type + '&planet=' + planet + '&container=' + container,
+              url: '/metrics' + queryString,
               method: 'GET',
               cache: false,
               headers: { 'Accept': 'application/json' }
@@ -139,6 +150,20 @@
             if (typeof complete == 'function') {
                 xhr.complete(complete);
             }
+        },
+        _getQueryString(queryParams) {
+          var queryString = '';
+
+          for (var i = 0, len = Object.keys(queryParams).length; i < len; i++) {
+            if (i == 0) queryString += '?';
+            else queryString += '&';
+
+            key = Object.keys(queryParams)[i];
+            value = queryParams[key];
+            queryString += (key + '=' + encodeURIComponent(value));
+          }
+
+          return queryString;
         },
         _convertNewsFeedsResponse: function(json) {
             var data = [];

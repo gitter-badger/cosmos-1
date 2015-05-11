@@ -1,6 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<link rel="import" href="/chart-cpu.html">
-<link rel="import" href="/chart-memory.html">
+<link rel="import" href="/chart-container-cpu.html">
+<link rel="import" href="/chart-container-memory.html">
 <dom-module id="cosmos-page-container">
 <style>
 .cosmos-container {
@@ -81,8 +81,8 @@
 
     <div id="main" class="main-container">
 
-      <cosmos-chart-cpu id="chartCpu"></cosmos-chart-cpu>
-      <cosmos-chart-memory id="chartMemory"></cosmos-chart-memory>
+      <cosmos-chart-container-cpu id="chartCpu"></cosmos-chart-container-cpu>
+      <cosmos-chart-container-memory id="chartMemory"></cosmos-chart-container-memory>
 
     </div>
 
@@ -108,8 +108,6 @@ Polymer({
 
     var links = this.$.nav.querySelectorAll('a');
     links[0].classList.add('selected');
-
-
   },
   attached: function() {
     this.$.chartCpu.hidden = true;

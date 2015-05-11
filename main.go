@@ -42,7 +42,7 @@ func getEnv(key, defaultValue string) string {
 // A middleware to distingush text/html content type and others
 //
 func serveIndexHTML(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {        
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		accept := strings.ToLower(r.Header.Get("Accept"))
 		if strings.Contains(accept, "text/html") {
             fp := path.Join("telescope", "public", "index.html")
