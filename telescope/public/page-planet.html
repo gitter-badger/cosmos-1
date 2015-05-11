@@ -74,7 +74,7 @@
     </div>
 
     <div id="nav" class="nav">
-      <a on-click="onTimelineClicked">Timeline</a>
+      <!--<a on-click="onTimelineClicked">Timeline</a>-->
       <a on-click="onContainersClicked">Containers</a>
       <a on-click="onCpuClicked">CPU</a>
       <a on-click="onMemoryClicked">Memory</a>
@@ -111,6 +111,8 @@ Polymer({
     this.$.listContainer.hidden = true;
     this.$.chartCpu.hidden = true;
     this.$.chartMemory.hidden = true;
+
+    this.onContainersClicked();
   },
   detached: function() {
 
@@ -133,7 +135,7 @@ Polymer({
     this.selectNavigationItemAtIndex(0);
   },
   onContainersClicked: function() {
-    this.selectNavigationItemAtIndex(1);
+    this.selectNavigationItemAtIndex(0);
     this.$.listContainer.hidden = false;
 
     NProgress.start();
@@ -146,7 +148,7 @@ Polymer({
     });
   },
   onCpuClicked: function() {
-    this.selectNavigationItemAtIndex(2);
+    this.selectNavigationItemAtIndex(1);
     this.$.chartCpu.hidden = false;
 
     var self = this;
@@ -164,7 +166,7 @@ Polymer({
     });
   },
   onMemoryClicked: function() {
-    this.selectNavigationItemAtIndex(3);
+    this.selectNavigationItemAtIndex(2);
     this.$.chartMemory.hidden = false;
 
     var self = this;
