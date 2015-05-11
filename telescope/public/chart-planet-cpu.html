@@ -1,5 +1,5 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
-<dom-module id="cosmos-chart-cpu">
+<dom-module id="cosmos-chart-planet-cpu">
 <style>
 .cosmos-container {
   width: 100%;
@@ -16,7 +16,7 @@
 </dom-module>
 <script>
 Polymer({
-  is: 'cosmos-chart-cpu',
+  is: 'cosmos-chart-planet-cpu',
   chart: undefined,
   properties: {
 
@@ -31,7 +31,6 @@ Polymer({
         x: 'date',
         columns: [
           ['date'],
-          ['CPU'],
         ]
       },
       point: { show: false },
@@ -54,24 +53,31 @@ Polymer({
     this.$.chart.hidden = true;
   },
   load: function(metrics) {
-    var times = ['date'];
-    var values = ['CPU'];
-
+    var columns = [
+      ['date']
+    ];
+    var containers = Object.keys(metrics);
+    var container = undefined;
+    var values = undefined;
     var time = undefined;
     var value = undefined;
-    for (var i = 0, len = metrics.length; i < len; i++) {
-      time = new Date(metrics[i][0]);
-      value = metrics[i][1];
 
-      times.push(time);
-      values.push(value);
+    for (var i = 0, containerLength = containers.length; i < containerLength; i++) {
+      container = containers[i];
+      values = metrics[container];
+      columns[i + 1] = [container];
+
+      for (var j = 0, valueLength = values.length; j < valueLength; j++) {
+        time = new Date(values[j][0]);
+        value = values[j][1];
+
+        columns[0 + 0][j + 1] = time; // date column
+        columns[i + 1][j + 1] = value; // container column
+      }
     }
 
     this.chart.load({
-      columns: [
-        times,
-        values
-      ]
+      columns: columns
     });
 
   }
