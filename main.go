@@ -69,10 +69,18 @@ func serveContext(
             body,
             queryParams,
         }
+
+        var js []byte
+        var length string
         
         status, res := next(c, w, r)
-        js, _ := json.Marshal(res)
-        length := strconv.Itoa(len(js))
+        if res == nil {
+            js = []byte("")
+            length = "0"
+        } else {
+            js, _ = json.Marshal(res)
+            length = strconv.Itoa(len(js))
+        }
 
         w.Header().Set("Content-Type", "application/json")
         w.Header().Set("Content-Length", length)
