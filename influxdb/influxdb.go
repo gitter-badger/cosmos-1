@@ -25,7 +25,7 @@ type InfluxDB struct {
 }
 
 var (
-    retentionPolicy = "default"
+    retentionPolicy = "7d"
     cosmos = "cosmos"
 )
 
