@@ -54,6 +54,8 @@ Polymer({
     this.$.chart.hidden = true;
   },
   load: function(metrics) {
+    if (!metrics) return;
+
     var times = ['date'];
     var values = ['Memory'];
 
@@ -61,7 +63,7 @@ Polymer({
     var value = undefined;
     for (var i = 0, len = metrics.length; i < len; i++) {
       time = new Date(metrics[i][0]);
-      value = metrics[i][1];
+      value = metrics[i][1] / 1024 / 1024;
 
       times.push(time);
       values.push(value);

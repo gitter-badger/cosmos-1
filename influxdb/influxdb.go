@@ -25,7 +25,7 @@ type InfluxDB struct {
 }
 
 var (
-    retentionPolicy = "7d"
+    retentionPolicy = "default"
     cosmos = "cosmos"
 )
 
@@ -100,7 +100,7 @@ func (i *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
             Fields: map[string]interface{} {
                 "value": container.Cpu,
             },
-            Timestamp: time.Now(),
+            Time: time.Now(),
             Precision: "s",
         }
 
@@ -115,7 +115,7 @@ func (i *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
             Fields: map[string]interface{} {
                 "value": container.Memory,
             },
-            Timestamp: time.Now(),
+            Time: time.Now(),
             Precision: "s",
         }
         

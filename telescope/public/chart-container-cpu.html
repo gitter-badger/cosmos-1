@@ -54,6 +54,8 @@ Polymer({
     this.$.chart.hidden = true;
   },
   load: function(metrics) {
+    if (!metrics) return;
+
     var times = ['date'];
     var values = ['CPU'];
 
