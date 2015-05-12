@@ -53,6 +53,8 @@ Polymer({
     this.$.chart.hidden = true;
   },
   load: function(metrics) {
+    if (!metrics) return;
+
     var columns = [
       ['date']
     ];

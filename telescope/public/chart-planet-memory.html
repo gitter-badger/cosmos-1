@@ -53,6 +53,8 @@ Polymer({
     this.$.chart.hidden = true;
   },
   load: function(metrics) {
+    if (!metrics) return;
+
     var columns = [
       ['date']
     ];
@@ -69,7 +71,7 @@ Polymer({
 
       for (var j = 0, valueLength = values.length; j < valueLength; j++) {
         time = new Date(values[j][0]);
-        value = values[j][1];
+        value = values[j][1] / 1024 / 1024;
 
         columns[0 + 0][j + 1] = time; // date column
         columns[i + 1][j + 1] = value; // container column
