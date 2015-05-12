@@ -108,9 +108,13 @@
 }
 
 .list-title h3 {
-    margin: 0;
-    padding: 0;
-    font-size: 20px;
+  margin: 0;
+  padding: 0 0 5px 0;
+  font-size: 20px;
+}
+
+.list-title p {
+  font-size: 12px;
 }
 
 .list-desc {
@@ -163,6 +167,7 @@
         </div>-->
         <div class="list-title">
           <h3>Planets</h3>
+          <p>A planet is a group of containers.</p>
         </div>
 
         <div class="planet-list">
@@ -261,7 +266,7 @@ Polymer({
     if (e.keyCode == 13) {
       var planetItems = $("div.planet-list").find("cosmos-planet-list-item");
       var item = undefined;
-							
+
       for ( var i in planetItems ) {
         if (i == "length") {
           break;
