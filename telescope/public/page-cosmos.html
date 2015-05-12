@@ -6,7 +6,7 @@
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: 50px 0 0 0;
+  padding: 0;
   display: block;
 }
 
@@ -67,6 +67,27 @@
   }
 }
 
+.logo {
+  height: 64px;
+  background-color: #fff;
+  border-bottom: 1px solid #e7e7ec;
+  text-align: center;
+}
+
+.logo a {
+  padding: 15px;
+  color: #000;
+  font-size: 24px;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: block;
+}
+
+.logo a:hover {
+  text-decoration: none;
+}
+
 .search {
   padding: 20px;
   background-color: #fff;
@@ -80,6 +101,32 @@
   outline: none;
   border: none;
   color: #333;
+}
+
+.list-title {
+  padding: 20px 20px 0 20px;
+}
+
+.list-title h3 {
+  margin: 0;
+  padding: 0 0 5px 0;
+  font-size: 20px;
+}
+
+.list-title p {
+  font-size: 12px;
+}
+
+.list-desc {
+  padding: 0 20px 20px 20px;
+}
+
+.list-desc p {
+  font-size: 12px;
+}
+
+.list-desc p a {
+  color: #29d;
 }
 
 .links {
@@ -106,6 +153,11 @@
     <div class="cosmos-row">
 
       <aside id="left" class="left-container">
+
+        <div class="logo">
+          <a href="/" on-click="onCosmosClicked">Cosmos</a>
+        </div>
+
         <div class="search">
           <input id="search-input" type="text" placeholder="Search all planets" autocomplete="off" on-keypress="onKeyPressed"/>
         </div>
@@ -113,12 +165,21 @@
         <!--<div class="links">
           <a href="/" on-click="onNewsFeedClicked">News Feed</a>
         </div>-->
+        <div class="list-title">
+          <h3>Planets</h3>
+          <p>A planet is a group of containers.</p>
+        </div>
 
         <div class="planet-list">
           <template id="planetListTemplate" is="dom-repeat" items="{{planets}}">
             <cosmos-planet-list-item planet="{{item}}"></cosmos-planet-list-item>
           </template>
         </div>
+
+        <div class="list-desc">
+          <p>Run <a href="https://github.com/cosmos-io/curiosity">Curiosity</a> to monitor your hosts.</p>
+        </div>
+
       </aside>
 
       <div id="main" class="main-container"></div>
@@ -158,7 +219,6 @@ Polymer({
     for (var i = 0, len = target.childNodes.length; i < len; i++) {
       target.removeChild(target.childNodes[i]);
     }
-
   },
   renderPlanet: function() {
     var target = this.$.main;
@@ -185,6 +245,12 @@ Polymer({
       }, 'planet', '/planets/' + target.planet);
     });
   },
+  onCosmosClicked: function(e) {
+    e.preventDefault();
+    history.pushState({
+      page: 'newsfeed'
+    }, 'newsfeed', '/');
+  },
   onNewsFeedClicked: function(e) {
     e.preventDefault();
     history.pushState({
@@ -200,7 +266,7 @@ Polymer({
     if (e.keyCode == 13) {
       var planetItems = $("div.planet-list").find("cosmos-planet-list-item");
       var item = undefined;
-							
+
       for ( var i in planetItems ) {
         if (i == "length") {
           break;
