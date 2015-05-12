@@ -12,6 +12,10 @@
 
 }
 
+.list-title p {
+  font-size: 12px;
+}
+
 .list-desc {
   padding: 20px 0;
 }
@@ -23,6 +27,10 @@
 .list-desc p a {
   color: #29d;
 }
+
+.list {
+  padding: 20px 0;
+}
 </style>
 <template>
   <div class="cosmos-container">
@@ -32,12 +40,14 @@
       <p>A container is a running application on the Docker engine.</p>
     </div>
 
-    <template id="list" is="dom-repeat" items="{{containers}}">
-      <cosmos-list-item-container planet="{{planet}}" container="{{item}}"></cosmos-list-item-container>
-    </template>
+    <div class="list">
+      <template id="list" is="dom-repeat" items="{{containers}}">
+        <cosmos-list-item-container planet="{{planet}}" container="{{item}}"></cosmos-list-item-container>
+      </template>
+    </div>
 
     <div class="list-desc">
-      <p>Run <a href="http://github.com/cosmos-io/curiosity">Curiosity</a> to monitor containers on this planet.</p>
+      <p>Both running and stopped containers are on this list.</p>
     </div>
 
   </div>

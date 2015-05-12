@@ -1,5 +1,6 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <link rel="import" href="/list-item-planet.html">
+<link rel="import" href="/page-tutorial.html">
 <dom-module id="cosmos-page-cosmos">
 <style>
 .cosmos-container {
@@ -13,6 +14,7 @@
 @media (min-width: 700px) {
   .cosmos-container {
     display: table;
+    table-layout: fixed;
   }
 }
 
@@ -118,7 +120,7 @@
 }
 
 .list-desc {
-  padding: 0 20px 20px 20px;
+  padding: 20px;
 }
 
 .list-desc p {
@@ -127,24 +129,6 @@
 
 .list-desc p a {
   color: #29d;
-}
-
-.links {
-  padding: 20px;
-}
-
-.links a {
-  padding: 10px;
-  color: #212121;
-  cursor: pointer;
-  display: block;
-  text-decoration: none;
-}
-
-.links a:hover,
-.link a:focus {
-  background-color: #f1f1f1;
-  text-decoration: none;
 }
 </style>
 <template>
@@ -162,9 +146,6 @@
           <input id="search-input" type="text" placeholder="Search all planets" autocomplete="off" on-keypress="onKeyPressed"/>
         </div>
 
-        <!--<div class="links">
-          <a href="/" on-click="onNewsFeedClicked">News Feed</a>
-        </div>-->
         <div class="list-title">
           <h3>Planets</h3>
           <p>A planet is a group of containers.</p>
@@ -215,10 +196,11 @@ Polymer({
   renderNewsFeed: function() {
     var target = this.$.main;
 
-    var element = document.createElement('cosmos-page-planet');
+    var element = document.createElement('cosmos-page-tutorial');
     for (var i = 0, len = target.childNodes.length; i < len; i++) {
       target.removeChild(target.childNodes[i]);
     }
+    target.appendChild(element);
   },
   renderPlanet: function() {
     var target = this.$.main;

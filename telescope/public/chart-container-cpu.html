@@ -4,16 +4,30 @@
 .cosmos-container {
   width: 100%;
   margin: 0 auto;
-  padding: 20px 0;
+  padding: 20px 40px;
   display: block;
+}
+
+.title p {
+  font-size: 12px;
+}
+
+.desc p {
+  font-size: 12px;
 }
 </style>
 <template>
   <div id="container" class="cosmos-container">
-    <div>
+    <div class="title">
       <h3>CPU Utilization</h3>
+      <p>A CPU utilization for a container.</p>
     </div>
+
     <div id="chart"></div>
+
+    <div class="desc">
+      <p>A stopped container won't be updated.</p>
+    </div>
   </div>
 </template>
 </dom-module>
