@@ -9,21 +9,21 @@ Cosmos is a container monitoring system. Cosmos can aggregate metrics of contain
 You can run Cosmos simply.
 
 ```
-$ docker run -d --name influxdb cosmosio/influxdb
-$ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --name cosmos cosmosio/cosmos
+$ docker run -d --name influxdb cosmosio/influxdb:0.9.0-rc29
+$ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --name cosmos cosmosio/cosmos:nightly
 ```
 
 ## Requirements
-* InfluxDB (>= v0.8.8)
+* InfluxDB (>= v0.9.0)
 * Docker (>= v1.5.0)
 
 ## Debug
 
 ### InfluxDB
 
-[InfluxDB](http://influxdb.com) is used in Cosmos. It is recommended to use [a InfluxDB container](https://registry.hub.docker.com/u/cosmosio/influxdb/) with Cosmos. Of course, you can install InfluxDB in your local machine directly. If you do, please follow [the instruction](http://influxdb.com/download/).
+[InfluxDB](http://influxdb.com) is used in Cosmos. It is recommended to use [an InfluxDB container](https://registry.hub.docker.com/u/cosmosio/influxdb/) with Cosmos. Of course, you can install InfluxDB in your local machine directly. If you do, please follow [the instruction](http://influxdb.com/download/).
 ```
-$ docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --rm --name influxdb cosmosio/influxdb
+$ docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --rm --name influxdb cosmosio/influxdb:0.9.0-rc29
 ```
 
 ### Go
@@ -44,66 +44,3 @@ Curiosity is a container monitoring agent of Cosmos. You can run Curiosity simpl
 $ docker run -e COSMOS_HOST=127.0.0.1 --rm --name curiosity cosmosio/curiosity:nightly
 ```
 See details: https://github.com/cosmos-io/curiosity
-
-
-## REST APIs
-
-### Planets
-
-Get all planets
-
-```
-GET /v1/planets 
-Accept: application/json
-```
-
-### Containers
-
-Get all containers
-
-```
-GET /v1/containers
-Accept: application/json
-```
-
-Get all containers of planet
-
-```
-GET /v1/planet/:planet/containers
-Accept: application/json
-```
-
-### Container
-
-Get container
-
-```
-GET /v1/planet/:planetName/containers/:containerName
-Accept: application/json
-```
-
-### Create containers
-
-```
-POST /v1/planet/:planet/containers
-Accept: application/json
-Content-Type: application/json
-
-[
-  {
-    "Id": "52236af62ef96f960611b6a9276d3be9800a9f04a497d24a4a7dfb1c74b23be6",
-    "Image": "cosmosio/cosmos:latest",
-    "Status": "Up 2 minutes",
-    "Command": "bash",
-    "Created": "1428047585",
-    "Names": ["cosmos"],
-    "Ports": [{"PrivatePort": 80, "PublicPort": 80, "Type": "TCP" }],
-    "Network": {"RxBytes": 8856494, "TxBytes: 102716"},
-    "Cpu": {"TotalUtilization": 0.00, "PerCpuUtilization": [0.00,0.00,0.00,0.00]},
-    "Memory": {"Limit": 2105901056, "Usage": 78176256}
-  }
-
-  ...
-  
-]
-```
