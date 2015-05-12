@@ -44,3 +44,7 @@ Curiosity is a container monitoring agent of Cosmos. You can run Curiosity simpl
 $ docker run -e COSMOS_HOST=127.0.0.1 --rm --name curiosity cosmosio/curiosity:nightly
 ```
 See details: https://github.com/cosmos-io/curiosity
+
+## Cosmos
+
+<img src="https://raw.githubusercontent.com/cosmos-io/cosmos/master/screenshot.png">
