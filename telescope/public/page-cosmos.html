@@ -107,7 +107,7 @@
 
       <aside id="left" class="left-container">
         <div class="search">
-          <input id="search-input" type="text" placeholder="Search all planets" />
+          <input id="search-input" type="text" placeholder="Search all planets" autocomplete="off" on-keypress="onKeyPressed"/>
         </div>
 
         <!--<div class="links">
@@ -195,6 +195,25 @@ Polymer({
     history.pushState({
       page: 'planet'
     }, 'planet', '/planets/' + target.planet);
+  },
+  onKeyPressed: function(e) {
+    if (e.keyCode == 13) {
+      var planetItems = $("div.planet-list").find("cosmos-planet-list-item");
+      var item = undefined;
+							
+      for ( var i in planetItems ) {
+        if (i == "length") {
+          break;
+        }
+        item = planetItems[i];
+        var name = $(item).find("a").text();
+        $(item).show();
+        if ( name.indexOf(document.getElementById('search-input').value) == -1) {
+          $(item).hide();
+        }
+      }
+      return false;
+    }
   },
   getPlanets: function() {
     this.$.left.hidden = true;
