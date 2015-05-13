@@ -1,111 +1,196 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
+<link rel="import" href="/metrics-item-container.html">
 <dom-module id="cosmos-chart-planet-cpu">
-<style>
-.cosmos-container {
-  width: 100%;
-  margin: 0 auto;
-  padding: 20px 40px;
-  display: block;
-}
+    <style>
+    .cosmos-container {
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px 40px;
+        display: block;
+    }
+    
+    .realtime {
+        text-align: right;
+        float: right;
+        font-size: 24px;
+        display: inline-block;
+        width: 120px;
+        padding-top: 7px;
+    }
+    
+    .realtime > label {
+        display: block;
+        font-size: 11px;
+        color: #666;
+    }
+    
+    .chart-container {
+        margin-top: 10px;
+    }
+    
+    .chart-container span.selector {
+        padding: 5px 8px;
+        color: #29d;
+    }
 
-.title p {
-  font-size: 12px;
-}
+    .controller {
+        font-size: 12px;
+        text-align: right;
+    }
+    
+    .title {
+        margin-top: 0px;
+    }
+    
+    .description {
+        font-size: 12px;
+        color: #888;
+    }
+    
+    .realtime > .description {
+        margin-bottom: 0;
+    }
+    
+    .chart-wrapper {
+        background-color: #fbfbfb;
+        border: 1px solid #f0f0f0;
+        padding: 10px 10px 10px 0;
+    }
 
-.desc p {
-  font-size: 12px;
-}
-</style>
-<template>
-  <div id="container" class="cosmos-container">
-    <div class="title">
-      <h3>CPU Utilization</h3>
-      <p>A CPU utilization for multiple containers.</p>
-    </div>
-
-    <div id="chart"></div>
-
-    <div class="desc">
-      <p>A stopped container won't be updated.</p>
-    </div>
-  </div>
-</template>
+    </style>
+    <template>
+        <div id="container" class="cosmos-container">
+            <div class="realtime">
+                <p class="description">TOTAL</p>
+                <b id="realtimeValue">0.0%</b>
+            </div>
+            <div>
+                <h3 class="title">CPU Utilization</h3>
+                <p class="description">A CPU utilization for multiple containers.</p>
+            </div>
+            <div class="chart-container">
+                <div class="controller">
+                    <b>Time Range</b>
+                    <span class="selector">2015-05-12 15:40</span>
+                    <span>~</span>
+                    <span class="selector">2015-05-13 14:10</span>
+                    <b>Period</b>
+                    <span>10min</span>
+                </div>
+                <div class="chart-wrapper">
+                    <div id="chart"></div>
+                </div>
+            </div>
+            <h4>Summary</h4>
+            <div>
+                <cosmos-metrics-item-container color="#1f77b4" label="carbon-cache" min="0.0%" max="98.02%" average="24.04%" current="33.3%"></cosmos-metrics-item-container>
+                <cosmos-metrics-item-container color="#ff7f0e" label="graphite-web" min="0.0%" max="98.02%" average="24.04%" current="33.3%"></cosmos-metrics-item-container>
+                <cosmos-metrics-item-container color="#2ca02c" label="influxdb" min="0.0%" max="98.02%" average="24.04%" current="33.3%"></cosmos-metrics-item-container>
+            </div>
+            <h4>Related NewsFeeds</h4>
+            <div></div>
+        </div>
+    </template>
 </dom-module>
 <script>
 Polymer({
-  is: 'cosmos-chart-planet-cpu',
-  chart: undefined,
-  properties: {
+    is: 'cosmos-chart-planet-cpu',
+    chart: undefined,
+    properties: {
 
-  },
-  ready: function() {
+    },
+    ready: function() {
+        var self = this;
+        setInterval(function() {
+            var val = Math.random() * 100;
+            val = parseInt(val * 100) / 100;
+            $(self.$.realtimeValue).text(val + '%');
+        }, 2000);
+    },
+    attached: function() {
 
-  },
-  attached: function() {
+    },
+    detached: function() {
 
-  },
-  detached: function() {
+    },
+    show: function() {
+        if (this.$.chart) this.$.chart.hidden = false;
+    },
+    hide: function() {
+        if (this.$.chart) this.$.chart.hidden = true;
+    },
+    setChart: function() {
+        var chart = c3.generate({
+            bindto: this.$.chart,
+            data: {
+                x: 'date',
+                columns: [
+                    ['date']
+                ]
+            },
+            point: {
+                show: false
+            },
+            tooltip: {
+                show: true
+            },
+            axis: {
+                x: {
+                    tick: {
+                        outer: false,
+                        format: '%m-%d %H:%M'
+                    },
+                    type: 'timeseries'
+                },
+                y: {
+                    tick: {
+                        outer: false
+                    },
+                    min: 0
+                }
+            },
+            grid: {
+                x: {
+                    show: true
+                },
+                y: {
+                    show: true
+                }
+            }
+        });
 
-  },
-  show: function() {
-    if (this.$.chart) this.$.chart.hidden = false;
-  },
-  hide: function() {
-    if (this.$.chart) this.$.chart.hidden = true;
-  },
-  setChart: function() {
-    var chart = c3.generate({
-      bindto: this.$.chart,
-      data: {
-        x: 'date',
-        columns: [
-          ['date']
-        ]
-      },
-      point: { show: false },
-      tooltip: { show: true },
-      axis: {
-        x: { tick: { outer: false, format: '%m-%d %H:%M' }, type: 'timeseries' },
-        y: { tick: { outer: false }, min: 0 }
-      },
-      grid: {
-        x: { show: true },
-        y: { show: true }
-      }
-    });
+        this.chart = chart;
+    },
+    load: function(metrics) {
+        if (!metrics) return;
 
-    this.chart = chart;
-  },
-  load: function(metrics) {
-    if (!metrics) return;
+        var columns = [
+            ['date']
+        ];
+        var containers = Object.keys(metrics);
+        var container = undefined;
+        var values = undefined;
+        var time = undefined;
+        var value = undefined;
 
-    var columns = [
-      ['date']
-    ];
-    var containers = Object.keys(metrics);
-    var container = undefined;
-    var values = undefined;
-    var time = undefined;
-    var value = undefined;
+        for (var i = 0, containerLength = containers.length; i < containerLength; i++) {
+            container = containers[i];
+            values = metrics[container];
+            columns[i + 1] = [container];
 
-    for (var i = 0, containerLength = containers.length; i < containerLength; i++) {
-      container = containers[i];
-      values = metrics[container];
-      columns[i + 1] = [container];
+            for (var j = 0, valueLength = values.length; j < valueLength; j++) {
+                time = new Date(values[j][0]);
+                value = values[j][1];
 
-      for (var j = 0, valueLength = values.length; j < valueLength; j++) {
-        time = new Date(values[j][0]);
-        value = values[j][1];
+                columns[0 + 0][j + 1] = time; // date column
+                columns[i + 1][j + 1] = value; // container column
+            }
+        }
 
-        columns[0 + 0][j + 1] = time; // date column
-        columns[i + 1][j + 1] = value; // container column
-      }
+        if (!this.chart) this.setChart();
+        this.chart.load({
+            columns: columns
+        });
     }
-
-    if (!this.chart) this.setChart();
-    this.chart.load({
-      columns: columns
-    });
-  }
 });
 </script>

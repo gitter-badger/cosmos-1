@@ -1,0 +1,60 @@
+<link rel="import" href="/vendor/polymer/polymer.html">
+<dom-module id="cosmos-metrics-item-container">
+	<style>
+	:host > div {
+		border: 1px solid #ccc;
+		padding-left: 10px;
+		padding-right: 10px;
+		padding-bottom 	: 10px;
+		margin-bottom: 10px;		
+		margin-top: 10px;		
+		display: inline-block;
+
+	}
+	:host > div > span {
+		display: inline-block;
+		margin-right: 10px;
+		margin-left: 10px;
+		font-size:14px;
+        font-style: bold;		
+	}
+
+	span.name {
+		width: 180px;
+	}
+
+	span > span {
+		display: block;
+/*		margin-right: 5px;*/
+		font-size: 11px;
+        color: #888;
+        font-style: normal;
+	}
+
+	</style>
+	<template>
+		<div id="container">
+			<h5 class="name">{{label}}</h5>
+			<span class="min"><span>MIN</span>{{min}}</span>
+			<span class="max"><span>MAX</span>{{max}}</span>
+			<span class="average"><span>AVERAGE</span>{{average}}</span>
+			<span class="current"><span>CURRENT</span>{{current}}</span>
+		</div>
+	</template>
+</dom-module>
+<script>
+	Polymer({
+		is: 'cosmos-metrics-item-container',
+		properties: {
+			color: String,
+			label: String,
+			min: String,
+			max: String,
+			current: String,
+			average: String
+		},
+		ready: function() {
+			$(this.$.container).css("border-left", "5px solid " + this.color);
+		}
+	});
+</script>
