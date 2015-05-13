@@ -66,13 +66,14 @@ Polymer({
       point: { show: false },
       tooltip: { show: true },
       axis: {
-        x: { tick: { outer: false, format: '%m-%d %H:%M' }, type: 'timeseries' },
+        x: { tick: { outer: false, format: '%m-%d %H:%M', multiline: true, width: 50 }, type: 'timeseries', height: 40 }, <!-- set height of axis.x to avoid overlap with legend -->
         y: { tick: { outer: false }, min: 0 }
       },
       grid: {
         x: { show: true },
         y: { show: true }
-      }
+      },
+      legend: { position: 'bottom' } <!-- this is a legend part. default position is 'bottom' -->
     });
 
     this.chart = chart;
