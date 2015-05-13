@@ -19,5 +19,9 @@ body {
 }
 
 .c3 text {
+  font-size: 13px;
+}
 
+.c3 .c3-grid line {
+  stroke: #ddd;
 }

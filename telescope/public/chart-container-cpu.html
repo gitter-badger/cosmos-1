@@ -66,8 +66,12 @@ Polymer({
       point: { show: false },
       tooltip: { show: true },
       axis: {
-        x: { tick: { outer: false, format: '%m-%dT%H:%M' }, type: 'timeseries' },
+        x: { tick: { outer: false, format: '%m-%d %H:%M' }, type: 'timeseries' },
         y: { tick: { outer: false }, min: 0 }
+      },
+      grid: {
+        x: { show: true },
+        y: { show: true }
       }
     });
 
