@@ -42,12 +42,24 @@ Polymer({
 
   },
   attached: function() {
+
+  },
+  detached: function() {
+
+  },
+  show: function() {
+    if (this.$.chart) this.$.chart.hidden = false;
+  },
+  hide: function() {
+    if (this.$.chart) this.$.chart.hidden = true;
+  },
+  setChart: function() {
     var chart = c3.generate({
       bindto: this.$.chart,
       data: {
         x: 'date',
         columns: [
-          ['date'],
+          ['date']
         ]
       },
       point: { show: false },
@@ -59,15 +71,6 @@ Polymer({
     });
 
     this.chart = chart;
-  },
-  detached: function() {
-
-  },
-  show: function() {
-    this.$.chart.hidden = false;
-  },
-  hide: function() {
-    this.$.chart.hidden = true;
   },
   load: function(metrics) {
     if (!metrics) return;
@@ -95,10 +98,10 @@ Polymer({
       }
     }
 
+    if (!this.chart) this.setChart();
     this.chart.load({
       columns: columns
     });
-
   }
 });
 </script>
