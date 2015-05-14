@@ -1,54 +1,54 @@
 <link rel="import" href="/vendor/polymer/polymer.html">
 <dom-module id="cosmos-metrics-item-container">
-	<style>
-	:host > div {
-		border: 1px solid #ccc;
-		padding-left: 10px;
-		padding-right: 10px;
-		padding-bottom 	: 10px;
-		margin-bottom: 10px;
-		margin-top: 10px;
-		display: inline-block;
+<style>
+.cosmos-container {
+	margin: 0 0 0 5px;
+	padding: 15px;
+	border-width: 1px 1px 1px 0;
+	border-style: solid;
+	border-color: #e7e7ec;
+	display: block;
+}
 
-	}
-	:host > div > span {
-		display: inline-block;
-		margin-right: 10px;
-		margin-left: 10px;
-		font-size:14px;
-        font-style: bold;
-	}
+@media (min-width: 700px) {
+  .cosmos-container {
+		margin: 0 10px 0 5px;
+    display: inline-block;
+  }
+}
 
-	span.name {
-		width: 180px;
-	}
+.cosmos-container h5 {
+	margin: 0;
+	padding: 0 0 5px 0;
+}
 
-	span > span {
-		display: block;
-/*		margin-right: 5px;*/
-		font-size: 11px;
-        color: #888;
-        font-style: normal;
-	}
+.cosmos-container span {
+	display: inline-block;
+}
 
-	#container {
-		margin-left: 5px;
-		margin-right: 10px;
-		border-width: 1px 1px 1px 0;
-		border-style: solid;
-		border-color: #ccc;
-	}
+.label {
+	margin: 0;
+	padding: 0;
+	color: #333;
+	font-weight: normal;
+	text-transform: uppercase;
+}
 
-	</style>
-	<template>
-		<div id="container">
-			<h5 class="name">{{label}}</h5>
-			<span class="min"><span>MIN</span>{{min}}</span>
-			<span class="max"><span>MAX</span>{{max}}</span>
-			<span class="average"><span>AVERAGE</span>{{average}}</span>
-			<span class="current"><span>CURRENT</span>{{current}}</span>
-		</div>
-	</template>
+.value {
+	padding: 5px;
+	color: #333;
+	font-weight: bold;
+}
+</style>
+<template>
+	<div id="container" class="cosmos-container">
+		<h5 class="name">{{label}}</h5>
+		<span class="now"><span class="label">Now</span><span class="value">{{now}}</span></span>
+		<span class="min"><span class="label">Min</span><span class="value">{{min}}</span></span>
+		<span class="max"><span class="label">Max</span><span class="value">{{max}}</span></span>
+		<span class="average"><span class="label">Avg</span><span class="value">{{average}}</span></span>
+	</div>
+</template>
 </dom-module>
 <script>
 	Polymer({
@@ -56,9 +56,9 @@
 		properties: {
 			color: String,
 			label: String,
+			now: String,
 			min: String,
 			max: String,
-			current: String,
 			average: String
 		},
 		ready: function() {
