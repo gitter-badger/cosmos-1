@@ -4,30 +4,56 @@
 .cosmos-container {
   width: 100%;
   margin: 0 auto;
-  padding: 20px 40px;
+  padding: 40px;
   display: block;
 }
 
-.title p {
-  font-size: 12px;
+.title {
+  margin-top: 0;
 }
 
-.desc p {
+.description {
   font-size: 12px;
+  color: #666;
+}
+
+.controller {
+  padding: 20px;
+  border-top: 1px solid #e7e7ec;
+  text-align: center;
+}
+
+.controller span {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.chart-container {
+  min-height: 412px;
+  border-top: 1px solid #e7e7ec;
+  border-bottom: 1px solid #e7e7ec;
+  background-color: #fff;
+  padding: 60px 0 30px 0;
 }
 </style>
 <template>
   <div id="container" class="cosmos-container">
-    <div class="title">
-      <h3>Memory Usage</h3>
-      <p>A memory usage for a container.</p>
+
+    <div>
+      <h3 class="title">Memory Usage</h3>
+      <p class="description">A memory usage for a container.</p>
     </div>
 
-    <div id="chart"></div>
-
-    <div class="desc">
-      <p>A stopped container won't be updated.</p>
+    <div class="controller">
+      <span>{{startDate}}</span>
+      <span>-</span>
+      <span>{{endDate}}</span>
     </div>
+
+    <div class="chart-container">
+      <div id="chart"></div>
+    </div>
+
   </div>
 </template>
 </dom-module>
@@ -35,6 +61,8 @@
 Polymer({
   is: 'cosmos-chart-container-memory',
   chart: undefined,
+  startDate: undefined,
+  endDate: undefined,
   properties: {
 
   },
@@ -85,12 +113,18 @@ Polymer({
 
     var time = undefined;
     var value = undefined;
+    var startDate = undefined;
+    var endDate = undefined;
+
     for (var i = 0, len = metrics.length; i < len; i++) {
       time = new Date(metrics[i][0]);
       value = metrics[i][1] / 1024 / 1024;
 
       times.push(time);
       values.push(value);
+
+      if (i == 0) startDate = time;
+      else if (i == metrics.length - 1) endDate = time;
     }
 
     if (!this.chart) this.setChart();
@@ -101,6 +135,8 @@ Polymer({
       ]
     });
 
+    this.startDate = startDate;
+    this.endDate = endDate;
   }
 });
 </script>
