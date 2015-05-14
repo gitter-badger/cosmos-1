@@ -13,12 +13,14 @@ import (
 	"github.com/cosmos-io/cosmos/context"
 	"github.com/cosmos-io/cosmos/influxdb"
 	"github.com/cosmos-io/cosmos/router"
+	"github.com/cosmos-io/cosmos/worker"
 
 	"github.com/gorilla/mux"
 )
 
 var (
-	cosmosPort = getEnv("COSMOS_PORT", "8888")
+	cosmosPort        = getEnv("COSMOS_PORT", "8888")
+	cosmosClusterRole = getEnv("COSMOS_CLUSTER_ROLE", "master")
 
 	influxdbHost     = getEnv("INFLUXDB_HOST", "localhost")
 	influxdbPort     = getEnv("INFLUXDB_PORT", "8086")
@@ -26,6 +28,7 @@ var (
 	influxdbPassword = getEnv("INFLUXDB_PASSWORD", "root")
 	influxdbDatabase = getEnv("INFLUXDB_DATABASE", "cosmos")
 	influxdbClient   = newInfluxDB()
+	newsfeedWorker   = worker.NewNewsFeedWorker(influxdbClient, 1000*60*1)
 )
 
 // to get an environment variable if it exists or default value
@@ -170,7 +173,9 @@ func run() {
 }
 
 func init() {
-
+	if cosmosClusterRole == "master" {
+		newsfeedWorker.Run()
+	}
 }
 
 func main() {

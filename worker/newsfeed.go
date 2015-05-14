@@ -2,101 +2,84 @@ package worker
 
 import (
 	"fmt"
-	"strings"
+	"log"
 	"time"
 
-	"github.com/cosmos-io/cosmos/dao"
-	"github.com/cosmos-io/cosmos/service"
-	"github.com/cosmos-io/influxdbc"
+	"github.com/cosmos-io/cosmos/influxdb"
 )
 
 type NewsFeedWorker struct {
-	newsFeedService *service.NewsFeedService
-	lifeTime        int
-	delayTime       time.Duration
+	db        *influxdb.InfluxDB
+	delayTime time.Duration
 }
 
-func NewNewsFeedWorker(lifeTime int, delayTime time.Duration) *NewsFeedWorker {
-	return &NewsFeedWorker{newsFeedService: &service.NewsFeedService{}, lifeTime: lifeTime, delayTime: delayTime}
+var (
+	lastCheckTime time.Time
+)
+
+func NewNewsFeedWorker(db *influxdb.InfluxDB, delayTime time.Duration) *NewsFeedWorker {
+	return &NewsFeedWorker{db: db, delayTime: delayTime}
 }
 
 func (this *NewsFeedWorker) Run() {
+	lastCheckTime = time.Now()
+
 	go func() {
-		ticker := time.NewTicker(time.Second * this.delayTime)
+		ticker := time.NewTicker(time.Millisecond * this.delayTime)
 		for _ = range ticker.C {
-			planetSeries, err := this.checkRemovedPlanets()
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-
-			containerSeries, err := this.checkRemovedContainers()
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-
-			series := make([]*influxdbc.Series, 0)
-			series = append(series, planetSeries...)
-			series = append(series, containerSeries...)
-
-			_, err = dao.Series.WriteSeries(series)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
+			this.checkNewContainer()
+			this.checkContainerUpDown()
+			lastCheckTime = time.Now()
 		}
 	}()
 }
 
-func (this *NewsFeedWorker) checkRemovedPlanets() ([]*influxdbc.Series, error) {
-	result := make([]*influxdbc.Series, 0)
-
-	passed, err := dao.Planet.GetPlanetStatusesPassLifeTime(this.lifeTime)
+func (this *NewsFeedWorker) checkNewContainer() error {
+	result, err := this.db.QueryFirstContainerMetrics()
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	current, err := dao.Planet.GetPlanetStatusesInLifeTime(this.lifeTime)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, passedCont := range passed {
-		exist := false
-		for _, currentCont := range current {
-			if passedCont.Name == currentCont.Name {
-				exist = true
-				break
+	for _, v := range result {
+		time, err := time.Parse(time.RFC3339Nano, v["time"])
+		if err == nil {
+			if time.Unix() > lastCheckTime.Unix() {
+				// New Container
+				log.Println("New Container is added - " + v["container"])
 			}
 		}
-
-		if exist == false {
-			// Removed one
-			comps := strings.Split(passedCont.Name, ".")
-			token := comps[1]
-			planet := comps[2]
-			series, err := this.newsFeedService.MakeNewsFeed(token, planet, service.FEED_TYPE_REMOVE_PLANET)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			result = append(result, series)
-
-			// make one explicitly
-			statusSeries := influxdbc.NewSeries(fmt.Sprintf("PLANET.%s.%s.Status", token, planet), "txt_value", "num_value")
-			statusSeries.AddPoint("Exited", nil)
-			result = append(result, statusSeries)
-
-			statusSeries = influxdbc.NewSeries(fmt.Sprintf("PLANET.%s.%s.Name", token, planet), "txt_value", "num_value")
-			statusSeries.AddPoint(planet, nil)
-			result = append(result, statusSeries)
-		}
 	}
 
-	return result, nil
+	return nil
 }
 
-func (this *NewsFeedWorker) checkRemovedContainers() ([]*influxdbc.Series, error) {
-	return nil, nil
+func (this *NewsFeedWorker) checkContainerUpDown() error {
+	start := fmt.Sprintf("%dm", (this.delayTime/1000/60)*2)
+	end := fmt.Sprintf("%dm", (this.delayTime / 1000 / 60))
+
+	containersPast, err := this.db.QueryContainersInRange(start, end, end)
+	if err != nil {
+		return err
+	}
+
+	containersCurrent, err := this.db.QueryContainersInRange(end, "0m", end)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(containersPast)
+	fmt.Println(containersCurrent)
+
+	for c, _ := range containersPast {
+		if v, ok := containersCurrent[c]; ok == false {
+			log.Println("Container is Down - " + v["container"])
+		}
+	}
+
+	for c, _ := range containersCurrent {
+		if v, ok := containersPast[c]; ok == false {
+			log.Println("Container is Up - " + v["container"])
+		}
+	}
+
+	return nil
 }
