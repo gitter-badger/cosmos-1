@@ -147,6 +147,7 @@ Polymer({
     var total = 0;
     var startDate = undefined;
     var endDate = undefined;
+    var unit = 'MB';
 
     for (var i = 0, containerLength = containers.length; i < containerLength; i++) {
       container = containers[i];
@@ -172,10 +173,10 @@ Polymer({
       var summary = {
         label: container,
         color: '#29d',
-        min: min.toFixed(2) + '%',
-        max: max.toFixed(2) + '%',
-        average: (sum / values.length).toFixed(2) + '%',
-        now: value.toFixed(2) + '%'
+        min: min.toFixed(2) + unit,
+        max: max.toFixed(2) + unit,
+        average: (sum / values.length).toFixed(2) + unit,
+        now: value.toFixed(2) + unit
       };
 
       summaries[i] = summary;
@@ -188,7 +189,7 @@ Polymer({
     });
 
     this.summaries = summaries;
-    this.total = total.toFixed(2) + '%';
+    this.total = total.toFixed(2) + unit;
     this.startDate = startDate;
     this.endDate = endDate;
   }
