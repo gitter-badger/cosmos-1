@@ -4,30 +4,77 @@
 .cosmos-container {
   width: 100%;
   margin: 0 auto;
-  padding: 20px 40px;
+  padding: 40px;
   display: block;
 }
 
-.title p {
-  font-size: 12px;
+.title {
+  margin-top: 0;
 }
 
-.desc p {
+.description {
   font-size: 12px;
+  color: #666;
+}
+
+.controller {
+  padding: 20px;
+  border-top: 1px solid #e7e7ec;
+  text-align: center;
+}
+
+.controller span {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.chart-container {
+  min-height: 412px;
+  border-top: 1px solid #e7e7ec;
+  border-bottom: 1px solid #e7e7ec;
+  background-color: #fff;
+  padding: 60px 0 30px 0;
+}
+
+.summary {
+  padding: 20px 0;
+}
+
+.summary h4 {
+  margin-bottom: 20px;
 }
 </style>
 <template>
   <div id="container" class="cosmos-container">
-    <div class="title">
-      <h3>Memory Usage</h3>
-      <p>A memory usage for multiple containers.</p>
+
+    <div>
+      <h3 class="title">Memory Usage</h3>
+      <p class="description">A memory usage for multiple containers.</p>
     </div>
 
-    <div id="chart"></div>
-
-    <div class="desc">
-      <p>A stopped container won't be updated.</p>
+    <div class="controller">
+      <span>{{startDate}}</span>
+      <span>-</span>
+      <span>{{endDate}}</span>
     </div>
+
+    <div class="chart-container">
+      <div id="chart"></div>
+    </div>
+
+    <div class="summary">
+      <h4>Summary</h4>
+      <template id="summaryList" is="dom-repeat" items="{{summaries}}">
+        <cosmos-metrics-item-container color="{{item.color}}"
+                                       label="{{item.label}}"
+                                       now="{{item.now}}"
+                                       min="{{item.min}}"
+                                       max="{{item.max}}"
+                                       average="{{item.average}}">
+        </cosmos-metrics-item-container>
+      </template>
+    </div>
+
   </div>
 </template>
 </dom-module>
@@ -35,6 +82,9 @@
 Polymer({
   is: 'cosmos-chart-planet-memory',
   chart: undefined,
+  summaries: [],
+  startDate: undefined,
+  endDate: undefined,
   properties: {
 
   },
@@ -83,15 +133,26 @@ Polymer({
       ['date']
     ];
     var containers = Object.keys(metrics);
+    var summaries = [];
+
+    // temp variables
     var container = undefined;
     var values = undefined;
     var time = undefined;
     var value = undefined;
+    var min = undefined;
+    var max = undefined;
+    var average = undefined;
+    var sum = undefined;
+    var total = 0;
+    var startDate = undefined;
+    var endDate = undefined;
 
     for (var i = 0, containerLength = containers.length; i < containerLength; i++) {
       container = containers[i];
       values = metrics[container];
       columns[i + 1] = [container];
+      min = max = average = sum = 0;
 
       for (var j = 0, valueLength = values.length; j < valueLength; j++) {
         time = new Date(values[j][0]);
@@ -99,13 +160,37 @@ Polymer({
 
         columns[0 + 0][j + 1] = time; // date column
         columns[i + 1][j + 1] = value; // container column
+
+        min = Math.min(min, value);
+        max = Math.max(max, value);
+        sum += value;
+
+        if (j == 0) startDate = time;
+        else if (j == values.length - 1) endDate = time;
       }
+
+      var summary = {
+        label: container,
+        color: '#29d',
+        min: min.toFixed(2) + '%',
+        max: max.toFixed(2) + '%',
+        average: (sum / values.length).toFixed(2) + '%',
+        now: value.toFixed(2) + '%'
+      };
+
+      summaries[i] = summary;
+      total += value;
     }
 
     if (!this.chart) this.setChart();
     this.chart.load({
       columns: columns
     });
+
+    this.summaries = summaries;
+    this.total = total.toFixed(2) + '%';
+    this.startDate = startDate;
+    this.endDate = endDate;
   }
 });
 </script>
