@@ -194,13 +194,15 @@ Polymer({
 
   },
   renderNewsFeed: function() {
-    var target = this.$.main;
-
-    var element = document.createElement('cosmos-page-tutorial');
-    for (var i = 0, len = target.childNodes.length; i < len; i++) {
-      target.removeChild(target.childNodes[i]);
-    }
-    target.appendChild(element);
+    //var target = this.$.main;
+    Cosmos.getPlanets(function(response){
+      if (!response || !response.data || response.data.length == 0) return;
+      var planet = response.data[0];
+      history.pushState({
+        page: 'planet'
+      }, 'planet', '/planets/' + planet);
+    },function(jqXHR){
+    });
   },
   renderPlanet: function() {
     var target = this.$.main;
