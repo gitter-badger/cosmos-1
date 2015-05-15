@@ -57,7 +57,7 @@ Polymer({
     });
   },
   changePage: function(page) {
-    if (!history.state) history.replaceState({page: page});
+    if (!history.state) history.replaceState({page: page}, '');
 
     var target = document.querySelector('cosmos-layout-content');
     setTimeout(function() {

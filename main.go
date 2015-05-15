@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -29,6 +30,8 @@ var (
 	influxdbDatabase = getEnv("INFLUXDB_DATABASE", "cosmos")
 	influxdbClient   = newInfluxDB()
 	newsfeedWorker   = worker.NewNewsFeedWorker(influxdbClient, 1000*60*1)
+
+	staticFileRegexp = regexp.MustCompile("^.*\\.(jpg|jpeg|png|gif|css|js|html|xml|json)$")
 )
 
 // to get an environment variable if it exists or default value
@@ -44,25 +47,33 @@ func getEnv(key, defaultValue string) string {
 
 // A middleware to distingush text/html content type and others
 //
-func serveIndexHTML(next http.Handler) http.Handler {
+func serveStaticFileOrIndexHTML(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if staticFileRegexp.MatchString(r.URL.Path) {
+			log.Println("Serving static file - " + r.URL.Path)
+			fp := path.Join("telescope", "public", r.URL.Path)
+			http.ServeFile(w, r, fp)
+			return
+		}
+
 		accept := strings.ToLower(r.Header.Get("Accept"))
 		if strings.Contains(accept, "text/html") {
+			log.Println("Serving index.html - " + r.URL.Path)
 			fp := path.Join("telescope", "public", "index.html")
 			http.ServeFile(w, r, fp)
 			return
 		}
+
 		next.ServeHTTP(w, r)
 	})
 }
 
 // A middleware to serve a cosmos context
 //
-func serveContext(
-	next func(
-		context.Context,
-		http.ResponseWriter,
-		*http.Request) (int, map[string]interface{})) func(http.ResponseWriter, *http.Request) {
+type MuxHandler func(context.Context, http.ResponseWriter, *http.Request) (int, map[string]interface{})
+
+func serveContext(next MuxHandler) func(http.ResponseWriter, *http.Request) {
 	return (func(w http.ResponseWriter, r *http.Request) {
 		body, _ := ioutil.ReadAll(r.Body)
 		queryParams := r.URL.Query()
@@ -127,8 +138,7 @@ func newInfluxDB() *influxdb.InfluxDB {
 // to run
 //
 func run() {
-	publicPath := path.Join("telescope", "public")
-
+	//	publicPath := path.Join("telescope", "public")
 	mux := mux.NewRouter()
 
 	mux.HandleFunc("/metrics",
@@ -164,11 +174,7 @@ func run() {
 	  mux.HandleFunc("/v1/planets/{planet}/containers",
 	      serveContext(router.AddContainersOfPlanet)).Methods("POST")*/
 
-	mux.PathPrefix("/").Handler(http.FileServer(http.Dir(publicPath)))
-
-	middlewares := serveIndexHTML(mux)
-
-	http.Handle("/", middlewares)
+	http.Handle("/", serveStaticFileOrIndexHTML(mux))
 	http.ListenAndServe(":"+cosmosPort, nil)
 }
 
