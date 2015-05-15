@@ -49,15 +49,16 @@ func getEnv(key, defaultValue string) string {
 //
 func serveStaticFileOrIndexHTML(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        log.Println(r.URL.Path)
+
 		if staticFileRegexp.MatchString(r.URL.Path) {
 			fp := path.Join("telescope", "public", r.URL.Path)
-            log.Println(fp)
 			http.ServeFile(w, r, fp)
 			return
 		}
 
 		accept := strings.ToLower(r.Header.Get("Accept"))
-		if r.URL.Path == "/" && strings.Contains(accept, "text/html") {
+		if strings.Contains(accept, "text/html") {
 			fp := path.Join("telescope", "public", "index.html")
 			http.ServeFile(w, r, fp)
 			return
