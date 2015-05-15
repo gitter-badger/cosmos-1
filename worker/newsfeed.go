@@ -64,9 +64,6 @@ func (this *NewsFeedWorker) checkContainerUpDown() error {
 		return err
 	}
 
-	fmt.Println(containersPast)
-	fmt.Println(containersCurrent)
-
 	for c, _ := range containersPast {
 		if _, ok := containersCurrent[c]; ok == false {
 		}
