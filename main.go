@@ -31,7 +31,7 @@ var (
 	influxdbClient   = newInfluxDB()
 	newsfeedWorker   = worker.NewNewsFeedWorker(influxdbClient, 1000*60*1)
 
-	staticFileRegexp = regexp.MustCompile("^.*\\.(jpg|jpeg|png|gif|css|js|html|xml|json)$")
+	staticFileRegexp = regexp.MustCompile("^.*\\.(jpg|jpeg|png|gif|css|js|html|xml|json|map)$")
 )
 
 // to get an environment variable if it exists or default value
@@ -49,23 +49,22 @@ func getEnv(key, defaultValue string) string {
 //
 func serveStaticFileOrIndexHTML(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		if staticFileRegexp.MatchString(r.URL.Path) {
-			log.Println("Serving static file - " + r.URL.Path)
 			fp := path.Join("telescope", "public", r.URL.Path)
+            log.Println(fp)
 			http.ServeFile(w, r, fp)
 			return
 		}
 
 		accept := strings.ToLower(r.Header.Get("Accept"))
-		if strings.Contains(accept, "text/html") {
-			log.Println("Serving index.html - " + r.URL.Path)
+		if r.URL.Path == "/" && strings.Contains(accept, "text/html") {
 			fp := path.Join("telescope", "public", "index.html")
 			http.ServeFile(w, r, fp)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+        next.ServeHTTP(w, r)
+        return
 	})
 }
 
@@ -175,7 +174,7 @@ func run() {
 	      serveContext(router.AddContainersOfPlanet)).Methods("POST")*/
 
 	http.Handle("/", serveStaticFileOrIndexHTML(mux))
-	http.ListenAndServe(":"+cosmosPort, nil)
+	http.ListenAndServe(":" + cosmosPort, nil)
 }
 
 func init() {

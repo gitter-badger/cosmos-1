@@ -2,7 +2,6 @@ package worker
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/cosmos-io/cosmos/influxdb"
@@ -44,7 +43,6 @@ func (this *NewsFeedWorker) checkNewContainer() error {
 		if err == nil {
 			if time.Unix() > lastCheckTime.Unix() {
 				// New Container
-				log.Println("New Container is added - " + v["container"])
 			}
 		}
 	}
@@ -66,18 +64,13 @@ func (this *NewsFeedWorker) checkContainerUpDown() error {
 		return err
 	}
 
-	fmt.Println(containersPast)
-	fmt.Println(containersCurrent)
-
 	for c, _ := range containersPast {
-		if v, ok := containersCurrent[c]; ok == false {
-			log.Println("Container is Down - " + v["container"])
+		if _, ok := containersCurrent[c]; ok == false {
 		}
 	}
 
 	for c, _ := range containersCurrent {
-		if v, ok := containersPast[c]; ok == false {
-			log.Println("Container is Up - " + v["container"])
+		if _, ok := containersPast[c]; ok == false {
 		}
 	}
 
