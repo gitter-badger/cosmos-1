@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	cosmosPort        = getEnv("COSMOS_PORT", "8888")
+	cosmosPort        = getEnv("PORT", "8888")
 	cosmosClusterRole = getEnv("COSMOS_CLUSTER_ROLE", "master")
 
 	influxdbHost     = getEnv("INFLUXDB_HOST", "localhost")
