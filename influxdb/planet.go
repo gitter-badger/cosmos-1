@@ -1,6 +1,8 @@
 package influxdb
 
-import "fmt"
+import (
+    "fmt"
+)
 
 func (db *InfluxDB) QueryPlanets() ([]string, error) {
 	cmd := fmt.Sprintf("SHOW TAG VALUES WITH KEY = %s WHERE cosmos = '%s'",
