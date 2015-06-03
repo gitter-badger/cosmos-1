@@ -66,7 +66,7 @@ func (db *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
 
 	index := 0
 	sampleSize := len(metrics.Containers)
-	pts := make([]client.Point, sampleSize*2) // cpu, memory
+	pts := make([]client.Point, sampleSize * 2) // cpu, memory
 	for i := 0; i < sampleSize; i++ {
 		container := metrics.Containers[i]
 		if container.Container == "" {

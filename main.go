@@ -31,7 +31,7 @@ var (
 	influxdbClient   = newInfluxDB()
 	newsfeedWorker   = worker.NewNewsFeedWorker(influxdbClient, 1000*60*1)
 
-	staticFileRegexp = regexp.MustCompile("^.*\\.(jpg|jpeg|png|gif|css|js|html|xml|json|map)$")
+	staticFileRegexp = regexp.MustCompile("^.*\\.(jpg|jpeg|png|gif|css|js|html|xml|json|map|txt)$")
 )
 
 // to get an environment variable if it exists or default value
@@ -49,8 +49,6 @@ func getEnv(key, defaultValue string) string {
 //
 func serveStaticFileOrIndexHTML(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        log.Println(r.URL.Path)
-
 		if staticFileRegexp.MatchString(r.URL.Path) {
 			fp := path.Join("telescope", "public", r.URL.Path)
 			http.ServeFile(w, r, fp)
