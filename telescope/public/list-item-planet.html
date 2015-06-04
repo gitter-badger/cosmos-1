@@ -27,7 +27,7 @@
 </style>
 <template>
   <div class="planet-list-item">
-    <a href="/planets/{{planet}}" on-click="onPlanetClicked">{{planet}}</a>
+    <a href="{{link}}" on-click="onPlanetClicked">{{planet}}</a>
   </div>
 </template>
 </dom-module>
@@ -35,6 +35,7 @@
 Polymer({
   is: 'cosmos-planet-list-item',
   $container: undefined,
+  link: undefined,
   properties: {
     planet: {
       type: String,
@@ -43,6 +44,7 @@ Polymer({
   },
   ready: function() {
     this.$container = $(document.querySelector('cosmos-page-cosmos'));
+    this.link = '/planets/' + this.planet;
   },
   attached: function() {
 
