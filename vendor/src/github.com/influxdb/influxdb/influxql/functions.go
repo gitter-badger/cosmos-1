@@ -12,12 +12,13 @@ import (
 	"math"
 	"math/rand"
 	"sort"
+	"strings"
 )
 
 // Iterator represents a forward-only iterator over a set of points.
 // These are used by the MapFunctions in this file
 type Iterator interface {
-	Next() (seriesID uint64, time int64, value interface{})
+	Next() (seriesKey string, time int64, value interface{})
 }
 
 // MapFunc represents a function used for mapping over a sequential series of data.
@@ -41,22 +42,50 @@ func InitializeMapFunc(c *Call) (MapFunc, error) {
 	// Ensure that there is either a single argument or if for percentile, two
 	if c.Name == "percentile" {
 		if len(c.Args) != 2 {
-			return nil, fmt.Errorf("expected two arguments for percentile()")
+			return nil, fmt.Errorf("expected two arguments for %s()", c.Name)
+		}
+	} else if strings.HasSuffix(c.Name, "derivative") {
+		// derivatives require a field name and optional duration
+		if len(c.Args) == 0 {
+			return nil, fmt.Errorf("expected field name argument for %s()", c.Name)
 		}
 	} else if len(c.Args) != 1 {
 		return nil, fmt.Errorf("expected one argument for %s()", c.Name)
 	}
 
-	// Ensure the argument is a variable reference.
-	_, ok := c.Args[0].(*VarRef)
-	if !ok {
-		return nil, fmt.Errorf("expected field argument in %s()", c.Name)
+	// derivative can take a nested aggregate function, everything else expects
+	// a variable reference as the first arg
+	if !strings.HasSuffix(c.Name, "derivative") {
+		// Ensure the argument is appropriate for the aggregate function.
+		switch fc := c.Args[0].(type) {
+		case *VarRef:
+		case *Distinct:
+			if c.Name != "count" {
+				return nil, fmt.Errorf("expected field argument in %s()", c.Name)
+			}
+		case *Call:
+			if fc.Name != "distinct" {
+				return nil, fmt.Errorf("expected field argument in %s()", c.Name)
+			}
+		default:
+			return nil, fmt.Errorf("expected field argument in %s()", c.Name)
+		}
 	}
 
 	// Retrieve map function by name.
 	switch c.Name {
 	case "count":
+		if _, ok := c.Args[0].(*Distinct); ok {
+			return MapCountDistinct, nil
+		}
+		if c, ok := c.Args[0].(*Call); ok {
+			if c.Name == "distinct" {
+				return MapCountDistinct, nil
+			}
+		}
 		return MapCount, nil
+	case "distinct":
+		return MapDistinct, nil
 	case "sum":
 		return MapSum, nil
 	case "mean":
@@ -81,6 +110,13 @@ func InitializeMapFunc(c *Call) (MapFunc, error) {
 			return nil, fmt.Errorf("expected float argument in percentile()")
 		}
 		return MapEcho, nil
+	case "derivative", "non_negative_derivative":
+		// If the arg is another aggregate e.g. derivative(mean(value)), then
+		// use the map func for that nested aggregate
+		if fn, ok := c.Args[0].(*Call); ok {
+			return InitializeMapFunc(fn)
+		}
+		return MapRawQuery, nil
 	default:
 		return nil, fmt.Errorf("function not found: %q", c.Name)
 	}
@@ -91,7 +127,17 @@ func InitializeReduceFunc(c *Call) (ReduceFunc, error) {
 	// Retrieve reduce function by name.
 	switch c.Name {
 	case "count":
+		if _, ok := c.Args[0].(*Distinct); ok {
+			return ReduceCountDistinct, nil
+		}
+		if c, ok := c.Args[0].(*Call); ok {
+			if c.Name == "distinct" {
+				return ReduceCountDistinct, nil
+			}
+		}
 		return ReduceSum, nil
+	case "distinct":
+		return ReduceDistinct, nil
 	case "sum":
 		return ReduceSum, nil
 	case "mean":
@@ -120,6 +166,13 @@ func InitializeReduceFunc(c *Call) (ReduceFunc, error) {
 			return nil, fmt.Errorf("expected float argument in percentile()")
 		}
 		return ReducePercentile(lit.Val), nil
+	case "derivative", "non_negative_derivative":
+		// If the arg is another aggregate e.g. derivative(mean(value)), then
+		// use the map func for that nested aggregate
+		if fn, ok := c.Args[0].(*Call); ok {
+			return InitializeReduceFunc(fn)
+		}
+		return nil, fmt.Errorf("expected function argument to %s", c.Name)
 	default:
 		return nil, fmt.Errorf("function not found: %q", c.Name)
 	}
@@ -148,6 +201,12 @@ func InitializeUnmarshaller(c *Call) (UnmarshalFunc, error) {
 			var o spreadMapOutput
 			err := json.Unmarshal(b, &o)
 			return &o, err
+		}, nil
+	case "distinct":
+		return func(b []byte) (interface{}, error) {
+			var val distinctValues
+			err := json.Unmarshal(b, &val)
+			return val, err
 		}, nil
 	case "first":
 		return func(b []byte) (interface{}, error) {
@@ -194,16 +253,199 @@ func MapCount(itr Iterator) interface{} {
 	return nil
 }
 
+type distinctValues []interface{}
+
+func (d distinctValues) Len() int      { return len(d) }
+func (d distinctValues) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
+func (d distinctValues) Less(i, j int) bool {
+	// Sort by type if types match
+	{
+		d1, ok1 := d[i].(float64)
+		d2, ok2 := d[j].(float64)
+		if ok1 && ok2 {
+			return d1 < d2
+		}
+	}
+
+	{
+		d1, ok1 := d[i].(uint64)
+		d2, ok2 := d[j].(uint64)
+		if ok1 && ok2 {
+			return d1 < d2
+		}
+	}
+
+	{
+		d1, ok1 := d[i].(bool)
+		d2, ok2 := d[j].(bool)
+		if ok1 && ok2 {
+			return d1 == false && d2 == true
+		}
+	}
+
+	{
+		d1, ok1 := d[i].(string)
+		d2, ok2 := d[j].(string)
+		if ok1 && ok2 {
+			return d1 < d2
+		}
+	}
+
+	// Types did not match, need to sort based on arbitrary weighting of type
+	const (
+		intWeight = iota
+		floatWeight
+		boolWeight
+		stringWeight
+	)
+
+	infer := func(val interface{}) (int, float64) {
+		switch v := val.(type) {
+		case uint64:
+			return intWeight, float64(v)
+		case int64:
+			return intWeight, float64(v)
+		case float64:
+			return floatWeight, v
+		case bool:
+			return boolWeight, 0
+		case string:
+			return stringWeight, 0
+		}
+		panic("unreachable code")
+	}
+
+	w1, n1 := infer(d[i])
+	w2, n2 := infer(d[j])
+
+	// If we had "numeric" data, use that for comparison
+	if n1 != n2 && (w1 == intWeight && w2 == floatWeight) || (w1 == floatWeight && w2 == intWeight) {
+		return n1 < n2
+	}
+
+	return w1 < w2
+}
+
+// MapDistinct computes the unique values in an iterator.
+func MapDistinct(itr Iterator) interface{} {
+	var index = make(map[interface{}]struct{})
+
+	for _, time, value := itr.Next(); time != 0; _, time, value = itr.Next() {
+		index[value] = struct{}{}
+	}
+
+	if len(index) == 0 {
+		return nil
+	}
+
+	results := make(distinctValues, len(index))
+	var i int
+	for value, _ := range index {
+		results[i] = value
+		i++
+	}
+	return results
+}
+
+// ReduceDistinct finds the unique values for each key.
+func ReduceDistinct(values []interface{}) interface{} {
+	var index = make(map[interface{}]struct{})
+
+	// index distinct values from each mapper
+	for _, v := range values {
+		if v == nil {
+			continue
+		}
+		d, ok := v.(distinctValues)
+		if !ok {
+			msg := fmt.Sprintf("expected distinctValues, got: %T", v)
+			panic(msg)
+		}
+		for _, distinctValue := range d {
+			index[distinctValue] = struct{}{}
+		}
+	}
+
+	// convert map keys to an array
+	results := make(distinctValues, len(index))
+	var i int
+	for k, _ := range index {
+		results[i] = k
+		i++
+	}
+	if len(results) > 0 {
+		sort.Sort(results)
+		return results
+	}
+	return nil
+}
+
+// MapCountDistinct computes the unique count of values in an iterator.
+func MapCountDistinct(itr Iterator) interface{} {
+	var index = make(map[interface{}]struct{})
+
+	for _, time, value := itr.Next(); time != 0; _, time, value = itr.Next() {
+		index[value] = struct{}{}
+	}
+
+	if len(index) == 0 {
+		return nil
+	}
+
+	return index
+}
+
+// ReduceCountDistinct finds the unique counts of values.
+func ReduceCountDistinct(values []interface{}) interface{} {
+	var index = make(map[interface{}]struct{})
+
+	// index distinct values from each mapper
+	for _, v := range values {
+		if v == nil {
+			continue
+		}
+		d, ok := v.(map[interface{}]struct{})
+		if !ok {
+			msg := fmt.Sprintf("expected map[interface{}]struct{}, got: %T", v)
+			panic(msg)
+		}
+		for distinctCountValue, _ := range d {
+			index[distinctCountValue] = struct{}{}
+		}
+	}
+
+	return len(index)
+}
+
+type NumberType int8
+
+const (
+	Float64Type NumberType = iota
+	Int64Type
+)
+
 // MapSum computes the summation of values in an iterator.
 func MapSum(itr Iterator) interface{} {
 	n := float64(0)
 	count := 0
+	var resultType NumberType
 	for _, k, v := itr.Next(); k != 0; _, k, v = itr.Next() {
 		count++
-		n += v.(float64)
+		switch n1 := v.(type) {
+		case float64:
+			n += n1
+		case int64:
+			n += float64(n1)
+			resultType = Int64Type
+		}
 	}
 	if count > 0 {
-		return n
+		switch resultType {
+		case Float64Type:
+			return n
+		case Int64Type:
+			return int64(n)
+		}
 	}
 	return nil
 }
@@ -212,15 +454,27 @@ func MapSum(itr Iterator) interface{} {
 func ReduceSum(values []interface{}) interface{} {
 	var n float64
 	count := 0
+	var resultType NumberType
 	for _, v := range values {
 		if v == nil {
 			continue
 		}
 		count++
-		n += v.(float64)
+		switch n1 := v.(type) {
+		case float64:
+			n += n1
+		case int64:
+			n += float64(n1)
+			resultType = Int64Type
+		}
 	}
 	if count > 0 {
-		return n
+		switch resultType {
+		case Float64Type:
+			return n
+		case Int64Type:
+			return int64(n)
+		}
 	}
 	return nil
 }
@@ -231,7 +485,13 @@ func MapMean(itr Iterator) interface{} {
 
 	for _, k, v := itr.Next(); k != 0; _, k, v = itr.Next() {
 		out.Count++
-		out.Mean += (v.(float64) - out.Mean) / float64(out.Count)
+		switch n1 := v.(type) {
+		case float64:
+			out.Mean += (n1 - out.Mean) / float64(out.Count)
+		case int64:
+			out.Mean += (float64(n1) - out.Mean) / float64(out.Count)
+			out.ResultType = Int64Type
+		}
 	}
 
 	if out.Count > 0 {
@@ -242,8 +502,9 @@ func MapMean(itr Iterator) interface{} {
 }
 
 type meanMapOutput struct {
-	Count int
-	Mean  float64
+	Count      int
+	Mean       float64
+	ResultType NumberType
 }
 
 // ReduceMean computes the mean of values for each key.
@@ -420,19 +681,33 @@ func partition(data []float64) (lows []float64, pivotValue float64, highs []floa
 	return data[1:low], pivotValue, data[high+1:]
 }
 
+type minMaxMapOut struct {
+	Val  float64
+	Type NumberType
+}
+
 // MapMin collects the values to pass to the reducer
 func MapMin(itr Iterator) interface{} {
-	var min float64
+	min := &minMaxMapOut{}
+
 	pointsYielded := false
+	var val float64
 
 	for _, k, v := itr.Next(); k != 0; _, k, v = itr.Next() {
-		val := v.(float64)
+		switch n := v.(type) {
+		case float64:
+			val = n
+		case int64:
+			val = float64(n)
+			min.Type = Int64Type
+		}
+
 		// Initialize min
 		if !pointsYielded {
-			min = val
+			min.Val = val
 			pointsYielded = true
 		}
-		min = math.Min(min, val)
+		min.Val = math.Min(min.Val, val)
 	}
 	if pointsYielded {
 		return min
@@ -442,41 +717,60 @@ func MapMin(itr Iterator) interface{} {
 
 // ReduceMin computes the min of value.
 func ReduceMin(values []interface{}) interface{} {
-	var min float64
+	min := &minMaxMapOut{}
 	pointsYielded := false
 
-	for _, v := range values {
-		if v == nil {
+	for _, value := range values {
+		if value == nil {
 			continue
 		}
-		val := v.(float64)
+
+		v, ok := value.(*minMaxMapOut)
+		if !ok {
+			continue
+		}
+
 		// Initialize min
 		if !pointsYielded {
-			min = val
+			min.Val = v.Val
+			min.Type = v.Type
 			pointsYielded = true
 		}
-		m := math.Min(min, val)
-		min = m
+		min.Val = math.Min(min.Val, v.Val)
 	}
 	if pointsYielded {
-		return min
+		switch min.Type {
+		case Float64Type:
+			return min.Val
+		case Int64Type:
+			return int64(min.Val)
+		}
 	}
 	return nil
 }
 
 // MapMax collects the values to pass to the reducer
 func MapMax(itr Iterator) interface{} {
-	var max float64
+	max := &minMaxMapOut{}
+
 	pointsYielded := false
+	var val float64
 
 	for _, k, v := itr.Next(); k != 0; _, k, v = itr.Next() {
-		val := v.(float64)
+		switch n := v.(type) {
+		case float64:
+			val = n
+		case int64:
+			val = float64(n)
+			max.Type = Int64Type
+		}
+
 		// Initialize max
 		if !pointsYielded {
-			max = val
+			max.Val = val
 			pointsYielded = true
 		}
-		max = math.Max(max, val)
+		max.Val = math.Max(max.Val, val)
 	}
 	if pointsYielded {
 		return max
@@ -486,38 +780,58 @@ func MapMax(itr Iterator) interface{} {
 
 // ReduceMax computes the max of value.
 func ReduceMax(values []interface{}) interface{} {
-	var max float64
+	max := &minMaxMapOut{}
 	pointsYielded := false
 
-	for _, v := range values {
-		if v == nil {
+	for _, value := range values {
+		if value == nil {
 			continue
 		}
-		val := v.(float64)
+
+		v, ok := value.(*minMaxMapOut)
+		if !ok {
+			continue
+		}
+
 		// Initialize max
 		if !pointsYielded {
-			max = val
+			max.Val = v.Val
+			max.Type = v.Type
 			pointsYielded = true
 		}
-		max = math.Max(max, val)
+		max.Val = math.Max(max.Val, v.Val)
 	}
 	if pointsYielded {
-		return max
+		switch max.Type {
+		case Float64Type:
+			return max.Val
+		case Int64Type:
+			return int64(max.Val)
+		}
 	}
 	return nil
 }
 
 type spreadMapOutput struct {
 	Min, Max float64
+	Type     NumberType
 }
 
 // MapSpread collects the values to pass to the reducer
 func MapSpread(itr Iterator) interface{} {
 	out := &spreadMapOutput{}
 	pointsYielded := false
+	var val float64
 
 	for _, k, v := itr.Next(); k != 0; _, k, v = itr.Next() {
-		val := v.(float64)
+		switch n := v.(type) {
+		case float64:
+			val = n
+		case int64:
+			val = float64(n)
+			out.Type = Int64Type
+		}
+
 		// Initialize
 		if !pointsYielded {
 			out.Max = val
@@ -547,13 +861,19 @@ func ReduceSpread(values []interface{}) interface{} {
 		if !pointsYielded {
 			result.Max = val.Max
 			result.Min = val.Min
+			result.Type = val.Type
 			pointsYielded = true
 		}
 		result.Max = math.Max(result.Max, val.Max)
 		result.Min = math.Min(result.Min, val.Min)
 	}
 	if pointsYielded {
-		return result.Max - result.Min
+		switch result.Type {
+		case Float64Type:
+			return result.Max - result.Min
+		case Int64Type:
+			return int64(result.Max - result.Min)
+		}
 	}
 	return nil
 }
@@ -563,7 +883,12 @@ func MapStddev(itr Iterator) interface{} {
 	var values []float64
 
 	for _, k, v := itr.Next(); k != 0; _, k, v = itr.Next() {
-		values = append(values, v.(float64))
+		switch n := v.(type) {
+		case float64:
+			values = append(values, n)
+		case int64:
+			values = append(values, float64(n))
+		}
 	}
 
 	return values
@@ -749,6 +1074,16 @@ func ReducePercentile(percentile float64) ReduceFunc {
 	}
 }
 
+// IsNumeric returns whether a given aggregate can only be run on numeric fields.
+func IsNumeric(c *Call) bool {
+	switch c.Name {
+	case "count", "first", "last", "distinct":
+		return false
+	default:
+		return true
+	}
+}
+
 // MapRawQuery is for queries without aggregates
 func MapRawQuery(itr Iterator) interface{} {
 	var values []*rawQueryMapOutput
@@ -762,6 +1097,10 @@ func MapRawQuery(itr Iterator) interface{} {
 type rawQueryMapOutput struct {
 	Time   int64
 	Values interface{}
+}
+
+func (r *rawQueryMapOutput) String() string {
+	return fmt.Sprintf("{%#v %#v}", r.Time, r.Values)
 }
 
 type rawOutputs []*rawQueryMapOutput

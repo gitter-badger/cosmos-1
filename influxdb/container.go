@@ -75,7 +75,7 @@ func (db *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
 
 		// cpu
 		pts[index] = client.Point{
-			Name: "cpu",
+			Measurement: "cpu",
 			Tags: map[string]string{
 				"cosmos":    cosmos,
 				"planet":    planet,
@@ -90,7 +90,7 @@ func (db *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
 
 		// memory
 		pts[index+1] = client.Point{
-			Name: "memory",
+			Measurement: "memory",
 			Tags: map[string]string{
 				"cosmos":    cosmos,
 				"planet":    planet,

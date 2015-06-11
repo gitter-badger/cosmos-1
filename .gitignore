@@ -2,3 +2,4 @@
 /bin
 *.log
 cosmos
+vendor/src/github.com/cosmos-io
