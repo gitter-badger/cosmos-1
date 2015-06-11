@@ -1,41 +1,47 @@
-GOPATH := ${PWD}/vendor
+MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+DIR := $(dir $(MAKEFILE_PATH))
+GOPATH := $(DIR)vendor
+COSMOS_VENDOR_PATH := $(GOPATH)/src/github.com/cosmos-io/cosmos
+
+export DIR
 export GOPATH
+export COSMOS_VENDOR_PATH
 
 default: build
 
 build:
-	@rm -rf ./vendor/src/github.com/cosmos-io/cosmos
-	@rm -rf ./bin/telescope
-	@mkdir -p ./bin
-	@mkdir -p ./vendor/src/github.com/cosmos-io/cosmos
-	@cp -r ./context ./vendor/src/github.com/cosmos-io/cosmos/context
-	@cp -r ./dao ./vendor/src/github.com/cosmos-io/cosmos/dao
-	@cp -r ./model ./vendor/src/github.com/cosmos-io/cosmos/model
-	@cp -r ./service ./vendor/src/github.com/cosmos-io/cosmos/service
-	@cp -r ./converter ./vendor/src/github.com/cosmos-io/cosmos/converter
-	@cp -r ./router ./vendor/src/github.com/cosmos-io/cosmos/router
-	@cp -r ./worker ./vendor/src/github.com/cosmos-io/cosmos/worker
-	@cp -r ./influxdb ./vendor/src/github.com/cosmos-io/cosmos/influxdb
-	@cp -r ./telescope ./bin/telescope
-	go build -o ./bin/cosmos
+	@rm -rf $(COSMOS_VENDOR_PATH)
+
+	@mkdir -p $(DIR)bin
+	@mkdir -p $(COSMOS_VENDOR_PATH)
+
+	@cp -r $(DIR)context $(COSMOS_VENDOR_PATH)/context
+	@cp -r $(DIR)model $(COSMOS_VENDOR_PATH)/model
+	@cp -r $(DIR)service $(COSMOS_VENDOR_PATH)/service
+	@cp -r $(DIR)converter $(COSMOS_VENDOR_PATH)/converter
+	@cp -r $(DIR)router $(COSMOS_VENDOR_PATH)/router
+	@cp -r $(DIR)worker $(COSMOS_VENDOR_PATH)/worker
+	@cp -r $(DIR)influxdb $(COSMOS_VENDOR_PATH)/influxdb
+
+	go build -o $(DIR)bin/cosmos
 
 run: build
-	./bin/cosmos
+	$(DIR)bin/cosmos
 
 doc:
 	godoc -http=:6060 -index
 
 fmt:
-	go fmt .
+	go fmt $(DIR)
 
 lint:
-	golint .
+	golint $(DIR)
 
 test:
-	go test .
+	go test $(DIR)
 
 vet:
-	go vet .
+	go vet $(DIR)
 
 clean:
-	rm -rf ./bin
+	rm -rf $(DIR)bin
