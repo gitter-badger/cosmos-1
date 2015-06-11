@@ -1,5 +1,5 @@
 FROM golang:1.4.2
-MAINTAINER brann <brann@cosmos.io>
+MAINTAINER Graham Lee <ghmlee@cosmos.io>
 
 ENV PORT 8888
 ENV INFLUXDB_HOST influxdb

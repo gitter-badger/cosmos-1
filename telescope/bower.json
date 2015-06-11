@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "homepage": "https://github.com/cosmos-io/cosmos/telescope",
   "authors": [
-    "Brann Park <brann@cosmos.io>",
     "Graham Lee <ghmlee@cosmos.io>"
   ],
   "description": "Telescope is a dashboard of container monitoring system.",
