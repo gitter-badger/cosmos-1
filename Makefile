@@ -23,7 +23,7 @@ build:
 	@cp -r $(DIR)worker $(COSMOS_VENDOR_PATH)/worker
 	@cp -r $(DIR)influxdb $(COSMOS_VENDOR_PATH)/influxdb
 
-	go build -o $(DIR)bin/cosmos
+	CGO_ENABLED=0 go build -a -ldflags '-s' -o $(DIR)bin/cosmos
 
 run: build
 	$(DIR)bin/cosmos
