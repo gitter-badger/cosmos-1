@@ -1,15 +1,16 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"log"
-	"net/http"
 	"os"
+	"log"
 	"path"
 	"regexp"
 	"strconv"
 	"strings"
+    "runtime"
+	"io/ioutil"
+	"net/http"
+	"encoding/json"    
 
 	"github.com/cosmos-io/cosmos/context"
 	"github.com/cosmos-io/cosmos/influxdb"
@@ -19,8 +20,7 @@ import (
 )
 
 var (
-	cosmosPort        = getEnv("PORT", "8888")
-	cosmosClusterRole = getEnv("COSMOS_CLUSTER_ROLE", "master")
+    port = getEnv("PORT", "8888")
 
 	influxdbHost     = getEnv("INFLUXDB_HOST", "localhost")
 	influxdbPort     = getEnv("INFLUXDB_PORT", "8086")
@@ -28,6 +28,8 @@ var (
 	influxdbPassword = getEnv("INFLUXDB_PASSWORD", "root")
 	influxdbDatabase = getEnv("INFLUXDB_DATABASE", "cosmos")
 	influxdbClient   = newInfluxDB()
+
+    telescopePath = getTelescopePath()
 )
 
 // to get an environment variable if it exists or default value
@@ -41,20 +43,31 @@ func getEnv(key, defaultValue string) string {
 	}
 }
 
+// to get an environment variable if it exists or default value
+//
+func getTelescopePath() string {
+    telescopePath := getEnv("TELESCOPE_PATH", "")
+    if telescopePath == "" {
+        _, current, _, _ := runtime.Caller(1)
+        telescopePath = path.Join(path.Dir(current), "telescope")
+    }
+    return telescopePath
+}
+
 // A middleware to distingush text/html content type and others
 //
 func serveMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         reg := regexp.MustCompile("^.*\\.(jpg|jpeg|png|gif|css|js|html|xml|json|map|txt|ico)$")
 		if reg.MatchString(r.URL.Path) {
-			fp := path.Join("telescope", "public", r.URL.Path)
+			fp := path.Join(telescopePath, "public", r.URL.Path)
 			http.ServeFile(w, r, fp)
 			return
 		}
 
 		accept := strings.ToLower(r.Header.Get("Accept"))
 		if strings.Contains(accept, "text/html") {
-			fp := path.Join("telescope", "public", "index.html")
+			fp := path.Join(telescopePath, "public", "index.html")
 			http.ServeFile(w, r, fp)
 			return
 		}
@@ -148,7 +161,7 @@ func run() {
 		serveContext(route.GetMetrics)).Methods("GET")
 
 	http.Handle("/", serveMiddleware(mux))
-	http.ListenAndServe(":" + cosmosPort, nil)
+	http.ListenAndServe(":" + port, nil)
 }
 
 func init() {
