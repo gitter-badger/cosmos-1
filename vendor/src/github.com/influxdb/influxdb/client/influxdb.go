@@ -121,22 +121,12 @@ func (c *Client) Query(q Query) (*Response, error) {
 func (c *Client) Write(bp BatchPoints) (*Response, error) {
 	c.url.Path = "write"
 
-	var b bytes.Buffer
-	for _, p := range bp.Points {
-		if p.Raw != "" {
-			if _, err := b.WriteString(p.Raw); err != nil {
-				return nil, err
-			}
-		} else {
-            return nil, nil
-		}
+    b, err := json.Marshal(&bp)
+    if err != nil {
+        return nil, err
+    }
 
-		if err := b.WriteByte('\n'); err != nil {
-			return nil, err
-		}
-	}
-
-	req, err := http.NewRequest("POST", c.url.String(), &b)
+	req, err := http.NewRequest("POST", c.url.String(), bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
@@ -363,6 +353,10 @@ func (p *Point) MarshalJSON() ([]byte, error) {
 		point.Time = p.Time.UTC().Format(time.RFC3339Nano)
 	}
 	return json.Marshal(&point)
+}
+
+func (p *Point) MarshalString() string {
+	return ""
 }
 
 // UnmarshalJSON decodes the data into the Point struct

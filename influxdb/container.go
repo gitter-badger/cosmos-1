@@ -36,7 +36,7 @@ func (db *InfluxDB) QueryContainers(planet string) ([]string, error) {
 }
 
 func (db *InfluxDB) QueryContainerMetrics(planet string, container string, t string) (interface{}, error) {
-	cmd := fmt.Sprintf("SELECT max(value) FROM %s WHERE cosmos = '%s' AND planet = '%s' AND container = '%s' AND time > now() - %s group by time(%s), value fill(0)",
+	cmd := fmt.Sprintf("SELECT max(value) FROM %s WHERE cosmos = '%s' AND planet = '%s' AND container = '%s' AND time > now() - %s group by time(%s) fill(0)",
 		t,
 		cosmos,
 		planet,
@@ -66,6 +66,10 @@ func (db *InfluxDB) WriteMetrics(metrics *model.MetricsParam) {
 
 	index := 0
 	sampleSize := len(metrics.Containers)
+    if sampleSize == 0 {
+        return
+    }
+    
 	pts := make([]client.Point, sampleSize * 2) // cpu, memory
 	for i := 0; i < sampleSize; i++ {
 		container := metrics.Containers[i]

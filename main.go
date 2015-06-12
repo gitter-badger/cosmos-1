@@ -13,8 +13,7 @@ import (
 
 	"github.com/cosmos-io/cosmos/context"
 	"github.com/cosmos-io/cosmos/influxdb"
-	"github.com/cosmos-io/cosmos/router"
-	"github.com/cosmos-io/cosmos/worker"
+	"github.com/cosmos-io/cosmos/route"
 
 	"github.com/gorilla/mux"
 )
@@ -29,9 +28,6 @@ var (
 	influxdbPassword = getEnv("INFLUXDB_PASSWORD", "root")
 	influxdbDatabase = getEnv("INFLUXDB_DATABASE", "cosmos")
 	influxdbClient   = newInfluxDB()
-	newsfeedWorker   = worker.NewNewsFeedWorker(influxdbClient, 1000*60*1)
-
-	staticFileRegexp = regexp.MustCompile("^.*\\.(jpg|jpeg|png|gif|css|js|html|xml|json|map|txt)$")
 )
 
 // to get an environment variable if it exists or default value
@@ -47,9 +43,10 @@ func getEnv(key, defaultValue string) string {
 
 // A middleware to distingush text/html content type and others
 //
-func serveStaticFileOrIndexHTML(next http.Handler) http.Handler {
+func serveMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if staticFileRegexp.MatchString(r.URL.Path) {
+        reg := regexp.MustCompile("^.*\\.(jpg|jpeg|png|gif|css|js|html|xml|json|map|txt|ico)$")
+		if reg.MatchString(r.URL.Path) {
 			fp := path.Join("telescope", "public", r.URL.Path)
 			http.ServeFile(w, r, fp)
 			return
@@ -136,50 +133,25 @@ func newInfluxDB() *influxdb.InfluxDB {
 // to run
 //
 func run() {
-	//	publicPath := path.Join("telescope", "public")
 	mux := mux.NewRouter()
 
 	mux.HandleFunc("/metrics",
-		serveContext(router.PostMetrics)).Methods("POST")
+		serveContext(route.PostMetrics)).Methods("POST")
 
 	mux.HandleFunc("/planets",
-		serveContext(router.GetPlanets)).Methods("GET")
+		serveContext(route.GetPlanets)).Methods("GET")
 
 	mux.HandleFunc("/containers",
-		serveContext(router.GetContainers)).Methods("GET")
+		serveContext(route.GetContainers)).Methods("GET")
 
 	mux.HandleFunc("/metrics",
-		serveContext(router.GetMetrics)).Methods("GET")
+		serveContext(route.GetMetrics)).Methods("GET")
 
-	/*mux.HandleFunc("/v1/newsfeeds",
-	      serveContext(router.GetNewsFeeds)).Methods("GET")
-
-	  mux.HandleFunc("/v1/planets/{planet}/containers/{container}",
-	      serveContext(router.GetContainerMetrics)).Methods("GET")
-
-	  mux.HandleFunc("/v1/planets/{planet}/containers",
-	      serveContext(router.GetContainersOfPlanet)).Methods("GET")
-
-	  mux.HandleFunc("/v1/planets/{planet}",
-	      serveContext(router.GetPlanetMetrics)).Methods("GET")
-
-	  mux.HandleFunc("/v1/planets",
-	      serveContext(router.GetPlanets)).Methods("GET")
-
-	  mux.HandleFunc("/v1/containers",
-	      serveContext(router.GetContainers)).Methods("GET")
-
-	  mux.HandleFunc("/v1/planets/{planet}/containers",
-	      serveContext(router.AddContainersOfPlanet)).Methods("POST")*/
-
-	http.Handle("/", serveStaticFileOrIndexHTML(mux))
+	http.Handle("/", serveMiddleware(mux))
 	http.ListenAndServe(":" + cosmosPort, nil)
 }
 
 func init() {
-	if cosmosClusterRole == "master" {
-		newsfeedWorker.Run()
-	}
 }
 
 func main() {
