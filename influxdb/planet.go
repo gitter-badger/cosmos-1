@@ -30,7 +30,7 @@ func (db *InfluxDB) QueryPlanets() ([]string, error) {
 }
 
 func (db *InfluxDB) QueryPlanetMetrics(planet string, t string) (interface{}, error) {
-	cmd := fmt.Sprintf("SELECT max(value) FROM %s WHERE cosmos = '%s' AND planet = '%s' AND time > now() - %s group by container, time(%s), value fill(0)",
+	cmd := fmt.Sprintf("SELECT max(value) FROM %s WHERE cosmos = '%s' AND planet = '%s' AND time > now() - %s group by container, time(%s) fill(0)",
 		t,
 		cosmos,
 		planet,
