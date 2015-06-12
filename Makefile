@@ -12,6 +12,7 @@ default: build
 
 build:
 	@rm -rf $(COSMOS_VENDOR_PATH)
+	@rm -rf $(DIR)bin/telescope
 
 	@mkdir -p $(DIR)bin
 	@mkdir -p $(COSMOS_VENDOR_PATH)
@@ -23,6 +24,7 @@ build:
 	@cp -r $(DIR)route $(COSMOS_VENDOR_PATH)/route
 	@cp -r $(DIR)worker $(COSMOS_VENDOR_PATH)/worker
 	@cp -r $(DIR)influxdb $(COSMOS_VENDOR_PATH)/influxdb
+	@cp -r $(DIR)telescope $(DIR)bin
 
 	go build -a -ldflags '-s' -o $(DIR)bin/cosmos
 
