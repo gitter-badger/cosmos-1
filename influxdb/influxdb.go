@@ -59,15 +59,12 @@ func New(config Config) (*InfluxDB, error) {
 	err = db.createDatabase()
 	if err != nil {
 		log.Println(err)
-	} else {
-		log.Println("database has been created")
 	}
+
 	// Creating retention policies
 	err = db.createRetentionPolicy(config.RetentionPolicies)
 	if err != nil {
 		log.Println(err)
-	} else {
-		log.Println("retention policies has been created")
 	}
 
 	return db, nil
