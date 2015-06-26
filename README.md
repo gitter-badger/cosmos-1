@@ -9,7 +9,7 @@ Cosmos is a container monitoring system. Cosmos can aggregate metrics of contain
 You can run Cosmos simply.
 
 ```
-$ docker run -d --name influxdb cosmosio/influxdb:0.9.0-rc29
+$ docker run -d --name influxdb cosmosio/influxdb:0.9.0
 $ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --name cosmos cosmosio/cosmos:nightly
 ```
 
@@ -23,7 +23,7 @@ $ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --name cosmos
 
 [InfluxDB](http://influxdb.com) is used in Cosmos. It is recommended to use [an InfluxDB container](https://registry.hub.docker.com/u/cosmosio/influxdb/) with Cosmos. Of course, you can install InfluxDB in your local machine directly. If you do, please follow [the instruction](http://influxdb.com/download/).
 ```
-$ docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --rm --name influxdb cosmosio/influxdb:0.9.0-rc29
+$ docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --rm --name influxdb cosmosio/influxdb:0.9.0
 ```
 
 ### Go
