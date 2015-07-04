@@ -19,10 +19,7 @@ build:
 
 	@cp -r $(DIR)context $(COSMOS_VENDOR_PATH)/context
 	@cp -r $(DIR)model $(COSMOS_VENDOR_PATH)/model
-	@cp -r $(DIR)service $(COSMOS_VENDOR_PATH)/service
-	@cp -r $(DIR)converter $(COSMOS_VENDOR_PATH)/converter
 	@cp -r $(DIR)route $(COSMOS_VENDOR_PATH)/route
-	@cp -r $(DIR)worker $(COSMOS_VENDOR_PATH)/worker
 	@cp -r $(DIR)influxdb $(COSMOS_VENDOR_PATH)/influxdb
 	@cp -r $(DIR)telescope $(DIR)bin
 
