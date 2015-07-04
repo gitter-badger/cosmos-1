@@ -10,7 +10,7 @@ import (
     "runtime"
 	"io/ioutil"
 	"net/http"
-	"encoding/json"    
+	"encoding/json"
 
 	"github.com/cosmos-io/cosmos/context"
 	"github.com/cosmos-io/cosmos/influxdb"
