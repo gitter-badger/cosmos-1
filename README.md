@@ -33,7 +33,9 @@ Cosmos is built with [Go](http://golang.org). [The latest version](https://golan
 * Go (>= 1.4.2)
 
 ```
-$ go get github.com/cosmos-io/cosmos
+$ git clone git@github.com:cosmos-io/cosmos
+$ cd cosmos
+$ make run
 ```
 
 ## Curiosity 
