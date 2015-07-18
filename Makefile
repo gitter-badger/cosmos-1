@@ -1,4 +1,4 @@
-MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+?1;2cMAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 DIR := $(dir $(MAKEFILE_PATH))
 GOPATH := $(DIR)vendor
 COSMOS_VENDOR_PATH := $(GOPATH)/src/github.com/cosmos-io/cosmos
@@ -23,7 +23,7 @@ build:
 	@cp -r $(DIR)influxdb $(COSMOS_VENDOR_PATH)/influxdb
 	@cp -r $(DIR)telescope $(DIR)bin
 
-	go build -a -ldflags '-s' -o $(DIR)bin/cosmos
+	go build -a -installsuffix cgo -ldflags '-w' -o $(DIR)bin/cosmos
 
 run: build
 	$(DIR)bin/cosmos
