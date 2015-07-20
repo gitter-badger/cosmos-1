@@ -1,7 +1,7 @@
 package context
 
 import (
-    "github.com/cosmos-io/cosmos/influxdb"
+    "github.com/cosmoshq/cosmos/influxdb"
 )
 
 type Context struct {

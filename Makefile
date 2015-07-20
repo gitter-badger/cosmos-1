@@ -1,7 +1,7 @@
 MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 DIR := $(dir $(MAKEFILE_PATH))
 GOPATH := $(DIR)vendor
-COSMOS_VENDOR_PATH := $(GOPATH)/src/github.com/cosmos-io/cosmos
+COSMOS_VENDOR_PATH := $(GOPATH)/src/github.com/cosmoshq/cosmos
 
 export DIR
 export GOPATH
