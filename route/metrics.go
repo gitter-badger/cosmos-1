@@ -1,12 +1,12 @@
 package route
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
+	"encoding/json"
 
-	"github.com/cosmos-io/cosmos/context"
-	"github.com/cosmos-io/cosmos/model"
+	"github.com/cosmoshq/cosmos/context"
+	"github.com/cosmoshq/cosmos/model"
 )
 
 var (

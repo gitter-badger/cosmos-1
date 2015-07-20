@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/cosmos-io/cosmos/model"
+	"github.com/cosmoshq/cosmos/model"
 	"github.com/influxdb/influxdb/client"
 )
 

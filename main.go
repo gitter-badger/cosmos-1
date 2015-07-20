@@ -12,9 +12,9 @@ import (
 	"net/http"
 	"encoding/json"
 
-	"github.com/cosmos-io/cosmos/context"
-	"github.com/cosmos-io/cosmos/influxdb"
-	"github.com/cosmos-io/cosmos/route"
+	"github.com/cosmoshq/cosmos/context"
+	"github.com/cosmoshq/cosmos/influxdb"
+	"github.com/cosmoshq/cosmos/route"
 
 	"github.com/gorilla/mux"
 )
