@@ -9,8 +9,8 @@ Cosmos is a container monitoring system. Cosmos can aggregate metrics of contain
 You can run Cosmos simply.
 
 ```
-$ docker run -d --name influxdb cosmoshq/influxdb
-$ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --name cosmos cosmoshq/cosmos:nightly
+$ docker run -d --name influxdb cosmosio/influxdb
+$ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --name cosmos cosmosio/cosmos:nightly
 ```
 
 ## Requirements
@@ -23,7 +23,7 @@ $ docker run -d --link influxdb:influxdb -e INFLUXDB_HOST=influxdb --name cosmos
 
 [InfluxDB](http://influxdb.com) is used in Cosmos. It is recommended to use [an InfluxDB container](https://registry.hub.docker.com/u/cosmoshq/influxdb/) with Cosmos. Of course, you can install InfluxDB in your local machine directly. If you do, please follow [the instruction](http://influxdb.com/download/).
 ```
-$ docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --rm --name influxdb cosmoshq/influxdb
+$ docker run -p 8083:8083 -p 8086:8086 --expose 8090 --expose 8099 --rm --name influxdb cosmosio/influxdb
 ```
 
 ### Go
@@ -43,7 +43,7 @@ $ make run
 Curiosity is a container monitoring agent of Cosmos. You can run Curiosity simply with your COSMOS_HOST variable.
 
 ```
-$ docker run -e COSMOS_HOST=127.0.0.1 --rm --name curiosity cosmoshq/curiosity:nightly
+$ docker run -e COSMOS_HOST=127.0.0.1 --rm --name curiosity cosmosio/curiosity:nightly
 ```
 See details: https://github.com/cosmoshq/curiosity
 
