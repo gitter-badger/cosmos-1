@@ -1,3 +1,5 @@
 .DS_Store
 bin/
 vendor/src/github.com/cosmoshq
+Cargo.lock
+target/
