@@ -1,11 +1,15 @@
-language: go
+language: rust
 
-go:
-  - 1.3
-  - 1.3.1
-  - 1.3.2
-  - 1.3.3
-  - 1.4
-  - 1.4.1
-  - 1.4.2
-  - tip
+rust:
+  - 1.0.0
+  - 1.1.0
+  - 1.2.0
+  - nightly
+
+script:
+  - cargo build
+  - cargo test
+  - cargo doc --no-deps
+
+after_success:
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && ./.travis/update_docs.sh

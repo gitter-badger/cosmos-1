@@ -5,7 +5,7 @@ use std::env;
 
 fn call() {
     // host
-    let _ = match env::var("HOST") {
+    /*let _ = match env::var("HOST") {
         Ok(host) => host,
         Err(e) => { println!("{}", e); return; }
     };
@@ -14,9 +14,41 @@ fn call() {
     let _ = match env::var("TOKEN") {
         Ok(token) => token,
         Err(e) => { println!("{}", e); return; }
-    };
+    };*/
 
     // try to connect to curiosity
+    let address = "www.google.com:80";
+    let mut stream = match TcpStream::connect(&address) {
+        Ok(stream) => stream,
+        Err(e) => { println!("{}", e); return; }
+    };
+
+    let request = "GET / HTTP/1.1\r\n\r\n";
+    match stream.write(request.as_bytes()) {
+        Ok(_) => {}
+        Err(e) => { println!("{}", e); return; }
+    };
+
+    const BUFFER_SIZE: usize = 1024;
+    let mut buffer: [u8; BUFFER_SIZE] = [0; BUFFER_SIZE];
+    let mut raw: Vec<u8> = Vec::new();
+    loop {
+        let len = match stream.read(&mut buffer) {
+            Ok(len) => len,
+            Err(e) => { println!("{}", e); break; }
+        };
+
+        for i in 0..len { raw.push(buffer[i]); }
+
+        if len < BUFFER_SIZE { break; }
+    }
+
+    let response = match String::from_utf8(raw) {
+        Ok(response) => response,
+        Err(e) => { println!("{}", e); return; }
+    };
+
+    println!("{}", response);
 
     // smtp notification
 }
