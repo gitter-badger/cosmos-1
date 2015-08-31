@@ -1,5 +1,7 @@
 # Cosmos
 
+[![Join the chat at https://gitter.im/cosmoshq/cosmos](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cosmoshq/cosmos?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/cosmoshq/cosmos.svg?branch=master)](https://travis-ci.org/cosmoshq/cosmos) [![GoDoc](https://godoc.org/github.com/cosmoshq/cosmos?status.svg)](https://godoc.org/github.com/cosmoshq/cosmos)
 
 Cosmos is a container monitoring system. Cosmos can aggregate metrics of containers with [Curiosity](https://github.com/cosmoshq/curiosity). It also supports a modern dashboard.
